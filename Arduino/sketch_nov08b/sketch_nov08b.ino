@@ -10,14 +10,17 @@ void setup() {
 }
  
 void loop(){
-    if (BT1.available())
-           Serial.write(BT1.read());
-       
+    if (BT1.available()){
+      c=BT1.read();
+           //Serial.println(BT1.read(),BIN);
+           Serial.println(c,BIN);
+    }    
        if (Serial.available())
           {  String S = GetLine();
-             BT1.print(S);
+             BT1.print("BT: "+S);
              Serial.println("---> " + S);
           }
+    
 }
 String GetLine()
    {   String S = "" ;
