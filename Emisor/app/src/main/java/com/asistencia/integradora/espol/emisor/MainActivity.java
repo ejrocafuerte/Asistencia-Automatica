@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
             // Get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
+            System.out.println(address);
         }
     };
 }
