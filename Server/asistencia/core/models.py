@@ -6,7 +6,6 @@ class Profesor(models.Model):
     nombres = models.CharField(max_length=60)
     apellidos = models.CharField(max_length=60)
     correo = models.CharField(max_length=60)
-    nombres = models.CharField(max_length=60)
 
 class Estudiante(models.Model):
     identificador = models.CharField(max_length=10,primary_key=True)
@@ -32,7 +31,7 @@ class Aula(models.Model):
     descripcion=models.CharField(max_length=25)
     capacidad=models.PositiveSmallIntegerField(default=0)
 
-class arduino(models.Model):
+class Arduino(models.Model):
     id_aula=models.ForeignKey('Aula', on_delete=models.CASCADE,)
     mac_arduino=models.CharField(max_length=17)
 class Materia(models.Model):
