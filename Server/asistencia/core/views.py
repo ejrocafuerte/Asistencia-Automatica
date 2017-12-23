@@ -54,7 +54,7 @@ class ProfesorList(generics.ListAPIView):
     serializer_class =  ProfesorSerializer
     name='Profesor-list'
 
-class EstudianteList(generics.ListAPIView):
+class EstudianteList(generics.ListCreateAPIView):
     queryset = Estudiante.objects.all()
     serializer_class = EstudianteSerializer
     name='Estudiante-list'

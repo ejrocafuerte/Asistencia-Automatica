@@ -13,8 +13,11 @@ class Estudiante(models.Model):
     apellidos = models.CharField(max_length=60)
     correo = models.CharField(max_length=60)
     nombres = models.CharField(max_length=60)
-    IMEI = models.CharField(max_length=15)
+    IMEI = models.CharField(max_length=15, null=True, blank=True)
     celular_no = models.CharField(max_length=12)
+
+    def __str__(self):
+        return self.apellidos+' '+self.nombres
 
 class Facultad(models.Model):
     nombre= models.CharField(max_length=50)
