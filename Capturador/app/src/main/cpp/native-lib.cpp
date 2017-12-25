@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <string>
+#include <android/log.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -7,10 +8,41 @@
 using namespace std;
 using namespace cv;
 
+#if defined(__arm__)
+#if defined(__ARM_ARCH_7A__)
+    #if defined(__ARM_NEON__)
+      #if defined(__ARM_PCS_VFP)
+        #define ABI "armeabi-v7a/NEON (hard-float)"
+      #else
+        #define ABI "armeabi-v7a/NEON"
+      #endif
+    #else
+      #if defined(__ARM_PCS_VFP)
+        #define ABI "armeabi-v7a (hard-float)"
+      #else
+        #define ABI "armeabi-v7a"
+      #endif
+    #endif
+  #else
+   #define ABI "armeabi"
+  #endif
+#elif defined(__i386__)
+#define ABI "x86"
+#elif defined(__x86_64__)
+#define ABI "x86_64"
+#elif defined(__mips64)  /* mips64el-* toolchain defines __mips__ too */
+#define ABI "mips64"
+#elif defined(__mips__)
+#define ABI "mips"
+#elif defined(__aarch64__)
+#define ABI "arm64-v8a"
+#else
+#define ABI "unknown"
+#endif
+
 extern "C"
 {
-static void test( Mat& image);
-static double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0);
+static void preprocesar(Mat& imagen_orig, Mat& imagen_prep);
 static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados);
 static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados);
 static void ordenarPuntosCuadrado(vector<Point> &cuadrado);
@@ -25,12 +57,15 @@ static void unificarParticiones(const int indiceCuadrado,
                                vector<vector<vector<Point> > > & particiones);
 static void decodificarParticiones( Mat& image,
                                     Mat& image_c,
-                                    vector<vector<vector<Point> > >& particiones);
+                                    vector<vector<vector<Point> > >& particiones,
+                                    string& mensajeBinario);
+static void traducirMensaje(string& mensajeBinario, string& mensaje, int numCuadrados, int modoTraduccion);
 bool existeCuadradoSemejante(const vector<vector<Point> >& cuadrados, vector<Point>& approx);
 float distanciaEntreDosPuntos(Point p1, Point p2);
 int buscarPuntoMasCercano(vector<Point> puntos, Point punto);
+double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0);
 string IntToString (int a);
-
+int binarioADecimal(int n);
 
 
 int N = 5; //11
@@ -40,48 +75,64 @@ int MAX_WIDTH, MAX_HEIGHT;
 int TECNICA_BORDES = 2;
 int SEGMENTOS = 4;
 int DIRECCION_ORDEN_C = 1;
-int NIVEL_THRESHOLD = 40;
+int NIVEL_THRESHOLD = 30;
 float TOLERANCIA_LED_ENCENDIDO = 3.0; //(%)
+int NUM_MATRICES = 3;
+int NUM_PARTICIONES = 16;
 
 
-JNIEXPORT jint JNICALL
-Java_com_app_house_asistenciaestudiante_MainActivity_decodificar(JNIEnv *env, jobject, jlong addrRgba, jlong addrCuadrados) {
-    Mat & mRgba = *(Mat*)addrRgba;
-    Mat mRgba_copia = mRgba.clone();
-    Mat & mCuadrados = *(Mat*)addrCuadrados;
+JNIEXPORT jstring JNICALL
+Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
+                                                                 jobject,
+                                                                 jlong imagenRGBA,
+                                                                 jlong imagenResultado) {
+    Mat & mOriginal = *(Mat*)imagenRGBA;
+    Mat mPrep = mOriginal.clone();
+    Mat mOriginalCopia = mOriginal.clone();
+    Mat & mResultado = *(Mat*)imagenResultado;
+    string mensajeBinario = "................................................";
+    string mensajeResultado = "";
 
-    MAX_WIDTH = mRgba.cols;
-    MAX_HEIGHT = mRgba.rows;
+    MAX_WIDTH = mOriginal.cols;
+    MAX_HEIGHT = mOriginal.rows;
 
     vector<vector<Point> > cuadrados;
     vector<vector<vector<Point> > > particiones;
 
-    //test(mRgba);
-    buscarCuadrados(mRgba, cuadrados);
-    dibujarCuadrados(mRgba, cuadrados);
-    particionarCuadrados(mRgba, cuadrados, particiones);
-    decodificarParticiones(mRgba, mRgba_copia, particiones);
+    buscarCuadrados(mOriginal, cuadrados);
+    dibujarCuadrados(mOriginal, cuadrados);
+    particionarCuadrados(mOriginal, cuadrados, particiones);
+    decodificarParticiones(mOriginal, mOriginalCopia, particiones, mensajeBinario);
 
-
-    /*cvtColor(mRgba, mRgba, CV_BGR2GRAY);
-    bitwise_not(mRgba, mRgba);
-    threshold(mRgba, mRgba, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);*/
-
+    if(cuadrados.size() > 0)
+       traducirMensaje(mensajeBinario, mensajeResultado, (int)cuadrados.size(), 0);
+/*
     //mRgba = mRgba_original;
-    mCuadrados = mRgba;
+    Mat dst;
+    //bitwise_not(mOriginal, mOriginal);
+    //
+    //
 
-    int conv = 1;
-    jint retVal;
+    cvtColor(mOriginal, mOriginalCopia, CV_BGR2GRAY);
+    GaussianBlur( mOriginalCopia, mOriginalCopia, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
+    bitwise_not(mOriginalCopia, mOriginalCopia);
+    Laplacian( mOriginalCopia, dst, CV_16S, 3, 1, 0, BORDER_DEFAULT );
+    convertScaleAbs( dst, mOriginalCopia );
+    //threshold(mOriginalCopia, mOriginalCopia, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);*/
 
-    //conv = toGray(mRgba, mcuadrados);
-    retVal = (jint)conv;
 
-    return retVal;
+
+    mResultado = mOriginalCopia;
+
+    return env->NewStringUTF(mensajeResultado.c_str());//(env, );
 }
-static void test( Mat& image){
-    cvtColor(image, image, CV_BGR2GRAY);
-    GaussianBlur( image, image, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
-    threshold( image, image, 70, 255, CV_THRESH_BINARY );
+static void preprocesar( Mat& image, Mat& image_prep){
+    Mat tmp;
+    cvtColor(image, image_prep, CV_BGR2GRAY);
+    GaussianBlur( image_prep, image_prep, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
+    Laplacian( image_prep, tmp, CV_16S, 3, 1, 0, BORDER_DEFAULT );
+    convertScaleAbs( tmp, image_prep );
+    //threshold(image_prep, image_prep, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);
 }
 static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados ){
     cuadrados.clear();
@@ -90,16 +141,17 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
     Mat timg(image);
     GaussianBlur( image, timg, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
 
-    Mat gray0(timg.size(), CV_8U), gray;
-    //Mat gray0_not(gray0.size(), CV_8U);
+    Mat gray0(timg.size(), CV_8U), gray1(timg.size(), CV_8U);
+    Mat gray, gray2;
 
-    vector<vector<Point> > contours;
+    vector<vector<Point> > contours1, contours2;
 
-    // find cuadrados in every color plane of the image
+    // Encuentra cuadrados en cada plano de la imagen
     for( int c = 0; c < CANALES; c++ ) //ORIGINAL 3 para canales
     {
         int ch[] = {c, 0};
         mixChannels(&timg, 1, &gray0, 1, ch, 1);
+        //Mat gray1 = gray0.clone();
 
         // try several threshold levels
         for( int l = 0; l < N; l++ )
@@ -111,37 +163,26 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 // apply Canny. Take the upper threshold from slider
                 // and set the lower to 0 (which forces edges merging)
                 if(TECNICA_BORDES == 1){
-                    /// Generate grad_x and grad_y
-                    int scale = 1;
-                    int delta = 0;
-                    int ddepth = CV_16S;
-                    Mat grad_x, grad_y;
-                    Mat abs_grad_x, abs_grad_y;
-
-                    /// Gradient X
-                    //Scharr( src_gray, grad_x, ddepth, 1, 0, scale, delta, BORDER_DEFAULT );
-                    Sobel( gray0, grad_x, ddepth, 1, 0, 3, scale, delta, BORDER_DEFAULT );
-                    convertScaleAbs( grad_x, abs_grad_x );
-
-                    /// Gradient Y
-                    //Scharr( src_gray, grad_y, ddepth, 0, 1, scale, delta, BORDER_DEFAULT );
-                    Sobel( gray0, grad_y, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT );
-                    convertScaleAbs( grad_y, abs_grad_y );
-
-                    /// Total Gradient (approximate)
-                    addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, gray );
-
                 }
                 else {
+                    /// Apply Laplace function
+                    Mat dst;
                     bitwise_not(gray0, gray0);
-                    Canny(gray0, gray, 10, 20, 3, false);//10,20,3);// 0 10 5
+                    Laplacian( gray0, dst, CV_16S, 3, 1, 0, BORDER_DEFAULT );
+                    convertScaleAbs( dst, gray );
+
+                    //Canny(gray0, gray, 0, 10, 5, false);//10,20,3);// 0 10 5
+
+                    //bitwise_not(gray0, gray1);
+                    //Laplacian( gray1, gray2, CV_16S, 3, 1, 0, BORDER_DEFAULT );
+                    //convertScaleAbs( gray2, gray2 );
                 }
                 //bitwise_not(gray, gray);
 
                 // dilate canny output to remove potential
                 // holes between edge segments
                 dilate(gray, gray, getStructuringElement( MORPH_RECT, Size(3,3))); //Mat(), Point(-1,-1));
-
+                //dilate(gray2, gray2, getStructuringElement( MORPH_RECT, Size(3,3)));
                 //erode( gray, gray, getStructuringElement( MORPH_RECT, Size(3,3)) );
             }
             else
@@ -149,19 +190,22 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 // apply threshold if l!=0:
                 //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
                 gray = gray0 >= (l+1)*255/N;
+                //gray2 = gray1 >= (l+1)*255/N;
             }
 
             // Encuentra los contornos (mas exteriores si existen otros dentro) y los enlista
-            findContours(gray, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(-1 ,-1));
-
+            findContours(gray, contours1, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(-1 ,-1));
+            //findContours(gray2, contours2, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(-1 ,-1));
+            //printf("contours1: %i, contours2: %i\n",contours1.size(), contours2.size());
+            //contours1.insert(contours1.end(), contours2.begin(), contours2.end());
             vector<Point> approx;
 
             // test each contour
-            for( size_t i = 0; i < contours.size(); i++ )
+            for( size_t i = 0; i < contours1.size(); i++ )
             {
                 // approximate contour with accuracy proportional
                 // to the contour perimeter
-                approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
+                approxPolyDP(Mat(contours1[i]), approx, arcLength(Mat(contours1[i]), true)*0.02, true);
                 //convexHull( Mat(contours[i]), approx, true );
 
                 // square contours should have 4 vertices after approximation
@@ -193,25 +237,26 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
             }
         }
     }
+
     ordenarCuadradosPorPosicionEspacial(cuadrados, DIRECCION_ORDEN_C);
 }
 static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados ) {
 
   // __android_log_print(ANDROID_LOG_ERROR, "cuadrados.size --> ", "%i", cuadrados.size());
     //char txt[] = "Cuadrados: ";
-    //putText(image, IntToString((int)cuadrados.size()).c_str(), Point(10,MAX_HEIGHT-20), FONT_HERSHEY_SIMPLEX, 1,Scalar(0,0,0),1, LINE_AA, false);
+    //putText(image, IntToString((int)cuadrados.size()).c_str(), Point(10,MAX_HEIGHT-20), FONT_HERSHEY_SIMPLEX, 1,Scalar(255,0,0),1, LINE_AA, false);
 
     for (int i = 0; i < cuadrados.size(); i++) {
 
         const Point *p = &cuadrados[i][0];
         int n = (int) cuadrados[i].size();
 
-        putText(image, IntToString(i+1).c_str(), Point(cuadrados[i][0].x,cuadrados[i][0].y), FONT_HERSHEY_SIMPLEX, 1,Scalar(0,0,0),2 , LINE_AA, false);
+        putText(image, IntToString(i+1).c_str(), Point(cuadrados[i][0].x,cuadrados[i][0].y), FONT_HERSHEY_SIMPLEX, 1,Scalar(255,0,0),2 , LINE_AA, false);
         //if (p->x > 3 && p->y > 3 && p->x < MAX_WIDTH -3 && p->y < MAX_HEIGHT-3) {
         //Rect boundRect;
         //boundRect = boundingRect(cuadrados[i]);
         //rectangle(image, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
-        polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 2, 16);
+        //polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 2, 16);
     }
 }
 static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados , vector<vector<vector<Point> > >& particiones) {
@@ -319,7 +364,7 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
         //
         //__android_log_print(ANDROID_LOG_ERROR, "particiones ---> ", "%i -> (%i %i)",i, particiones[i].size());
 
-        if (particiones.size() > 0) {
+        /*if (particiones.size() > 0) {
             for (int r = 0; r < particiones[i].size(); r++) {
                 const Point *p = &particiones[i][r][0];
                 int n = (int) particiones[i][r].size();
@@ -327,7 +372,7 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
                 polylines(image, &p, &n, 1, true, Scalar(255 * r / particiones[i].size(), 0, 200),
                           1, 16);
             }
-        }
+        }*/
 
 
     }
@@ -502,12 +547,17 @@ static void unificarParticiones(const int indiceCuadrado,
 
     //__android_log_print(ANDROID_LOG_ERROR, "unificarParticiones1 ---> ", "%i, (%i)",indiceCuadrado+1,particiones[indiceCuadrado].size());
 }
-static void decodificarParticiones( Mat& image, Mat& image_c, vector<vector<vector<Point> > >& particiones){
+static void decodificarParticiones( Mat& image,
+                                    Mat& image_c,
+                                    vector<vector<vector<Point> > >& particiones,
+                                    string& mensajeBinario){
 
     if(particiones.size() <= 0 ) return;
     if(particiones[0].size() <= 0 ) return; //!!
 
-    int ANCHO_TRANSF = 50, ALTO_TRANSF = 50, NUM_PARTICIONES = (int)particiones[0].size();
+    int ANCHO_TRANSF = 50, ALTO_TRANSF = 50;
+    int NUM_MATRICES_ACTUALES = particiones.size();
+    int NUM_PARTICIONES_ACTUALES = particiones[0].size();
     float porcentajeBlanco = 0;
     vector<Point> puntosBlancos;
     Mat mParticionTransfomada(ANCHO_TRANSF, ALTO_TRANSF, CV_8UC1);
@@ -515,20 +565,14 @@ static void decodificarParticiones( Mat& image, Mat& image_c, vector<vector<vect
                                      Point(ANCHO_TRANSF, 0),
                                      Point(ANCHO_TRANSF, ALTO_TRANSF),
                                      Point(0, ALTO_TRANSF)};
-    char mensaje[3][16] = {{'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'},
+    /*char mensaje[3][16] = {{'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'},
                            {'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'},
-                           {'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'}};
+                           {'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'}};*/
 
-    //strcpy(mensaje, "");
+    preprocesar(image, image_c);
 
-    //Convirtiendo particion a escala de grises
-    cvtColor(image_c, image_c, CV_BGR2GRAY);
-
-    //Convirtiendo particion a binaria
-    threshold(image_c, image_c, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);
-
-    for(int i = 0; i < particiones.size(); i++) {
-        for (int k = 0; k < NUM_PARTICIONES; k++) {
+    for(int i = 0; i < NUM_MATRICES_ACTUALES; i++) {
+        for (int k = 0; k < NUM_PARTICIONES_ACTUALES; k++) {
             origen[0] = particiones[i][k][0];
             origen[1] = particiones[i][k][1];
             origen[2] = particiones[i][k][2];
@@ -536,15 +580,6 @@ static void decodificarParticiones( Mat& image, Mat& image_c, vector<vector<vect
 
             Mat mLambda = getPerspectiveTransform(origen, destino);
             warpPerspective(image_c, mParticionTransfomada, mLambda, mParticionTransfomada.size());
-
-            /*Mat mLambda = getPerspectiveTransform(origen, destino);
-            warpPerspective(image_c, mParticionTransfomada, mLambda, mParticionTransfomada.size());
-
-            //Convirtiendo particion a escala de grises
-            cvtColor(mParticionTransfomada, mParticionTransfomada, CV_BGR2GRAY);
-
-            //Convirtiendo particion a binaria
-            threshold(mParticionTransfomada, mParticionTransfomada, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);*/
 
             //Busca pixeles blancos en imagen binarizada
             findNonZero(mParticionTransfomada, puntosBlancos);
@@ -554,41 +589,88 @@ static void decodificarParticiones( Mat& image, Mat& image_c, vector<vector<vect
             //Calcula el procentaje de pixeles blancos contra el total de pixeles en la region
             porcentajeBlanco = float((puntosBlancos.size()) * 100.0) / tamanio;
 
-            /*if(i == 1){
-                __android_log_print(ANDROID_LOG_ERROR, "findNonZero", "%f %f", (puntosBlancos.size()), porcentajeBlanco);
-            }*/
+            //porcentajeBlanco = float(100.0 - porcentajeBlanco);
+
+            //__android_log_print(ANDROID_LOG_ERROR, "findNonZero", "%.3f", porcentajeBlanco);
 
             //mensaje[i % 3][k] = x;
 
             if (porcentajeBlanco >= TOLERANCIA_LED_ENCENDIDO) {
-                mensaje[i % 3][k] = '1'; //[k / 4][k % 4] = '1';
+                mensajeBinario[(i % NUM_MATRICES_ACTUALES) * NUM_PARTICIONES_ACTUALES + k] = '1';
+                //mensaje[i % 3][k] = '1'; //[k / 4][k % 4] = '1';
             }
             else{
-                mensaje[i % 3][k] = '0'; //[k / 4][k % 4] = '0';
+                mensajeBinario[(i % NUM_MATRICES_ACTUALES) * NUM_PARTICIONES_ACTUALES + k] = '0';
+                //mensaje[i % 3][k] = '0'; //[k / 4][k % 4] = '0';
             }
         }
-        //__android_log_print(ANDROID_LOG_ERROR, "findNonZero", "%s", string(mensaje[0]).substr(0,4).c_str());
+        //
     }
     //cvtColor(image, image, CV_BGR2GRAY);
     //bitwise_not(mRgba, mRgba);
     //threshold(image, image, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);
-    //image = image_c;
+    image = image_c;
 
-    putText(image, string(mensaje[0]).substr(0,4).c_str(), Point(10,MAX_HEIGHT-135), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[0]).substr(4,4).c_str(), Point(10,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[0]).substr(8,4).c_str(), Point(10,MAX_HEIGHT-75), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[0]).substr(12,4).c_str(), Point(10,MAX_HEIGHT-45), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(0,4).c_str(), Point(10,MAX_HEIGHT-135), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(4,4).c_str(), Point(10,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(8,4).c_str(), Point(10,MAX_HEIGHT-75), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(12,4).c_str(), Point(10,MAX_HEIGHT-45), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
 
-    putText(image, string(mensaje[1]).substr(0,4).c_str(), Point(120,MAX_HEIGHT-135), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[1]).substr(4,4).c_str(), Point(120,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[1]).substr(8,4).c_str(), Point(120,MAX_HEIGHT-75), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[1]).substr(12,4).c_str(), Point(120,MAX_HEIGHT-45), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(16,4).c_str(), Point(120,MAX_HEIGHT-135), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(20,4).c_str(), Point(120,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(24,4).c_str(), Point(120,MAX_HEIGHT-75), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(28,4).c_str(), Point(120,MAX_HEIGHT-45), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
 
-    putText(image, string(mensaje[2]).substr(0,4).c_str(), Point(240,MAX_HEIGHT-135), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[2]).substr(4,4).c_str(), Point(240,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[2]).substr(8,4).c_str(), Point(240,MAX_HEIGHT-75), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
-    putText(image, string(mensaje[2]).substr(12,4).c_str(), Point(240,MAX_HEIGHT-45), FONT_HERSHEY_DUPLEX, 1,Scalar(0,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(32,4).c_str(), Point(240,MAX_HEIGHT-135), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(36,4).c_str(), Point(240,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(40,4).c_str(), Point(240,MAX_HEIGHT-75), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, string(mensajeBinario).substr(44,4).c_str(), Point(240,MAX_HEIGHT-45), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
 
+}
+static void traducirMensaje(string& mensajeBinario, string& mensaje, int numCuadrados, int modoTraduccion){
+    if(mensaje == "................................................") return;
+    mensaje = "";
+
+
+    string msg_seg1 = "";
+    string msg_seg2 = "";
+    string msg_seg3 = "";
+    string msg_seg4 = "";
+    string msg_seg5 = "";
+    string msg_seg6 = "";
+    string msg_seg7 = "";
+    string msg_seg8 = "";
+    int msg_seg1_bin = -1;
+    string msg_dec = "";
+
+    if(modoTraduccion == 0) {
+        for(int p = 0; p < numCuadrados; p++) {
+            if (p == 0) {
+
+
+                for (int r = 0; r < 4; r++) {
+                    msg_seg1 = mensajeBinario.substr(r * 4, 4);
+                    msg_seg1_bin = atoi(msg_seg1.c_str());
+                        msg_dec = msg_dec + IntToString(binarioADecimal(msg_seg1_bin));
+
+                }
+                if(p < numCuadrados-1){
+                    msg_dec = msg_dec + "-";
+                }
+
+                /*__android_log_print(ANDROID_LOG_ERROR, "tradiccion: ", "%s",
+                                    msg_dec.c_str());*/
+            } else if (p == 1) {
+                //msg_seg5 = mensajeBinario.substr(16, 4) + mensajeBinario.substr(20, 4);
+                // msg_seg6 = mensajeBinario.substr(24, 4) + mensajeBinario.substr(28, 4);
+            } else if (p == 2) {
+
+                //msg_seg7 = mensajeBinario.substr(32, 4) + mensajeBinario.substr(36, 4);
+                //msg_seg8 = mensajeBinario.substr(40, 4) + mensajeBinario.substr(44, 4);
+            }
+        }
+    }
+    mensaje = msg_dec;
 }
 static void ordenarCuadradosPorPosicionEspacial(vector<vector<Point> >& cuadrados, int direccion){
     if(cuadrados.size() <= 1) return;
@@ -643,7 +725,7 @@ static void ordenarCuadradosPorPosicionEspacial(vector<vector<Point> >& cuadrado
 }
 
 
-static double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0){
+double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0){
     double dx1 = pt1.x - pt0.x;
     double dy1 = pt1.y - pt0.y;
     double dx2 = pt2.x - pt0.x;
@@ -743,11 +825,28 @@ float distanciaEntreDosPuntos(Point p1, Point p2){
     return (float)sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
 
-}
-
 string IntToString (int a)
 {
     ostringstream tmp;
     tmp << a;
     return tmp.str();
 }
+
+int binarioADecimal(int n)
+{
+    int factor = 1;
+    int total = 0;
+
+    while (n != 0)
+    {
+        total += (n%10) * factor;
+        n /= 10;
+        factor *= 2;
+    }
+
+    return total;
+}
+
+}
+
+
