@@ -22,7 +22,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/benviar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

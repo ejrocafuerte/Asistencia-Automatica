@@ -22,15 +22,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class InfoActivity extends AppCompatActivity {
+    private Context mContext;
     private Button btn_guardar;
     private TextView txt_nombres;
     private TextView txt_apellidos;
     private TextView txt_matricula;
     private File miArchivo;
+    private String delimitador = ";;";
 
     private String nombres;
     private String apellidos;
     private String matricula;
+    private String nombreArchivoEstudiante = "InfoEstudiante";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +43,7 @@ public class InfoActivity extends AppCompatActivity {
         toolbar.setTitle("Información");
         setSupportActionBar(toolbar);
 
+        mContext = this;
         btn_guardar = (Button) findViewById(R.id.bguardar);
         txt_nombres = (TextView) findViewById(R.id.tnombres);
         txt_apellidos = (TextView) findViewById(R.id.tapellidos);
@@ -52,7 +56,7 @@ public class InfoActivity extends AppCompatActivity {
                 nombres = txt_nombres.getText().toString().trim();
                 apellidos = txt_apellidos.getText().toString().trim();
                 matricula = txt_matricula.getText().toString().trim();
-                miArchivo = new File(getFilesDir().getPath(),"asistencia-info.txt");
+                miArchivo = new File(getFilesDir().getPath(), nombreArchivoEstudiante);
 
 
                 if(nombres.length() <= 0){
@@ -68,15 +72,25 @@ public class InfoActivity extends AppCompatActivity {
                     return;
                 }
 
-                String info = nombres + ";;" + apellidos + ";;" + matricula;
+                String info = nombres + delimitador + apellidos + delimitador + matricula;
 
                 try {
                     FileOutputStream fos = new FileOutputStream(miArchivo);
                     fos.write(info.getBytes());
                     fos.close();
                     Toast.makeText(v.getContext(), "Datos guardados", Toast.LENGTH_SHORT).show();
-                    finishActivity(0);
+
+                    Intent intent = new Intent(mContext, LobbyActivity.class);
+                    intent.putExtra("intent_nombres", nombres);
+                    intent.putExtra("intent_apellidos", apellidos);
+                    intent.putExtra("intent_matricula", matricula);
+
+                    setResult(InfoActivity.RESULT_OK, intent);
+                    finish();
+
+
                 } catch (IOException e) {
+                    setResult(InfoActivity.RESULT_CANCELED, null);
                     Toast.makeText(v.getContext(), "IOException", Toast.LENGTH_SHORT).show();
                 }
             }

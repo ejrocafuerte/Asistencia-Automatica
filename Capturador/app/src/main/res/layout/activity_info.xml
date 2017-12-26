@@ -26,11 +26,10 @@
         android:id="@+id/tnombres"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="65dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/lnombres"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Nombres"
         android:textColor="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.094"
@@ -42,11 +41,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/tnombres"
-        android:layout_marginTop="30dp"
+        android:layout_below="@+id/lapelllidos"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Apellidos"
         android:textColor="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -57,12 +54,10 @@
         android:id="@+id/tmatricula"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/tapellidos"
-        android:layout_marginTop="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/lmatricula"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Matrícula"
         android:textColor="@color/colorPrimaryDark" />
 
     <Button
@@ -70,11 +65,45 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
+        android:layout_alignWithParentIfMissing="false"
         android:layout_below="@+id/tmatricula"
+        android:layout_centerHorizontal="false"
+        android:layout_centerInParent="false"
+        android:layout_centerVertical="false"
         android:layout_marginTop="30dp"
         android:background="@color/colorPrimaryDark"
         android:text="GUARDAR"
         android:textColor="@android:color/background_light"
         android:textColorLink="@color/colorPrimary" />
+
+    <TextView
+        android:id="@+id/lnombres"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/appBarLayout"
+        android:paddingLeft="10dp"
+        android:paddingTop="15dp"
+        android:text="Mis nombres" />
+
+    <TextView
+        android:id="@+id/lapelllidos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tnombres"
+        android:paddingLeft="10dp"
+        android:paddingTop="15dp"
+        android:text="Mis apellidos" />
+
+    <TextView
+        android:id="@+id/lmatricula"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tapellidos"
+        android:paddingLeft="10dp"
+        android:paddingTop="15dp"
+        android:text="Mi matrícula" />
 
 </RelativeLayout>
