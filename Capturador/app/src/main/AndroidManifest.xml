@@ -37,7 +37,7 @@
         <activity
             android:name=".CameraActivity"
             android:label="Decodificador"
-            android:screenOrientation="landscape"></activity>
+            android:screenOrientation="landscape"/>
     </application>
 
 </manifest>

@@ -13,5 +13,6 @@ urlpatterns = [
     url(r'^arduino/$',views.ArduinoList.as_view(),name='views.ArduinoList.name'),
     url(r'^materia/$',views.MateriaList.as_view(),name='views.MateriaList.name'),
     url(r'^paralelo/$',views.ParaleloList.as_view(),name='views.ParaleloList.name'),
+    url(r'^gestionar/$', views.gestionar,name='gestionar'),
     #url(r'^paralelo/<int=anio>/<int=paralelo>/$',views.ParaleloAnioList.as_view(),name='views.ParaleloList.name'),
 ]

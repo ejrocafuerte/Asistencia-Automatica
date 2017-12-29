@@ -1,1 +1,5 @@
+OPENCV_LIB_TYPE:=STATIC
+OPENCV_CAMERA_MODULES:=off
+OPENCV_INSTALL_MODULES:=on
 C:/OpenCV-android-sdk-3.3.1/sdk/native/libs
+C:/OpenCV-android-sdk-3.3.1/sdk/native/libs/armeabi-v7a/libopencv_java3.so

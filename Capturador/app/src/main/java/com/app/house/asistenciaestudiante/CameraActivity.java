@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,9 +50,15 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_camera);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Decodificador");
+        setSupportActionBar(toolbar);
+
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(com.app.house.asistenciaestudiante.R.layout.activity_camera);
 
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(CameraActivity.this,
@@ -84,6 +91,12 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
@@ -106,7 +119,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         return false;
     }
 
-
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
+    }
 
     public void onDestroy() {
         super.onDestroy();

@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -26,6 +27,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.NetworkInterface;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,27 +37,49 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class LobbyActivity extends AppCompatActivity {
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
+import retrofit.Connection;
+import retrofit.RestClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import cipher.Crypt;
+
+public class LobbyActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "LobbyActivity";
 
     private Context mContext;
     private NetworkConReceiver mNetworkConReceiver;
+    private static Retrofit retrofit = null;
+    private RestClient restClient = null;
+    private Crypt crypto;
+
     private String mac = "";
     private String nombres = "";
     private String apellidos = "";
     private String matricula = "";
+    private String fecha = "";
     private String materia = "CCG01INTEGRADORA";
     private String codigo = "0110101";
-    private String fecha = "";
+    private String distanciaX = "0.0";
+    private String distanciaY = "0.0";
+
     private String delimitador = ";;";
+    private String delimitadorNl = "**";
     private String nombreArchivoEstudiante = "/InfoEstudiante";
     private String nombreArchivoAsistencia = "/Asistencia";
     private int REQUESTCODE_INFO = 1;
     private int REQUESTCODE_CAMERA = 2;
     private ArrayList<String> infoEstudiante;
-    private ArrayList<String> infoAsistencia;
+    private ArrayList<String> infoAsistencias;
+    private String infoAsistenciaActual;
     private boolean existeInternet = false;
     private Button btn_enviar;
+    private TextView txt_asistencias;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,39 +89,145 @@ public class LobbyActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         mContext = this;
+        crypto = Crypt.getInstance();
 
         fileManager(mContext);
 
-
         mac = getMacAddr();
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH24:mm:ss");
-        fecha = formatter.format(new Date());
+        fecha = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
-        infoAsistencia.add("Christian Alejandro;;Jaramillo Espinoza;;200518124;;CCG01INTEGRADORA;;0110101");
-        infoAsistencia.add("Carlos Javier;;Moran Espinoza;;200518124;;CCG01INTEGRADORA;;0110101");
-        infoAsistencia.add("Anahi Thalia;;Jaramillo Espinoza;;200518124;;CCG01INTEGRADORA;;0110101");
+        //infoAsistencia.add("Christian A;;Jaramillo E;;200518124;;CCG01INTEGRADORA;;0110101");
+        //infoAsistencia.add("CJ;;ME;;200518124;;CCG01INTEGRADORA;;0110101");
+        //infoAsistencia.add("AT;;JE;;200518124;;CCG01INTEGRADORA;;0110101");
+
+
+
 
         mNetworkConReceiver = new NetworkConReceiver();
 
         registerReceiver(mNetworkConReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         btn_enviar = (Button)findViewById(R.id.benviar);
-        btn_enviar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //enviar asistencia servidor web
-                if(existeInternet){
-                    saveFile(mContext, infoAsistencia, nombreArchivoAsistencia);
-                }
-                //guardar info a archivo
-                else{
+        btn_enviar.setOnClickListener(this);
 
-                }
-            }
-        });
-
+        if(retrofit == null){
+            Connection.init();
+            restClient = Connection.createService(RestClient.class); //, username, password);
+        }
     }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.benviar:{
+                if(validateInfo()){
+
+                    infoAsistenciaActual = getAsistenciaActualMessage();
+                    infoAsistencias.add(infoAsistenciaActual);
+
+                    //enviar asistencia servidor web
+                    if(existeInternet){
+                        sendMessage(getAsistenciasMessage());
+                        infoAsistencias.clear();
+                        _deleteFile(nombreArchivoAsistencia);
+                        Toast.makeText(mContext, "Asistencias enviadas con exito",
+                                Toast.LENGTH_SHORT).show();
+
+                        Log.e("ENVIANDO", getAsistenciaActualMessage());
+                    }
+                    //guardar info a archivo
+                    else{
+                        saveFile(mContext, infoAsistencias, nombreArchivoAsistencia);
+                    }
+                };
+            }
+            default: break;
+        }
+    }
+
+    private void sendMessage(String asistenciasMessage) {
+
+        if(restClient != null){
+            Log.e("sendMessage", asistenciasMessage);
+            Call<String> request = restClient.sendMessage(encrypt(asistenciasMessage));
+
+            request.enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    if(response.isSuccessful()){
+                        infoAsistencias.clear();
+                        _deleteFile(nombreArchivoAsistencia);
+                        Toast.makeText(mContext, response.body(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                }
+            });
+        }
+    }
+
+    private String getAsistenciasMessage() {
+        if(infoAsistencias.size() <= 0) return "";
+        StringBuilder message = new StringBuilder("");
+        for(int k = 0; k < infoAsistencias.size(); k++){
+            message.append(infoAsistencias.get(k));
+            if(k < infoAsistencias.size() - 1){
+                message.append(delimitadorNl);
+            }
+        }
+        return message.toString();
+    }
+
+    private String getAsistenciaActualMessage() {
+        StringBuilder sb = new StringBuilder("");
+        sb.append(mac).append(delimitador)
+            .append(nombres).append(delimitador)
+            .append(apellidos).append(delimitador)
+            .append(matricula).append(delimitador)
+            .append(fecha).append(delimitador)
+            .append(materia).append(delimitador)
+            .append(codigo).append(delimitador)
+            .append(distanciaX).append(delimitador)
+            .append(distanciaY);
+        return sb.toString();
+    }
+
+    private boolean validateInfo() {
+        if(mac.isEmpty()){
+            Toast.makeText(mContext, "Error: MAC", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(nombres.isEmpty()){
+            Toast.makeText(mContext, "Error: Nombres", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(apellidos.isEmpty()){
+            Toast.makeText(mContext, "Error: Apellidos", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(matricula.isEmpty()){
+            Toast.makeText(mContext, "Error: Matricula", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(fecha.isEmpty()){
+            Toast.makeText(mContext, "Error: Fecha", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(codigo.isEmpty()){
+            Toast.makeText(mContext, "Error: Codigo", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(materia.isEmpty()) {
+            Toast.makeText(mContext, "Error: Materia", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(distanciaX.isEmpty()){
+            Toast.makeText(mContext, "Error: Distancia X", Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(distanciaY.isEmpty()){
+            Toast.makeText(mContext, "Error: Distancia Y", Toast.LENGTH_SHORT).show();
+            return false;
+        }else
+            return true;
+    }
+
     public static String getMacAddr() {
         try {
             List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
@@ -150,13 +282,15 @@ public class LobbyActivity extends AppCompatActivity {
             } catch (IOException e) {
             }
         }else{
-            infoAsistencia = readFile(context, nombreArchivoAsistencia);
-            try {
+            infoAsistencias = readFile(context, nombreArchivoAsistencia);
+            txt_asistencias = (TextView)findViewById(R.id.lasistencias);
+            txt_asistencias.setText(getAsistenciasMessage());
+            /*try {
 
-                fileAsistencia.delete();
-                fileAsistencia.createNewFile();
+                //fileAsistencia.delete();
+                //fileAsistencia.createNewFile();
             } catch (IOException e) {
-            }
+            }*/
 
         }
     }
@@ -172,7 +306,7 @@ public class LobbyActivity extends AppCompatActivity {
 
             for(int i = 0;  i < infoAsistencia.size(); i++) {
                 fos.write((infoAsistencia.get(i).toString() + "\n").getBytes());
-                Log.e("saveFile", (infoAsistencia.get(i).toString() + "\n"));
+                Log.e("saveFile "+filename, (infoAsistencia.get(i).toString() + "\n"));
             }
             fos.close();
             Toast.makeText(context, "Datos guardados", Toast.LENGTH_SHORT).show();
@@ -195,7 +329,7 @@ public class LobbyActivity extends AppCompatActivity {
                 while ( (receiveString = bufferedReader.readLine()) != null ) {
                     //stringBuilder.append(receiveString);
                     dataList.add(receiveString);
-                    Log.e("readFile: 4", receiveString);
+                    Log.e("readFile " + filename, receiveString);
                 }
                 fileInputStream.close();
                 //dataList = (ArrayList<String>)Arrays.asList(stringBuilder.toString().split("\\n"));
@@ -211,7 +345,16 @@ public class LobbyActivity extends AppCompatActivity {
 
         return dataList;
     }
-
+    private void _deleteFile(String filename){
+        File fileAsistencia = new File(getFilesDir().getPath() + filename);
+        if (fileAsistencia.exists()) {
+            try {
+                fileAsistencia.delete();
+                fileAsistencia.createNewFile();
+            } catch (IOException e) {
+            }
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -296,6 +439,29 @@ public class LobbyActivity extends AppCompatActivity {
         }
     }
 
+    public String encrypt(final String message){
+        try {
+            String encryptMessage = crypto.encrypt_string(message);
+            Log.e("Encrypt Message", encryptMessage);
+            return encryptMessage;
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
     public class NetworkConReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -303,13 +469,14 @@ public class LobbyActivity extends AppCompatActivity {
             NetworkInfo wifi = conMngr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             NetworkInfo mobile = conMngr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 
-            if(wifi.isConnected()){
+            if (wifi.isConnected()) {
                 existeInternet = true;
+                //sendMessage(getAsistenciasMessage());
                 Toast.makeText(context, "BroadcastReceiver: WIFI ON", Toast.LENGTH_SHORT).show();
-            }else if(mobile.isConnected() && wifi.isConnected()){
+            } else if (mobile.isConnected()/* && wifi.isConnected()*/) {
                 existeInternet = true;
                 Toast.makeText(context, "BroadcastReceiver: MOBILE ON", Toast.LENGTH_SHORT).show();
-            }else{
+            } else {
                 existeInternet = false;
                 Toast.makeText(context, "BroadcastReceiver: MOBILE OR WIFI OFF", Toast.LENGTH_SHORT).show();
             }
