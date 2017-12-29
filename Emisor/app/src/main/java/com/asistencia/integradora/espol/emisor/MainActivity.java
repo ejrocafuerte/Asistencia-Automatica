@@ -29,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EmisorSQLHelper db1 = new EmisorSQLHelper(getApplicationContext());
+        System.out.println("el nombre del profesor es: "+db1.getProfesor());
+
+
         setContentView(R.layout.activity_main);
         mPairedDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_main);
         mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_main);
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         //btAdap.startDiscovery();
         doDiscovery();
         Toast.makeText(getApplicationContext(), "Showing Nearest Devices",Toast.LENGTH_SHORT).show();
+
 
     }
     public void encenderBT() {
