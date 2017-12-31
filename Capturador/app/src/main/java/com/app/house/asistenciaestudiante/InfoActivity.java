@@ -43,6 +43,9 @@ public class InfoActivity extends AppCompatActivity {
         toolbar.setTitle("Información");
         setSupportActionBar(toolbar);
 
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mContext = this;
         btn_guardar = (Button) findViewById(R.id.bguardar);
         txt_nombres = (TextView) findViewById(R.id.tnombres);
@@ -105,6 +108,11 @@ public class InfoActivity extends AppCompatActivity {
         }
 
 
+    }
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
     }
 
     @Override
