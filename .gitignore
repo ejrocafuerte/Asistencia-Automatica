@@ -358,3 +358,4 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.gitignore.io/api/python,django,windows,pycharm
+Server/.idea/workspace.xml
