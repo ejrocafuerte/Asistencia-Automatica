@@ -41,6 +41,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import models.Token;
 import retrofit.Connection;
 import retrofit.RestClient;
 import retrofit2.Call;
@@ -134,7 +135,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                         Toast.makeText(mContext, "Asistencias enviadas con exito",
                                 Toast.LENGTH_SHORT).show();
 
-                        Log.e("ENVIANDO", getAsistenciaActualMessage());
+                        //Log.e("ENVIANDO", getAsistenciaActualMessage());
                     }
                     //guardar info a archivo
                     else{
@@ -150,7 +151,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
         if(restClient != null){
             Log.e("sendMessage", asistenciasMessage);
-            Call<String> request = restClient.sendMessage(encrypt(asistenciasMessage));
+            Call<String> request = restClient.sendMessage(new Token(encrypt(asistenciasMessage)));
 
             request.enqueue(new Callback<String>() {
                 @Override
@@ -158,13 +159,16 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     if(response.isSuccessful()){
                         infoAsistencias.clear();
                         _deleteFile(nombreArchivoAsistencia);
-                        Toast.makeText(mContext, response.body(),
-                                Toast.LENGTH_SHORT).show();
                     }
+
+                    Toast.makeText(mContext, response.body(),
+                            Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onFailure(Call<String> call, Throwable t) {
+                    Toast.makeText(mContext, "sendMessage OnFailure",
+                            Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -442,7 +446,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     public String encrypt(final String message){
         try {
             String encryptMessage = crypto.encrypt_string(message);
-            Log.e("Encrypt Message", encryptMessage);
+            Log.e("Encrypted Message", encryptMessage);
             return encryptMessage;
         } catch (InvalidKeyException e) {
             e.printStackTrace();

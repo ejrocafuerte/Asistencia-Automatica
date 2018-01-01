@@ -1,3 +1,2 @@
 include ':app'
-include ':openCVLibrary331'
-//include ':openCVLibrary24134'
+include ':libs:openCVLibrary331'

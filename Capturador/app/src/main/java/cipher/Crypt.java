@@ -35,7 +35,6 @@ public class Crypt {
 
     private static Crypt instance = null;
 
-
     Crypt() {
         SecureRandom random = new SecureRandom();
         Crypt.ivBytes = new byte[16];
@@ -51,7 +50,7 @@ public class Crypt {
     }
 
     public String encrypt_string(final String plain) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, IOException {
-        return Base64.encodeToString(encrypt(plain.getBytes()), Base64.DEFAULT);
+        return Base64.encodeToString(encrypt(plain.getBytes()), Base64.NO_WRAP); //Base64.DEFAULT
     }
 
     public String decrypt_string(final String plain) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, IOException {

@@ -18,6 +18,15 @@ media
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff:
+Server/.idea/misc.xml
+Server/.idea/modules.xml
+Server/.idea/Server.iml
+Server/.idea/vcs.xml
+Server/.idea/workspace.xml
+Server/.idea/
+Server/.idea/*
+Capturador/.idea/
+Capturador/.idea/*
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/dictionaries

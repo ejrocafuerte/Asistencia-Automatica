@@ -33,7 +33,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
+                    Log.e(TAG, "OpenCV loaded successfully");
                     // Load ndk built module, as specified in moduleName in build.gradle
                     // after opencv initialization
                     System.loadLibrary("native-lib");
@@ -82,10 +82,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     public void onResume() {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            Log.e(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, _baseLoaderCallback);
         } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            Log.e(TAG, "OpenCV library found inside package. Using it!");
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
@@ -138,7 +138,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     public void onCameraViewStarted(int width, int height) {
 
 
-        Log.e(TAG, width + " ABCDE " + height);
+        Log.e(TAG, width + "x" + height);
         mRGBA = new Mat(width, height, CvType.CV_8UC4);
         mResultado = new Mat(width, height, CvType.CV_8UC4);
     }

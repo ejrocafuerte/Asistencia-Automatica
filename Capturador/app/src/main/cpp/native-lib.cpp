@@ -50,7 +50,7 @@ static void ordenarCuadradosPorPosicionEspacial(vector<vector<Point> >& cuadrado
 static void particionarCuadrados( Mat& image,
                                   const vector<vector<Point> >& cuadrados,
                                   vector<vector<vector<Point> > >& particiones);
-static void unificarParticiones(const int indiceCuadrado,
+static void unificarParticiones(const vector<vector<Point> >& cuadrados,
                                const vector<vector<Point> > & puntosVertices,
                                const vector<vector<vector<Point> > > & puntosFrontera,
                                const vector<vector<vector<Point> > > & puntosInternos,
@@ -73,7 +73,8 @@ int CANALES = 3;
 int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
 int TECNICA_BORDES = 2;
-int SEGMENTOS = 4;
+int SEGMENTOS_FRONTERA = 4;
+int SEGMENTOS_INTERNOS = 3;
 int DIRECCION_ORDEN_C = 1;
 int NIVEL_THRESHOLD = 30;
 float TOLERANCIA_LED_ENCENDIDO = 3.0; //(%)
@@ -102,16 +103,16 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     buscarCuadrados(mOriginal, cuadrados);
     dibujarCuadrados(mOriginal, cuadrados);
     particionarCuadrados(mOriginal, cuadrados, particiones);
-    decodificarParticiones(mOriginal, mOriginalCopia, particiones, mensajeBinario);
+    //decodificarParticiones(mOriginal, mOriginalCopia, particiones, mensajeBinario);
 
-    if(cuadrados.size() > 0)
-       traducirMensaje(mensajeBinario, mensajeResultado, (int)cuadrados.size(), 0);
+    //if(cuadrados.size() > 0)
+     //  traducirMensaje(mensajeBinario, mensajeResultado, (int)cuadrados.size(), 0);
 /*
     //mRgba = mRgba_original;
     Mat dst;
     //bitwise_not(mOriginal, mOriginal);
     //
-    //
+
 
     cvtColor(mOriginal, mOriginalCopia, CV_BGR2GRAY);
     GaussianBlur( mOriginalCopia, mOriginalCopia, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
@@ -122,7 +123,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
 
 
 
-    mResultado = mOriginalCopia;
+    mResultado = mOriginal;//mOriginalCopia;
 
     return env->NewStringUTF(mensajeResultado.c_str());//(env, );
 }
@@ -136,7 +137,7 @@ static void preprocesar( Mat& image, Mat& image_prep){
 }
 static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados ){
     cuadrados.clear();
-
+    __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%0.2f",1.0);
     // blur will enhance edge detection
     Mat timg(image);
     GaussianBlur( image, timg, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
@@ -245,7 +246,7 @@ static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrado
   // __android_log_print(ANDROID_LOG_ERROR, "cuadrados.size --> ", "%i", cuadrados.size());
     //char txt[] = "Cuadrados: ";
     //putText(image, IntToString((int)cuadrados.size()).c_str(), Point(10,MAX_HEIGHT-20), FONT_HERSHEY_SIMPLEX, 1,Scalar(255,0,0),1, LINE_AA, false);
-
+    __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%0.2f",2.0);
     for (int i = 0; i < cuadrados.size(); i++) {
 
         const Point *p = &cuadrados[i][0];
@@ -256,7 +257,7 @@ static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrado
         //Rect boundRect;
         //boundRect = boundingRect(cuadrados[i]);
         //rectangle(image, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
-        //polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 2, 16);
+        polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 2, 16);
     }
 }
 static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados , vector<vector<vector<Point> > >& particiones) {
@@ -276,15 +277,23 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
 
     particiones.clear();
 
+    /*puntosVertices.clear();
+    puntosFrontera.clear();
+    puntosInternos.clear();*/
+
+    //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 1);
+    __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%0.2f",3.0);
     for (int i = 0; i < cuadrados.size(); i++) {
-
+        __android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f", 3.1);
         //Buscando los puntos de las fronteras
-        for (int n = 0; n < SEGMENTOS; n++) {
-
+        for (int n = 0; n < SEGMENTOS_FRONTERA; n++) {
+            //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 3);
             const Point puntoInicial = cuadrados[i][n];
-            const Point puntoFinal = cuadrados[i][(n + 1) % SEGMENTOS];
+            const Point puntoFinal = cuadrados[i][(n + 1) % SEGMENTOS_FRONTERA];
+            __android_log_print(ANDROID_LOG_ERROR, "puntos vertices ptos ---> ", "PTO INI PTO FIN (%i %i) - (%i %i)",
+                                puntoInicial.x, puntoInicial.y, puntoFinal.x, puntoFinal.y);
             LineIterator it(image, puntoInicial, puntoFinal, 8, false);
-            int razon = (int) round(it.count / SEGMENTOS);
+            int razon = (int) round(it.count / SEGMENTOS_FRONTERA);
 
             puntosVerticePorCuadrado.push_back(puntoInicial);
 
@@ -296,8 +305,8 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
                     if (((k - 1) % razon) == 0) {
                         puntosFronteraPorSegmento.push_back(it.pos());
 
-                        /*__android_log_print(ANDROID_LOG_ERROR, "puntos FRONTERA ptos ---> ", "PTO INI PTO FIN %i %i %i, %i  (%i %i)",
-                                            i,n,razon, it.count,it.pos().x, it.pos().y);*/
+                        __android_log_print(ANDROID_LOG_ERROR, "puntos FRONTERA ptos ---> ", "PTO INI PTO FIN %i %i %i, %i  (%i %i)",
+                                            i,n,razon, it.count,it.pos().x, it.pos().y);
                         //circle(image, it.pos(), 2, Scalar((255 * k / it.count), 0, 0), 2, 8);
                     }
                 }
@@ -305,6 +314,7 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
             puntosFronteraPorCuadrado.push_back(puntosFronteraPorSegmento);
             puntosFronteraPorSegmento.clear();
         }
+        __android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f", 3.2);
         /*__android_log_print(ANDROID_LOG_ERROR, "puntos Vertice ---> ", "%i, (%i %i) (%i %i) (%i %i) (%i %i)",i+1,
                             puntosFronteraPorCuadrado[0][0].x, puntosFronteraPorCuadrado[0][0].y,
                             puntosFronteraPorCuadrado[1][0].x, puntosFronteraPorCuadrado[1][0].y,
@@ -320,21 +330,24 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
         //int NPUNTOSFRONTERA = (int)puntosFrontera[0].size();
 
         //Buscando los puntos internos del cuadrado
-        for (int r = 0; r < SEGMENTOS - 1; r++) {
+        for (int r = 0; r < SEGMENTOS_INTERNOS; r++) {
+            //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 4);
             //Punto del segmento A del cuadrado
-            Point puntoInicial = puntosFrontera[i][3][SEGMENTOS - r - 2];
+            __android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f %i %i %i", 3.3, i, SEGMENTOS_INTERNOS - r - 1, (int)puntosFrontera[i].size());
+            Point puntoInicial = puntosFrontera[i][3][SEGMENTOS_INTERNOS - r - 1];
 
+            __android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f", 3.31);
             //Punto del segmento B del cuadrado opuesto a A
             Point puntoFinal = puntosFrontera[i][1][r];
-            /*__android_log_print(ANDROID_LOG_ERROR, "puntos internos ptos ---> ", "PTO INI PTO FIN(%i %i) - (%i %i)",
-                                puntoInicial.x, puntoInicial.y, puntoFinal.x, puntoFinal.y);*/
+            __android_log_print(ANDROID_LOG_ERROR, "puntos internos ptos ---> ", "PTO INI PTO FIN(%i %i) - (%i %i)",
+                                puntoInicial.x, puntoInicial.y, puntoFinal.x, puntoFinal.y);
             //Iterador que recorre el segmento de linea punto a punto
             LineIterator it(image, puntoInicial, puntoFinal, 8, true);
-
-            int razon = (int) round(it.count / (SEGMENTOS)); //+ 1
+            int razon = (int) round(it.count / (SEGMENTOS_INTERNOS+1)); //+ 1
 
             //Recoriendo el segmento punto a punto
             for (int k = 1; k <= it.count; k++, ++it) {
+                //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 5);
                 if (k == 1 || k == it.count /*|| (it.count - k) < 3*/) { ; }
                 else {
                     if (((k - 1) % razon) == 0) {
@@ -345,6 +358,7 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
                     }
                 }
             }
+            __android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f", 4.0);
             /*__android_log_print(ANDROID_LOG_ERROR, "puntos Vertice ---> ", "%i %i, (%i %i) (%i %i) (%i %i)",i+1, r+1,
                                 puntosInternosPorSegmento[0].x, puntosInternosPorSegmento[0].y,
                                 puntosInternosPorSegmento[1].x, puntosInternosPorSegmento[1].y,
@@ -354,17 +368,16 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
             puntosInternosPorCuadrado.push_back(puntosInternosPorSegmento);
             puntosInternosPorSegmento.clear();
         }
+        //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 6);
         puntosInternos.push_back(puntosInternosPorCuadrado);
         //__android_log_print(ANDROID_LOG_ERROR, "puntos sq ---> ", "%i %i",i+1, puntosInternos.size());
 
         puntosInternosPorCuadrado.clear();
 
-        unificarParticiones(i, puntosVertices, puntosFrontera, puntosInternos, particiones);
-
         //
         //__android_log_print(ANDROID_LOG_ERROR, "particiones ---> ", "%i -> (%i %i)",i, particiones[i].size());
 
-        /*if (particiones.size() > 0) {
+        if (particiones.size() > 0) {
             for (int r = 0; r < particiones[i].size(); r++) {
                 const Point *p = &particiones[i][r][0];
                 int n = (int) particiones[i][r].size();
@@ -372,178 +385,205 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
                 polylines(image, &p, &n, 1, true, Scalar(255 * r / particiones[i].size(), 0, 200),
                           1, 16);
             }
-        }*/
-
+        }
 
     }
 
-    puntosVertices.clear();
-    puntosFrontera.clear();
-    puntosInternos.clear();
+
+    unificarParticiones(cuadrados, puntosVertices, puntosFrontera, puntosInternos, particiones);
+
 }
-static void unificarParticiones(const int indiceCuadrado,
-                               const vector<vector<Point> > & puntosVertices,
-                               const vector<vector<vector<Point> > >& puntosFrontera,
-                               const vector<vector<vector<Point> > > & puntosInternos,
-                               vector<vector<vector<Point> > > & particiones){
+static void unificarParticiones(const vector<vector<Point> >& cuadrados,
+                                const vector<vector<Point> > & puntosVertices,
+                                const vector<vector<vector<Point> > >& puntosFrontera,
+                                const vector<vector<vector<Point> > > & puntosInternos,
+                                vector<vector<vector<Point> > > & particiones){
+    if(cuadrados.size() <= 0) return;
     //puntosFrontera MAX 0-2
     //puntosVertices MAX 0-3
     //puntosInternos MAX 0-3
-    vector<vector<Point> > particionesPorCuadrado;
-    vector<Point> particion; // = puntosFrontera[3];
-    //__android_log_print(ANDROID_LOG_ERROR, "unificarParticiones1 ---> ", "(%i %i) (%i %i) (%i %i)", p1[0].x, p1[0].y, p1[1].x, p1[1].y, p1[2].x, p1[2].y);
-    /*__android_log_print(ANDROID_LOG_ERROR, "unificarParticiones1 ---> ", "%i, (v-> %i f-> %i i-> %i)",indiceCuadrado,
-                        puntosVertices[indiceCuadrado].size(),
-                        puntosFrontera[indiceCuadrado].size(),
-                        puntosInternos[indiceCuadrado].size());*/
-    //Particion 1
-    particion.push_back(puntosVertices[indiceCuadrado][0]);
-    particion.push_back(puntosFrontera[indiceCuadrado][0][0]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][0]);
-    particion.push_back(puntosFrontera[indiceCuadrado][3][2]);
-    particionesPorCuadrado.push_back(particion);
+    for(int indiceCuadrado = 0; indiceCuadrado < cuadrados.size(); indiceCuadrado++){
+        vector<vector<Point> > particionesPorCuadrado;
+        vector<Point> particion; // = puntosFrontera[3];
+        //__android_log_print(ANDROID_LOG_ERROR, "unificarParticiones1 ---> ", "(%i %i) (%i %i) (%i %i)", p1[0].x, p1[0].y, p1[1].x, p1[1].y, p1[2].x, p1[2].y);
+        /*__android_log_print(ANDROID_LOG_ERROR, "unificarParticiones1 ---> ", "%i, (v-> %i f-> %i i-> %i)",indiceCuadrado,
+                            puntosVertices[indiceCuadrado].size(),
+                            puntosFrontera[indiceCuadrado].size(),
+                            puntosInternos[indiceCuadrado].size());*/
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%0.2f", 7.1);
 
-    particion.clear();
+        //Particion 1
+        particion.push_back(puntosVertices[indiceCuadrado][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.11);
+        particion.push_back(puntosFrontera[indiceCuadrado][0][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.12);
+        particion.push_back(puntosInternos[indiceCuadrado][0][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.13);
+        particion.push_back(puntosFrontera[indiceCuadrado][3][2]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.14);
+        particionesPorCuadrado.push_back(particion);
 
-    //Particion 2
-    particion.push_back(puntosFrontera[indiceCuadrado][0][0]);
-    particion.push_back(puntosFrontera[indiceCuadrado][0][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][0]);
-    particionesPorCuadrado.push_back(particion);
+        particion.clear();
 
-    particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.2);
+        //Particion 2
+        particion.push_back(puntosFrontera[indiceCuadrado][0][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.21);
+        particion.push_back(puntosFrontera[indiceCuadrado][0][1]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.22);
+        particion.push_back(puntosInternos[indiceCuadrado][0][1]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.23);
+        particion.push_back(puntosInternos[indiceCuadrado][0][0]);
+        particionesPorCuadrado.push_back(particion);
 
-    //Particion 3
-    particion.push_back(puntosFrontera[indiceCuadrado][0][1]);
-    particion.push_back(puntosFrontera[indiceCuadrado][0][2]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][2]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][1]);
-    particionesPorCuadrado.push_back(particion);
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.3);
+        //Particion 3
+        particion.push_back(puntosFrontera[indiceCuadrado][0][1]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.31);
+        particion.push_back(puntosFrontera[indiceCuadrado][0][2]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.32);
+        particion.push_back(puntosInternos[indiceCuadrado][0][2]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.33);
+        particion.push_back(puntosInternos[indiceCuadrado][0][1]);
+        particionesPorCuadrado.push_back(particion);
 
-    particion.clear();
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.4);
+        //Particion 4
+        particion.push_back(puntosFrontera[indiceCuadrado][0][2]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.41);
+        particion.push_back(puntosVertices[indiceCuadrado][1]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.42);
+        particion.push_back(puntosFrontera[indiceCuadrado][1][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.43);
+        particion.push_back(puntosInternos[indiceCuadrado][0][2]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.44);
+        particionesPorCuadrado.push_back(particion);
 
-    //Particion 4
-    particion.push_back(puntosFrontera[indiceCuadrado][0][2]);
-    particion.push_back(puntosVertices[indiceCuadrado][1]);
-    particion.push_back(puntosFrontera[indiceCuadrado][1][0]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][2]);
-    particionesPorCuadrado.push_back(particion);
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.5);
+        //Particion 5
+        particion.push_back(puntosFrontera[indiceCuadrado][3][2]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.51);
+        particion.push_back(puntosInternos[indiceCuadrado][0][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.52);
+        particion.push_back(puntosInternos[indiceCuadrado][1][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.53);
+        particion.push_back(puntosFrontera[indiceCuadrado][3][1]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.54);
+        particionesPorCuadrado.push_back(particion);
 
-    particion.clear();
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.7);
+        //Particion 6
+        particion.push_back(puntosInternos[indiceCuadrado][0][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.71);
+        particion.push_back(puntosInternos[indiceCuadrado][0][1]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.72);
+        particion.push_back(puntosInternos[indiceCuadrado][1][1]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.73);
+        particion.push_back(puntosInternos[indiceCuadrado][1][0]);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f", 7.74);
+        particionesPorCuadrado.push_back(particion);
 
-    //Particion 5
-    particion.push_back(puntosFrontera[indiceCuadrado][3][2]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][0]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][0]);
-    particion.push_back(puntosFrontera[indiceCuadrado][3][1]);
-    particionesPorCuadrado.push_back(particion);
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.7);
+        //Particion 7
+        particion.push_back(puntosInternos[indiceCuadrado][0][1]);
+        particion.push_back(puntosInternos[indiceCuadrado][0][2]);
+        particion.push_back(puntosInternos[indiceCuadrado][1][2]);
+        particion.push_back(puntosInternos[indiceCuadrado][1][1]);
+        particionesPorCuadrado.push_back(particion);
 
-    particion.clear();
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.8);
+        //Particion 8
+        particion.push_back(puntosInternos[indiceCuadrado][0][2]);
+        particion.push_back(puntosFrontera[indiceCuadrado][1][0]);
+        particion.push_back(puntosFrontera[indiceCuadrado][1][1]);
+        particion.push_back(puntosInternos[indiceCuadrado][1][2]);
+        particionesPorCuadrado.push_back(particion);
 
-    //Particion 6
-    particion.push_back(puntosInternos[indiceCuadrado][0][0]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][0]);
-    particionesPorCuadrado.push_back(particion);
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.9);
+        //Particion 9
+        particion.push_back(puntosFrontera[indiceCuadrado][3][1]);
+        particion.push_back(puntosInternos[indiceCuadrado][1][0]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][0]);
+        particion.push_back(puntosFrontera[indiceCuadrado][3][0]);
+        particionesPorCuadrado.push_back(particion);
 
-    particion.clear();
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.10);
+        //Particion 10
+        particion.push_back(puntosInternos[indiceCuadrado][1][0]);
+        particion.push_back(puntosInternos[indiceCuadrado][1][1]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][1]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][0]);
+        particionesPorCuadrado.push_back(particion);
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.11);
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.12);
+        //Particion 11
+        particion.push_back(puntosInternos[indiceCuadrado][1][1]);
+        particion.push_back(puntosInternos[indiceCuadrado][1][2]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][2]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][1]);
+        particionesPorCuadrado.push_back(particion);
 
-    //Particion 7
-    particion.push_back(puntosInternos[indiceCuadrado][0][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][0][2]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][2]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][1]);
-    particionesPorCuadrado.push_back(particion);
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.13);
+        //Particion 12
+        particion.push_back(puntosInternos[indiceCuadrado][1][2]);
+        particion.push_back(puntosFrontera[indiceCuadrado][1][1]);
+        particion.push_back(puntosFrontera[indiceCuadrado][1][2]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][2]);
+        particionesPorCuadrado.push_back(particion);
 
-    particion.clear();
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.14);
+        //Particion 13
+        particion.push_back(puntosFrontera[indiceCuadrado][3][0]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][0]);
+        particion.push_back(puntosFrontera[indiceCuadrado][2][2]);
+        particion.push_back(puntosVertices[indiceCuadrado][3]);
+        particionesPorCuadrado.push_back(particion);
 
-    //Particion 8
-    particion.push_back(puntosInternos[indiceCuadrado][0][2]);
-    particion.push_back(puntosFrontera[indiceCuadrado][1][0]);
-    particion.push_back(puntosFrontera[indiceCuadrado][1][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][2]);
-    particionesPorCuadrado.push_back(particion);
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.15);
+        //Particion 14
+        particion.push_back(puntosInternos[indiceCuadrado][2][0]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][1]);
+        particion.push_back(puntosFrontera[indiceCuadrado][2][1]);
+        particion.push_back(puntosFrontera[indiceCuadrado][2][2]);
+        particionesPorCuadrado.push_back(particion);
 
-    particion.clear();
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.16);
+        //Particion 15
+        particion.push_back(puntosInternos[indiceCuadrado][2][1]);
+        particion.push_back(puntosInternos[indiceCuadrado][2][2]);
+        particion.push_back(puntosFrontera[indiceCuadrado][2][0]);
+        particion.push_back(puntosFrontera[indiceCuadrado][2][1]);
+        particionesPorCuadrado.push_back(particion);
 
-    //Particion 9
-    particion.push_back(puntosFrontera[indiceCuadrado][3][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][0]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][0]);
-    particion.push_back(puntosFrontera[indiceCuadrado][3][0]);
-    particionesPorCuadrado.push_back(particion);
+        particion.clear();
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.17);
+        //Particion 16
+        particion.push_back(puntosInternos[indiceCuadrado][2][2]);
+        particion.push_back(puntosFrontera[indiceCuadrado][1][2]);
+        particion.push_back(puntosVertices[indiceCuadrado][2]);
+        particion.push_back(puntosFrontera[indiceCuadrado][2][0]);
+        particionesPorCuadrado.push_back(particion);
 
-    particion.clear();
+        particion.clear();
 
-    //Particion 10
-    particion.push_back(puntosInternos[indiceCuadrado][1][0]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][0]);
-    particionesPorCuadrado.push_back(particion);
+        particiones.push_back(particionesPorCuadrado);
+        particionesPorCuadrado.clear();
 
-    particion.clear();
-
-    //Particion 11
-    particion.push_back(puntosInternos[indiceCuadrado][1][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][1][2]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][2]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][1]);
-    particionesPorCuadrado.push_back(particion);
-
-    particion.clear();
-
-    //Particion 12
-    particion.push_back(puntosInternos[indiceCuadrado][1][2]);
-    particion.push_back(puntosFrontera[indiceCuadrado][1][1]);
-    particion.push_back(puntosFrontera[indiceCuadrado][1][2]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][2]);
-    particionesPorCuadrado.push_back(particion);
-
-    particion.clear();
-
-    //Particion 13
-    particion.push_back(puntosFrontera[indiceCuadrado][3][0]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][0]);
-    particion.push_back(puntosFrontera[indiceCuadrado][2][2]);
-    particion.push_back(puntosVertices[indiceCuadrado][3]);
-    particionesPorCuadrado.push_back(particion);
-
-    particion.clear();
-
-    //Particion 14
-    particion.push_back(puntosInternos[indiceCuadrado][2][0]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][1]);
-    particion.push_back(puntosFrontera[indiceCuadrado][2][1]);
-    particion.push_back(puntosFrontera[indiceCuadrado][2][2]);
-    particionesPorCuadrado.push_back(particion);
-
-    particion.clear();
-
-    //Particion 15
-    particion.push_back(puntosInternos[indiceCuadrado][2][1]);
-    particion.push_back(puntosInternos[indiceCuadrado][2][2]);
-    particion.push_back(puntosFrontera[indiceCuadrado][2][0]);
-    particion.push_back(puntosFrontera[indiceCuadrado][2][1]);
-    particionesPorCuadrado.push_back(particion);
-
-    particion.clear();
-
-    //Particion 16
-    particion.push_back(puntosInternos[indiceCuadrado][2][2]);
-    particion.push_back(puntosFrontera[indiceCuadrado][1][2]);
-    particion.push_back(puntosVertices[indiceCuadrado][2]);
-    particion.push_back(puntosFrontera[indiceCuadrado][2][0]);
-    particionesPorCuadrado.push_back(particion);
-
-    particion.clear();
-    
-    particiones.push_back(particionesPorCuadrado);
-    particionesPorCuadrado.clear();
-
-
+        __android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%i", 8);
+    }
 
     //__android_log_print(ANDROID_LOG_ERROR, "unificarParticiones1 ---> ", "%i, (%i)",indiceCuadrado+1,particiones[indiceCuadrado].size());
 }
