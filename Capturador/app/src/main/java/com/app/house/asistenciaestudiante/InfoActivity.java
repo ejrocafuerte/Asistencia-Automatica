@@ -79,7 +79,7 @@ public class InfoActivity extends AppCompatActivity {
 
                 try {
                     FileOutputStream fos = new FileOutputStream(miArchivo);
-                    fos.write(info.getBytes());
+                    fos.write((LobbyActivity.encrypt(info)).getBytes());
                     fos.close();
                     Toast.makeText(v.getContext(), "Datos guardados", Toast.LENGTH_SHORT).show();
 

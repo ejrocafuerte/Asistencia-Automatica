@@ -53,8 +53,27 @@ public class Crypt {
         return Base64.encodeToString(encrypt(plain.getBytes()), Base64.NO_WRAP); //Base64.DEFAULT
     }
 
-    public String decrypt_string(final String plain) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, IOException {
-        byte[] encryptedBytes = decrypt(Base64.decode(plain, 0));
+    public String decrypt_string(final String plain){
+        byte[] encryptedBytes = new byte[0];
+        try {
+            encryptedBytes = decrypt(Base64.decode(plain, 0));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         //return Base64.encodeToString(encryptedBytes, Base64.DEFAULT);
         return new String(encryptedBytes);
     }

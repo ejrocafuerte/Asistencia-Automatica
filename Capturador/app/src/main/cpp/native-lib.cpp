@@ -69,7 +69,7 @@ string IntToString (int a);
 int binarioADecimal(int n);
 
 
-int N = 30; //11
+int N = 50; //11
 int CANALES = 1;
 int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
@@ -157,7 +157,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 if(metodo == LAPLACIAN) {
                     /// Apply Laplace function
                     Mat dst;
-                    bitwise_not(gray0, gray0);
+                    bitwise_not(   gray0, gray0);
                     Laplacian(gray0, dst, CV_16S, 3, 1, 0, BORDER_DEFAULT);
                     convertScaleAbs(dst, gray);
 
@@ -675,7 +675,7 @@ static void decodificarParticiones( Mat& image,
             float tamanio = (ANCHO_TRANSF * ALTO_TRANSF);
 
             //Calcula el procentaje de pixeles blancos contra el total de pixeles en la region
-            porcentajeBlanco = float((puntosBlancos.size()) * 100.0) / tamanio;
+            porcentajeBlanco = 100.0f-float((puntosBlancos.size()) * 100.0) / tamanio;
 
             //porcentajeBlanco = float(100.0 - porcentajeBlanco);
 
@@ -699,7 +699,7 @@ static void decodificarParticiones( Mat& image,
     //cvtColor(image, image, CV_BGR2GRAY);
     //bitwise_not(mRgba, mRgba);
     //threshold(image, image, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);
-    image = image_c;
+    //image = image_c;
     //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 7.0);
     putText(image, string(mensajeBinario).substr(0,4).c_str(), Point(10,MAX_HEIGHT-135), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
     putText(image, string(mensajeBinario).substr(4,4).c_str(), Point(10,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
