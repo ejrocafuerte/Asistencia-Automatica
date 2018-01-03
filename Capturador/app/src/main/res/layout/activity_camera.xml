@@ -23,7 +23,9 @@
     </android.support.design.widget.AppBarLayout>
 
     <org.opencv.android.JavaCameraView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/main_surface" />
+        android:id="@+id/main_surface"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/appBarLayout2"
+        app:camera_id="back" />
 </RelativeLayout>

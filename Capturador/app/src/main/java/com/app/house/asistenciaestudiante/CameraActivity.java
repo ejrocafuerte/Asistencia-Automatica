@@ -1,18 +1,23 @@
 package com.app.house.asistenciaestudiante;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
+import android.graphics.Camera;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.SizeF;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.WindowManager;
-import android.widget.Toast;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -65,7 +70,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 new String[]{Manifest.permission.CAMERA},
                 1);
 
-        _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(com.app.house.asistenciaestudiante.R.id.main_surface);
+        _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
         _cameraBridgeViewBase.setMaxFrameSize(640,640);
@@ -136,9 +141,37 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     public void onCameraViewStarted(int width, int height) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            CameraManager manager = (CameraManager)getSystemService(CAMERA_SERVICE);
+
+            try {
+
+                for (String cameraId : manager.getCameraIdList()) {
+                    CameraCharacteristics chars = manager.getCameraCharacteristics(cameraId);
+                    float[] focalLengths = chars.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+                    SizeF sensorSize = chars.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+
+                    float w = 0.5f * sensorSize.getWidth();
+                    float h = 0.5f * sensorSize.getHeight();
+                    Log.e("mr", "Camera " + cameraId + " has sensorSize == " + Float.toString(2.0f*w) + ", " + Float.toString(2.0f*h));
+                    for (int focusId=0; focusId<focalLengths.length; focusId++) {
+                        float focalLength = focalLengths[focusId];
+                        float horizonalAngle = (float) Math.toDegrees(2 * Math.atan(w / focalLength));
+                        float verticalAngle = (float) Math.toDegrees(2 * Math.atan(h / focalLength));
+                        Log.e("mr", "Camera " + cameraId + "/f" + focusId + " has focalLength == " + Float.toString(focalLength));
+                        Log.e("mr", "  * horizonalAngle == " + Float.toString(horizonalAngle));
+                        Log.e("mr", "  * verticalAngle == " + Float.toString(verticalAngle));
+                    }
+                }
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        } else{
+            // do something for phones running an SDK before lollipop
+        }
 
 
-        Log.e(TAG, width + "x" + height);
+        Log.e(TAG,"Resolution: " +  (width + "x" + height));
         mRGBA = new Mat(width, height, CvType.CV_8UC4);
         mResultado = new Mat(width, height, CvType.CV_8UC4);
     }
