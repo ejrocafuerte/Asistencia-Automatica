@@ -11,7 +11,7 @@ include_directories(src/main/jniLibs/include)
 
 add_library( opencv-lib SHARED IMPORTED)
 #set_target_properties(opencv-lib PROPERTIES IMPORTED_LOCATION C:/OpenCV-android-sdk-3.3.1/sdk/native/libs/${ANDROID_ABI}/libopencv_java3.so)
-set_target_properties(opencv-lib PROPERTIES IMPORTED_LOCATION C:/Asistencia-Automatica/Capturador/app/src/main/jniLibs/${ANDROID_ABI}/libopencv_java3.so)
+set_target_properties(opencv-lib PROPERTIES IMPORTED_LOCATION C:/Users/Desarrollo/AndroidStudioProjects/Asistencia-Automatica/Capturador/app/src/main/jniLibs/${ANDROID_ABI}/libopencv_java3.so)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.

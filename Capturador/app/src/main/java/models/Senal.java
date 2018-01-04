@@ -44,4 +44,11 @@ public class Senal {
     public void setLevel2(int level2) {
         this.level2 = level2;
     }
+
+    @Override
+    public String toString() {
+        return bssid + "^^" +
+               level + "^^" +
+               level2;
+    }
 }

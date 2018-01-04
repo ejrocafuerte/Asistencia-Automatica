@@ -44,7 +44,7 @@ public class Asistencia {
 
     @SerializedName("senales")
     @Expose
-    private ArrayList<Senal> senales;
+    private ArrayList<Senal> senales = new ArrayList<Senal>();
 
     public String getMac() {
         return mac;
@@ -116,5 +116,25 @@ public class Asistencia {
 
     public void setEstudiante(Estudiante estudiante) {
         this.estudiante = estudiante;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sbs = new StringBuilder();
+        for(int i = 0; i < senales.size(); i++){
+            sbs.append(senales.get(i).toString());
+            if(i < senales.size()-1){
+                sbs.append("..");
+            }
+        }
+        return  mac + ";;" +
+                imei + ";;" +
+                estudiante.toString() + ";;" +
+                fecha + ";;" +
+                materia + ";;" +
+                codigo + ";;" +
+                distanciaX + ";;" +
+                distanciaY + ";;" +
+                sbs.toString();
     }
 }

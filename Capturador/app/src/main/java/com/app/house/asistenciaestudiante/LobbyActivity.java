@@ -46,6 +46,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import models.Asistencia;
 import models.Estudiante;
+import models.Senal;
 import models.Token;
 import retrofit.Connection;
 import retrofit.RestClient;
@@ -67,6 +68,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private ArrayList<Asistencia> asistencias;
     private Asistencia asistenciaActual;
     private Estudiante estudiante;
+    private ArrayList<Senal> senales;
 
     private String mac = "";
     private String imei = "";
@@ -78,7 +80,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private String codigo = "0110101";
     private String distanciaX = "0.0";
     private String distanciaY = "0.0";
-    private String senales = "";
+    //private String senales = "";
 
     private String delimitador = ";;";
     private String delimitadorNl = "**";
@@ -103,7 +105,9 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
         mContext = this;
         crypto = Crypt.getInstance();
-
+        asistenciaActual = new Asistencia();
+        estudiante = new Estudiante();
+        senales = new ArrayList<Senal>();
         //_deleteFile(nombreArchivoEstudiante);
         //_deleteFile(nombreArchivoAsistencia);
 
@@ -137,14 +141,16 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             case R.id.benviar: {
                 if (validateInfo()) {
                         infoAsistenciaActual = getAsistenciaActualMessage();
-
                     if(!asistenciaEnlistada) {
-                        infoAsistencias.add(infoAsistenciaActual);
+                        //infoAsistencias.add(infoAsistenciaActual);
+                        asistencias.add(asistenciaActual);
                         asistenciaEnlistada = true;
                     }
                     else{
-                        infoAsistencias.remove(infoAsistencias.size()-1);
-                        infoAsistencias.add(infoAsistenciaActual);
+                        //infoAsistencias.remove(infoAsistencias.size()-1);
+                        //infoAsistencias.add(infoAsistenciaActual);
+                        asistencias.remove(asistencias.size()-1);
+                        asistencias.add(asistenciaActual);
                     }
 
                     //enviar asistencia servidor web
@@ -167,8 +173,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
     private void sendMessage(String asistenciasMessage) {
 
-        if (restClient != null) {
-            Log.e("sendMessage", asistenciasMessage);
+        if (restClient != null) {            Log.e("sendMessage", asistenciasMessage);
             Call<String> request = restClient.sendMessage(new Token(encrypt(asistenciasMessage)));
 
             request.enqueue(new Callback<String>() {
@@ -201,8 +206,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     Log.e("Retrofit fail!", infoAsistenciaActual);
                     saveFile(mContext, infoAsistencias, nombreArchivoAsistencia);
                 }
-            });
-        }
+            });        }
     }
 
     private String getAsistenciasMessage() {
@@ -231,6 +235,19 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 .append(distanciaX).append(delimitador)
                 .append(distanciaY).append(delimitador)
                 .append(senales);
+
+        asistenciaActual.setMac(mac);
+        asistenciaActual.setImei(imei);
+        estudiante.setNombres(nombres);
+        estudiante.setApellidos(apellidos);
+        estudiante.setMatricula(matricula);
+        asistenciaActual.setEstudiante(estudiante);
+        asistenciaActual.setFecha(fecha);
+        asistenciaActual.setMateria(materia);
+        asistenciaActual.setCodigo(codigo);
+        asistenciaActual.setDistanciaX(distanciaX);
+        asistenciaActual.setDistanciaY(distanciaY);
+        asistenciaActual.setSenales(senales);
         return sb.toString();
     }
 
@@ -263,7 +280,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             Toast.makeText(mContext, "Error: Distancia Y", Toast.LENGTH_SHORT).show();
             return false;
         } else if (senales.isEmpty()) {
-            Toast.makeText(mContext, "Error: Distancia Y", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Error: Senales", Toast.LENGTH_SHORT).show();
             return false;
         } else
             return true;
@@ -331,6 +348,35 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             }
         } else {
             infoAsistencias = readFile(context, nombreArchivoAsistencia);
+
+            for(String info : infoAsistencias){
+                String[] parametros = info.split(delimitador);
+                Asistencia asistencia = new Asistencia();
+                asistencia.setMac(parametros[0]);
+                asistencia.setImei(parametros[1]);
+                Estudiante estudiante = new Estudiante();
+                estudiante.setNombres(parametros[2]);
+                estudiante.setApellidos(parametros[3]);
+                estudiante.setMatricula(parametros[4]);
+                asistencia.setEstudiante(estudiante);
+                asistencia.setFecha(parametros[5]);
+                asistencia.setMateria(parametros[6]);
+                asistencia.setDistanciaX(parametros[7]);
+                asistencia.setDistanciaY(parametros[8]);
+                String[] senal = parametros[9].split("..");
+
+                ArrayList<Senal> ls = new ArrayList<>();
+                for(String infosenal : senal){
+                    String[] paramsenal = infosenal.split("^^");
+                    Senal s = new Senal();
+                    s.setBssid(paramsenal[0]);
+                    s.setLevel(Integer.parseInt(paramsenal[1]));
+                    s.setLevel2(Integer.parseInt(paramsenal[2]));
+                    ls.add(s);
+                }
+                asistencia.setSenales(ls);
+                asistencias.add(asistencia);
+            }
             /*try {
 
                 //fileAsistencia.delete();
@@ -350,8 +396,12 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         try {
             FileOutputStream fos = new FileOutputStream(getFilesDir().getPath() + filename);//, true);
 
-            for (int i = 0; i < infoAsistencia.size(); i++) {
+            /*for (int i = 0; i < infoAsistencia.size(); i++) {
                 fos.write((encrypt(infoAsistencia.get(i).toString()) + "\n").getBytes());
+                Log.e("saveFile " + filename, (infoAsistencia.get(i).toString() + "\n"));
+            }*/
+            for (int i = 0; i < asistencias.size(); i++) {
+                fos.write((encrypt(asistencias.get(i).toString()) + "\n").getBytes());
                 Log.e("saveFile " + filename, (infoAsistencia.get(i).toString() + "\n"));
             }
             fos.close();
@@ -534,20 +584,26 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<ScanResult> wifiList = wifiManager.getScanResults();
         StringBuilder sb = new StringBuilder("");
+        senales.clear();
 
         for (int i = 0; i < wifiList.size(); i++) {
             ScanResult scanResult = wifiList.get(i);
-            sb.append(scanResult.BSSID)
+            Senal senal = new Senal();
+            senal.setBssid(scanResult.BSSID);
+            senal.setLevel(scanResult.level);
+            senal.setLevel2(WifiManager.calculateSignalLevel(scanResult.level, 100));
+            senales.add(senal);
+            /*sb.append(scanResult.BSSID)
                     .append("^^")
                     .append(scanResult.level)
                     .append("^^")
                     .append(WifiManager.calculateSignalLevel(scanResult.level, 100));
             if (i < wifiList.size() - 1) {
                 sb.append("..");
-            }
+            }*/
         }
 
-        senales = sb.toString();
+        //senales = sb.toString();
         //Log.e(TAG, "senales: " + senales);
     }
 }
