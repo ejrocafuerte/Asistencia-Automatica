@@ -105,13 +105,14 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
         mContext = this;
         crypto = Crypt.getInstance();
+
         asistenciaActual = new Asistencia();
         estudiante = new Estudiante();
         senales = new ArrayList<Senal>();
-        _deleteFile(nombreArchivoEstudiante);
-        _deleteFile(nombreArchivoAsistencia);
+        //_deleteFile(nombreArchivoEstudiante);
+        //_deleteFile(nombreArchivoAsistencia);
 
-        /*fileManager(mContext);
+        fileManager(mContext);
 
         mac = getMacAddr();
         imei = getImei();
@@ -123,8 +124,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         btn_enviar = (Button) findViewById(R.id.benviar);
         btn_enviar.setOnClickListener(this);
 
-        txt_asistencias = (TextView) findViewById(R.id.lasistencias);
-        txt_asistencias.setText(getAsistenciasMessage());
+        //txt_asistencias = (TextView) findViewById(R.id.lasistencias);
+        //txt_asistencias.setText(getAsistenciasMessage());
 
 
         if (retrofit == null) {
@@ -132,7 +133,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             restClient = Connection.createService(RestClient.class); //, username, password);
         }
 
-        scanWifiSignals();*/
+        scanWifiSignals();
     }
 
     @Override
@@ -142,8 +143,10 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 if (validateInfo()) {
                         infoAsistenciaActual = getAsistenciaActualMessage();
                     if(!asistenciaEnlistada) {
+                        Log.e("Existe internet, enviando server: ", "1");
                         //infoAsistencias.add(infoAsistenciaActual);
                         asistencias.add(asistenciaActual);
+                        Log.e("Existe internet, enviando server: ", "2");
                         asistenciaEnlistada = true;
                     }
                     else{
@@ -155,7 +158,9 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
                     //enviar asistencia servidor web
                     if (existeInternet) {
-                        sendMessage(getAsistenciasMessage());
+                        Log.e("Existe internet, enviando server: ", "3");
+                        sendMessage(asistencias/*getAsistenciasMessage()*/);
+                        Log.e("Existe internet, enviando server: ", "4");
 
                         Log.e("Existe internet, enviando server", infoAsistenciaActual);
                     }
@@ -171,16 +176,17 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void sendMessage(String asistenciasMessage) {
+    private void sendMessage(ArrayList<Asistencia> asistencias/*String asistenciasMessage*/) {
 
-        if (restClient != null) {            Log.e("sendMessage", asistenciasMessage);
-            Call<String> request = restClient.sendMessage(new Token(encrypt(asistenciasMessage)));
+        if (restClient != null) {            Log.e("sendMessage", "1");
+            Call<ArrayList<Asistencia>> request = restClient.sendMessage(asistencias/*new Token(encrypt(asistenciasMessage))*/);
 
-            request.enqueue(new Callback<String>() {
+            request.enqueue(new Callback<ArrayList<Asistencia>>() {
                 @Override
-                public void onResponse(Call<String> call, Response<String> response) {
+                public void onResponse(Call<ArrayList<Asistencia>> call, Response<ArrayList<Asistencia>> response) {
                     if (response.isSuccessful()) {
-                        switch(response.body()){
+                        String rsp = response.body().toString();
+                        switch(rsp){
                             case "0":{ //OK
                                 infoAsistencias.clear();
                                 //infoAsistenciaActual = "";
@@ -201,7 +207,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 }
 
                 @Override
-                public void onFailure(Call<String> call, Throwable t) {
+                public void onFailure(Call<ArrayList<Asistencia>> call, Throwable t) {
                     Toast.makeText(mContext, "Retrofit fail!", Toast.LENGTH_SHORT).show();
                     Log.e("Retrofit fail!", infoAsistenciaActual);
                     saveFile(mContext, infoAsistencias, nombreArchivoAsistencia);
@@ -219,6 +225,20 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             }
         }
         return message.toString();
+
+        /*if(asistencias.size() <= 0) return "";
+        StringBuilder message = new StringBuilder("");
+        for (int k = 0; k < asistencias.size(); k++) {
+            Asistencia a = asistencias.get(k);
+
+            if(a != null) {
+                message.append(a.getMac()).append(delimitador)
+                .append(a.getImei()).appe);
+                if (k < infoAsistencias.size() - 1) {
+                    message.append(delimitadorNl);
+                }
+            }
+        }*/
     }
 
     private String getAsistenciaActualMessage() {
@@ -338,7 +358,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 apellidos = info[1];
                 matricula = info[2];
             }
-            else Log.e("fileManager: ", "NOK");
         }
 
         if (!fileAsistencia.exists()) {
@@ -438,18 +457,15 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             Log.e("IOException", "Can not read file: " + e.toString());
             return dataList;
         }
-
+        Log.e("Read File", dataList.get(0).toString());
         return dataList;
     }
 
     private void _deleteFile(String filename) {
         File fileAsistencia = new File(getFilesDir().getPath() + filename);
         if (fileAsistencia.exists()) {
-            try {
-                fileAsistencia.delete();
-                fileAsistencia.createNewFile();
-            } catch (IOException e) {
-            }
+            fileAsistencia.delete();
+                //fileAsistencia.createNewFile();
         }
     }
 
@@ -536,28 +552,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public static String encrypt(final String message) {
-        try {
-            String encryptMessage = crypto.encrypt_string(message);
-            Log.e("Encrypted Message", encryptMessage);
-            return encryptMessage;
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
 
     public class NetworkConReceiver extends BroadcastReceiver {
         @Override
@@ -605,5 +599,28 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
         //senales = sb.toString();
         //Log.e(TAG, "senales: " + senales);
+    }
+
+    public static String encrypt(final String message) {
+        try {
+            String encryptMessage = crypto.encrypt_string(message);
+            Log.e("Encrypted Message", encryptMessage);
+            return encryptMessage;
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

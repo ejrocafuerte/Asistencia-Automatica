@@ -1,5 +1,8 @@
 package retrofit;
 
+import java.util.ArrayList;
+
+import models.Asistencia;
 import models.Token;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -13,5 +16,5 @@ import retrofit2.http.POST;
 public interface RestClient {
     @Headers("Content-Type: application/json; charset=utf-8")
     @POST("gestionar/")
-    Call<String> sendMessage(@Body Token message);
+    Call<ArrayList<Asistencia>> sendMessage(@Body ArrayList<Asistencia> asistencias);
 }

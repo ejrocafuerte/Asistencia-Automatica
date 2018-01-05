@@ -48,11 +48,13 @@ public class Connection {
     public static <S> S createService( Class<S> serviceClass, final String auth, boolean withCredentials) {
         if (!TextUtils.isEmpty(auth)) {
             AuthenticationInterceptor interceptor_auth = new AuthenticationInterceptor(auth, withCredentials);
+            EncryptionInterceptor interceptor_encryptor = new EncryptionInterceptor();
             HttpLoggingInterceptor interceptor_log = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
 
             if (!httpClient.interceptors().contains(interceptor_auth)) {
                 httpClient.addInterceptor(interceptor_auth);
                 httpClient.addInterceptor(interceptor_log);
+                httpClient.addInterceptor(interceptor_encryptor);
 
                 builder.client(httpClient.build());
                 retrofit = builder.build();
