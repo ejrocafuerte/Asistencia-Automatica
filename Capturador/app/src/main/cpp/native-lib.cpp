@@ -48,6 +48,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
 static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados);
 static void ordenarVerticesCuadrado(vector<Point> &cuadrado);
 static void ordenarCuadradosPorPosicionEspacial(vector<vector<Point> >& cuadrados, int direccion);
+static bool filtradoCross(Mat& image, vector<vector<Point> >& cuadrados);
 static void particionarCuadrados( Mat& image,
                                   vector<vector<Point> >& cuadrados,
                                   vector<vector<vector<Point> > >& particiones);
@@ -69,7 +70,7 @@ string IntToString (int a);
 int binarioADecimal(int n);
 
 
-int N = 50; //11
+int N = 10; //11
 int CANALES = 1;
 int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
@@ -107,11 +108,14 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.5);
     dibujarCuadrados(mOriginal, cuadrados);
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.6);
-    particionarCuadrados(mOriginal, cuadrados, particiones);
-    //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.7);
-    decodificarParticiones(mOriginal, mOriginalCopia, particiones, mensajeBinario);
-    //traducirMensaje(mensajeBinario, mensajeResultado, (int) cuadrados.size(), 0);
-    //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.8);
+    if(filtradoCross(mOriginal, cuadrados)) {
+        particionarCuadrados(mOriginal, cuadrados, particiones);
+        //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.7);
+
+        decodificarParticiones(mOriginal, mOriginalCopia, particiones, mensajeBinario);
+        //traducirMensaje(mensajeBinario, mensajeResultado, (int) cuadrados.size(), 0);
+        //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.8);
+    }
     mResultado = mOriginal; //mOriginal;//
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.9);
     return env->NewStringUTF(mensajeResultado.c_str());
@@ -157,7 +161,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 if(metodo == LAPLACIAN) {
                     /// Apply Laplace function
                     Mat dst;
-                    bitwise_not(   gray0, gray0);
+                    //bitwise_not(   gray0, gray0);
                     Laplacian(gray0, dst, CV_16S, 3, 1, 0, BORDER_DEFAULT);
                     convertScaleAbs(dst, gray);
 
@@ -255,17 +259,22 @@ static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrado
         const Point *p = &cuadrados[i][0];
         int n = (int) cuadrados[i].size();
 
-        putText(image, IntToString(i+1).c_str(), Point(cuadrados[i][0].x,cuadrados[i][0].y), FONT_HERSHEY_SIMPLEX, 1,Scalar(255,0,0),2 , LINE_AA, false);
+        putText(image, IntToString(i + 1).c_str(), Point(cuadrados[i][0].x, cuadrados[i][0].y),
+                FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0), 2, LINE_AA, false);
         //if (p->x > 3 && p->y > 3 && p->x < MAX_WIDTH -3 && p->y < MAX_HEIGHT-3) {
         //Rect boundRect;
         //boundRect = boundingRect(cuadrados[i]);
         //rectangle(image, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
         polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 2, 16);
     }
+
+
 }
 static void particionarCuadrados( Mat& image, vector<vector<Point> >& cuadrados , vector<vector<vector<Point> > >& particiones) {
 
     if(cuadrados.size() <= 0) return;
+
+
 
     vector<vector<vector<Point> > > puntosFrontera;
     vector<vector<vector<Point> > > puntosInternos;
@@ -958,6 +967,17 @@ int binarioADecimal(int n)
     }
 
     return total;
+}
+
+bool filtradoCross(Mat& image, vector<vector<Point> >& cuadrados) {
+    if (cuadrados.size() == 1) {
+        if (Rect(cuadrados[0][0], cuadrados[0][2]).contains(Point(MAX_WIDTH/2, MAX_HEIGHT/2))){
+            drawMarker(image, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(0, 255, 0), MARKER_CROSS, 20, 2);
+            return true;
+        }
+    }
+    drawMarker(image, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(0, 0, 255), MARKER_CROSS, 20, 2);
+    return false;
 }
 
 }

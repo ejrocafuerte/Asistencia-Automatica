@@ -108,10 +108,10 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         asistenciaActual = new Asistencia();
         estudiante = new Estudiante();
         senales = new ArrayList<Senal>();
-        //_deleteFile(nombreArchivoEstudiante);
-        //_deleteFile(nombreArchivoAsistencia);
+        _deleteFile(nombreArchivoEstudiante);
+        _deleteFile(nombreArchivoAsistencia);
 
-        fileManager(mContext);
+        /*fileManager(mContext);
 
         mac = getMacAddr();
         imei = getImei();
@@ -132,7 +132,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             restClient = Connection.createService(RestClient.class); //, username, password);
         }
 
-        scanWifiSignals();
+        scanWifiSignals();*/
     }
 
     @Override

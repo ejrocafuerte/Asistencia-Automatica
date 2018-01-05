@@ -2,575 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8058b355-b1cb-47af-b32b-1c947f57aae9" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/resources/background.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/resources/tab.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/resources/titlebar.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/resources/titlebar_end.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/app/src/main/java/models/Token.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/.settings/org.eclipse.jdt.core.prefs" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/AndroidManifest.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/build.gradle" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/allclasses-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/allclasses-noframe.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/constant-values.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/help-doc.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/index-all.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/BaseLoaderCallback.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/CameraBridgeViewBase.CvCameraViewFrame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/CameraBridgeViewBase.CvCameraViewListener.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/CameraBridgeViewBase.CvCameraViewListener2.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/CameraBridgeViewBase.ListItemAccessor.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/CameraBridgeViewBase.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/FpsMeter.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/InstallCallbackInterface.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/JavaCameraView.JavaCameraSizeAccessor.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/JavaCameraView.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/LoaderCallbackInterface.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/OpenCVLoader.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/Utils.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/android/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/calib3d/Calib3d.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/calib3d/StereoBM.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/calib3d/StereoMatcher.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/calib3d/StereoSGBM.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/calib3d/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/calib3d/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/calib3d/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Algorithm.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Core.MinMaxLocResult.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Core.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/CvException.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/CvType.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/DMatch.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/KeyPoint.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Mat.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfByte.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfDMatch.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfDouble.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfFloat.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfFloat4.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfFloat6.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfInt.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfInt4.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfKeyPoint.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfPoint.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfPoint2f.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfPoint3.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfPoint3f.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfRect.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/MatOfRect2d.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Point.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Point3.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Range.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Rect.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Rect2d.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/RotatedRect.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Scalar.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/Size.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/TermCriteria.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/TickMeter.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/core/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/dnn/DictValue.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/dnn/Dnn.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/dnn/Importer.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/dnn/Layer.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/dnn/Net.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/dnn/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/dnn/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/dnn/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/engine/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/engine/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/engine/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/AKAZE.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/AgastFeatureDetector.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/BFMatcher.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/BOWImgDescriptorExtractor.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/BOWKMeansTrainer.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/BOWTrainer.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/BRISK.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/DescriptorExtractor.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/DescriptorMatcher.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/FastFeatureDetector.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/Feature2D.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/FeatureDetector.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/Features2d.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/FlannBasedMatcher.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/GFTTDetector.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/KAZE.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/MSER.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/ORB.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/Params.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/features2d/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgcodecs/Imgcodecs.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgcodecs/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgcodecs/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgcodecs/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgproc/CLAHE.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgproc/Imgproc.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgproc/LineSegmentDetector.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgproc/Moments.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgproc/Subdiv2D.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgproc/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgproc/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/imgproc/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/ANN_MLP.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/Boost.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/DTrees.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/EM.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/KNearest.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/LogisticRegression.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/Ml.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/NormalBayesClassifier.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/ParamGrid.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/RTrees.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/SVM.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/SVMSGD.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/StatModel.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/TrainData.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/ml/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/objdetect/BaseCascadeClassifier.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/objdetect/CascadeClassifier.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/objdetect/HOGDescriptor.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/objdetect/Objdetect.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/objdetect/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/objdetect/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/objdetect/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/osgi/OpenCVInterface.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/osgi/OpenCVNativeLoader.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/osgi/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/osgi/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/osgi/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/AlignExposures.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/AlignMTB.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/CalibrateCRF.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/CalibrateDebevec.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/CalibrateRobertson.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/MergeDebevec.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/MergeExposures.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/MergeMertens.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/MergeRobertson.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/Photo.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/Tonemap.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/TonemapDrago.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/TonemapDurand.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/TonemapMantiuk.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/TonemapReinhard.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/photo/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/utils/Converters.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/utils/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/utils/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/utils/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/BackgroundSubtractor.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/BackgroundSubtractorKNN.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/BackgroundSubtractorMOG2.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/DenseOpticalFlow.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/DualTVL1OpticalFlow.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/FarnebackOpticalFlow.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/KalmanFilter.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/SparseOpticalFlow.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/SparsePyrLKOpticalFlow.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/Video.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/video/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/videoio/VideoCapture.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/videoio/VideoWriter.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/videoio/Videoio.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/videoio/package-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/videoio/package-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/org/opencv/videoio/package-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/overview-frame.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/overview-summary.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/overview-tree.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/package-list" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/serialized-form.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/javadoc/stylesheet.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/lint.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/project.properties" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/res/values/attrs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/AsyncServiceHelper.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/BaseLoaderCallback.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/Camera2Renderer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/CameraBridgeViewBase.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/CameraGLRendererBase.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/CameraGLSurfaceView.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/CameraRenderer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/FpsMeter.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/InstallCallbackInterface.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/JavaCameraView.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/LoaderCallbackInterface.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/OpenCVLoader.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/StaticHelper.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/android/Utils.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/calib3d/Calib3d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/calib3d/StereoBM.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/calib3d/StereoMatcher.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/calib3d/StereoSGBM.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Algorithm.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Core.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/CvException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/CvType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/DMatch.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/KeyPoint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Mat.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfByte.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfDMatch.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfDouble.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfFloat.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfFloat4.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfFloat6.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfInt.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfInt4.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfKeyPoint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfPoint.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfPoint2f.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfPoint3.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfPoint3f.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfRect.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/MatOfRect2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Point.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Point3.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Range.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Rect.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Rect2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/RotatedRect.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Scalar.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/Size.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/TermCriteria.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/core/TickMeter.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/dnn/DictValue.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/dnn/Dnn.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/dnn/Importer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/dnn/Layer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/dnn/Net.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/engine/OpenCVEngineInterface.aidl" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/AKAZE.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/AgastFeatureDetector.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/BFMatcher.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/BOWImgDescriptorExtractor.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/BOWKMeansTrainer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/BOWTrainer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/BRISK.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/DescriptorExtractor.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/DescriptorMatcher.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/FastFeatureDetector.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/Feature2D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/FeatureDetector.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/Features2d.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/FlannBasedMatcher.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/GFTTDetector.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/KAZE.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/MSER.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/ORB.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/features2d/Params.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/imgcodecs/Imgcodecs.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/imgproc/CLAHE.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/imgproc/Imgproc.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/imgproc/LineSegmentDetector.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/imgproc/Moments.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/imgproc/Subdiv2D.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/ANN_MLP.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/Boost.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/DTrees.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/EM.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/KNearest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/LogisticRegression.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/Ml.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/NormalBayesClassifier.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/ParamGrid.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/RTrees.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/SVM.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/SVMSGD.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/StatModel.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/ml/TrainData.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/objdetect/BaseCascadeClassifier.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/objdetect/CascadeClassifier.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/objdetect/HOGDescriptor.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/objdetect/Objdetect.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/osgi/OpenCVInterface.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/osgi/OpenCVNativeLoader.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/AlignExposures.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/AlignMTB.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/CalibrateCRF.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/CalibrateDebevec.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/CalibrateRobertson.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/MergeDebevec.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/MergeExposures.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/MergeMertens.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/MergeRobertson.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/Photo.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/Tonemap.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/TonemapDrago.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/TonemapDurand.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/TonemapMantiuk.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/photo/TonemapReinhard.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/utils/Converters.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/BackgroundSubtractor.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/BackgroundSubtractorKNN.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/BackgroundSubtractorMOG2.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/DenseOpticalFlow.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/DualTVL1OpticalFlow.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/FarnebackOpticalFlow.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/KalmanFilter.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/SparseOpticalFlow.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/SparsePyrLKOpticalFlow.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/video/Video.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/videoio/VideoCapture.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/videoio/VideoWriter.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../Capturador/libs/openCVLibrary331/src/org/opencv/videoio/Videoio.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/app/src/main/jniLibs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/build.gradle" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/lint.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/AndroidManifest.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/aidl/org/opencv/engine/OpenCVEngineInterface.aidl" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/AsyncServiceHelper.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/BaseLoaderCallback.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/CameraBridgeViewBase.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/FpsMeter.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/InstallCallbackInterface.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/JavaCameraView.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/LoaderCallbackInterface.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/NativeCameraView.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/OpenCVLoader.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/StaticHelper.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/android/Utils.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/calib3d/Calib3d.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/calib3d/StereoBM.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/calib3d/StereoSGBM.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/contrib/Contrib.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/contrib/FaceRecognizer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/contrib/StereoVar.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Algorithm.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Core.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/CvException.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/CvType.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Mat.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfByte.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfDMatch.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfDouble.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfFloat.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfFloat4.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfFloat6.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfInt.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfInt4.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfKeyPoint.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfPoint.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfPoint2f.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfPoint3.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfPoint3f.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/MatOfRect.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Point.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Point3.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Range.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Rect.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/RotatedRect.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Scalar.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/Size.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/core/TermCriteria.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/features2d/DMatch.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/features2d/DescriptorExtractor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/features2d/DescriptorMatcher.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/features2d/FeatureDetector.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/features2d/Features2d.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/features2d/GenericDescriptorMatcher.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/features2d/KeyPoint.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/gpu/DeviceInfo.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/gpu/Gpu.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/gpu/TargetArchs.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/highgui/Highgui.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/highgui/VideoCapture.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/imgproc/CLAHE.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/imgproc/Imgproc.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/imgproc/Moments.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/imgproc/Subdiv2D.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvANN_MLP.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvANN_MLP_TrainParams.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvBoost.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvBoostParams.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvDTree.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvDTreeParams.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvERTrees.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvGBTrees.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvGBTreesParams.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvKNearest.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvNormalBayesClassifier.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvParamGrid.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvRTParams.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvRTrees.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvSVM.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvSVMParams.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/CvStatModel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/EM.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/ml/Ml.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/objdetect/CascadeClassifier.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/objdetect/HOGDescriptor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/objdetect/Objdetect.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/photo/Photo.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/utils/Converters.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/video/BackgroundSubtractor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/video/BackgroundSubtractorMOG.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/video/BackgroundSubtractorMOG2.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/video/KalmanFilter.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/java/org/opencv/video/Video.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary24134/src/main/res/values/attrs.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/build.gradle" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/lint.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/AndroidManifest.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/aidl/org/opencv/engine/OpenCVEngineInterface.aidl" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/AsyncServiceHelper.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/BaseLoaderCallback.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/Camera2Renderer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/CameraBridgeViewBase.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/CameraGLRendererBase.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/CameraGLSurfaceView.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/CameraRenderer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/FpsMeter.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/InstallCallbackInterface.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/JavaCameraView.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/LoaderCallbackInterface.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/OpenCVLoader.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/StaticHelper.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/android/Utils.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/calib3d/Calib3d.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/calib3d/StereoBM.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/calib3d/StereoMatcher.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/calib3d/StereoSGBM.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Algorithm.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Core.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/CvException.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/CvType.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/DMatch.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/KeyPoint.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Mat.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfByte.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfDMatch.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfDouble.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfFloat.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfFloat4.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfFloat6.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfInt.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfInt4.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfKeyPoint.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfPoint.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfPoint2f.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfPoint3.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfPoint3f.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfRect.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/MatOfRect2d.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Point.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Point3.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Range.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Rect.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Rect2d.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/RotatedRect.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Scalar.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/Size.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/TermCriteria.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/core/TickMeter.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/dnn/DictValue.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/dnn/Dnn.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/dnn/Importer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/dnn/Layer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/dnn/Net.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/AKAZE.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/AgastFeatureDetector.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/BFMatcher.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/BOWImgDescriptorExtractor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/BOWKMeansTrainer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/BOWTrainer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/BRISK.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/DescriptorExtractor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/DescriptorMatcher.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/FastFeatureDetector.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/Feature2D.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/FeatureDetector.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/Features2d.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/FlannBasedMatcher.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/GFTTDetector.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/KAZE.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/MSER.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/ORB.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/features2d/Params.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/imgcodecs/Imgcodecs.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/imgproc/CLAHE.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/imgproc/Imgproc.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/imgproc/LineSegmentDetector.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/imgproc/Moments.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/imgproc/Subdiv2D.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/ANN_MLP.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/Boost.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/DTrees.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/EM.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/KNearest.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/LogisticRegression.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/Ml.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/NormalBayesClassifier.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/ParamGrid.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/RTrees.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/SVM.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/SVMSGD.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/StatModel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/ml/TrainData.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/objdetect/BaseCascadeClassifier.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/objdetect/CascadeClassifier.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/objdetect/HOGDescriptor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/objdetect/Objdetect.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/osgi/OpenCVInterface.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/osgi/OpenCVNativeLoader.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/AlignExposures.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/AlignMTB.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/CalibrateCRF.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/CalibrateDebevec.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/CalibrateRobertson.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/MergeDebevec.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/MergeExposures.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/MergeMertens.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/MergeRobertson.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/Photo.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/Tonemap.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/TonemapDrago.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/TonemapDurand.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/TonemapMantiuk.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/photo/TonemapReinhard.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/utils/Converters.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/BackgroundSubtractor.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/BackgroundSubtractorKNN.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/BackgroundSubtractorMOG2.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/DenseOpticalFlow.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/DualTVL1OpticalFlow.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/FarnebackOpticalFlow.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/KalmanFilter.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/SparseOpticalFlow.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/SparsePyrLKOpticalFlow.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/video/Video.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/videoio/VideoCapture.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/videoio/VideoWriter.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/java/org/opencv/videoio/Videoio.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../Capturador/openCVLibrary331/src/main/res/values/attrs.xml" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/.gitignore" afterPath="$PROJECT_DIR$/../Capturador/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/.idea/gradle.xml" afterPath="$PROJECT_DIR$/../Capturador/.idea/gradle.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/.idea/modules.xml" afterPath="$PROJECT_DIR$/../Capturador/.idea/modules.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/app/CMakeLists.txt" afterPath="$PROJECT_DIR$/../Capturador/app/CMakeLists.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/app/build.gradle" afterPath="$PROJECT_DIR$/../Capturador/app/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/app/src/main/cpp/native-lib.cpp" afterPath="$PROJECT_DIR$/../Capturador/app/src/main/cpp/native-lib.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/app/src/main/java/cipher/Crypt.java" afterPath="$PROJECT_DIR$/../Capturador/app/src/main/java/cipher/Crypt.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/app/src/main/java/com/app/house/asistenciaestudiante/CameraActivity.java" afterPath="$PROJECT_DIR$/../Capturador/app/src/main/java/com/app/house/asistenciaestudiante/CameraActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/app/src/main/java/com/app/house/asistenciaestudiante/LobbyActivity.java" afterPath="$PROJECT_DIR$/../Capturador/app/src/main/java/com/app/house/asistenciaestudiante/LobbyActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/app/src/main/java/retrofit/RestClient.java" afterPath="$PROJECT_DIR$/../Capturador/app/src/main/java/retrofit/RestClient.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/gradle.properties" afterPath="$PROJECT_DIR$/../Capturador/gradle.properties" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Capturador/settings.gradle" afterPath="$PROJECT_DIR$/../Capturador/settings.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/asistencia/core/views.py" afterPath="$PROJECT_DIR$/asistencia/core/views.py" />
     </list>
     <ignored path=".idea/dataSources.local.xml" />
@@ -602,7 +35,7 @@
         <entry file="file://$PROJECT_DIR$/asistencia/core/urls.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="221">
-              <caret line="15" column="59" selection-start-line="15" selection-start-column="59" selection-end-line="15" selection-end-column="59" />
+              <caret line="15" column="59" lean-forward="false" selection-start-line="15" selection-start-column="59" selection-end-line="15" selection-end-column="59" />
               <folding />
             </state>
           </provider>
@@ -611,10 +44,17 @@
       <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/asistencia/core/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="49" column="42" selection-start-line="49" selection-start-column="42" selection-end-line="49" selection-end-column="42" />
+            <state relative-caret-position="816">
+              <caret line="48" column="39" lean-forward="false" selection-start-line="48" selection-start-column="39" selection-end-line="48" selection-end-column="39" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
+                <marker date="1514987247934" expanded="true" signature="339:552" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="1496:1716" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="1747:2555" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2128:2316" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2588:2958" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="3000:3305" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="3307:3470" ph="..." />
               </folding>
             </state>
           </provider>
@@ -623,9 +63,26 @@
       <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="28" column="38" selection-start-line="28" selection-start-column="38" selection-end-line="28" selection-end-column="38" />
-              <folding />
+            <state relative-caret-position="476">
+              <caret line="28" column="38" lean-forward="false" selection-start-line="28" selection-start-column="38" selection-end-line="28" selection-end-column="38" />
+              <folding>
+                <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+                <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -633,8 +90,8 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/asistencia/core/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
-              <caret line="91" column="25" selection-start-line="91" selection-start-column="25" selection-end-line="91" selection-end-column="25" />
+            <state relative-caret-position="312">
+              <caret line="135" column="0" lean-forward="false" selection-start-line="135" selection-start-column="0" selection-end-line="135" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -653,9 +110,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/asistencia/core/models.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/asistencia/core/views.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/asistencia/manage.py" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/asistencia/core/models.py" root0="SKIP_INSPECTION" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -687,18 +144,11 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1308" />
+    <option name="width" value="1282" />
     <option name="height" value="784" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
-    <OptionsSetting value="true" id="Add" />
-    <OptionsSetting value="true" id="Remove" />
-    <OptionsSetting value="true" id="Checkout" />
-    <OptionsSetting value="true" id="Update" />
-    <OptionsSetting value="true" id="Status" />
-    <OptionsSetting value="true" id="Edit" />
     <ConfirmationsSetting value="1" id="Add" />
-    <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectView">
     <navigator currentView="Scope" currentSubView="Project Files" proportions="" version="1">
@@ -715,9 +165,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane">
-        <subPane />
-      </pane>
+      <pane id="Scratches" />
       <pane id="Scope">
         <subPane subId="Project Files">
           <PATH>
@@ -725,10 +173,82 @@
               <option name="myItemId" value="" />
               <option name="myItemType" value="" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="Server">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="asistencia">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="Server">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="asistencia">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="static">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="Server">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="asistencia">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="core">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="Server">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="asistencia">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="asistencia">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT USER_OBJECT="Root">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT USER_OBJECT="Server">
+              <option name="myItemId" value="" />
+              <option name="myItemType" value="" />
+            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -776,6 +296,7 @@
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/asistencia/asistencia/wsgi.py" />
       <option name="PARAMETERS" value="runserver" />
       <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
       <method />
     </configuration>
     <configuration default="true" type="DjangoTestsConfigurationType" factoryName="Django tests">
@@ -845,6 +366,7 @@
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/asistencia/manage.py" />
       <option name="PARAMETERS" value="runserver" />
       <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
       <method />
     </configuration>
     <configuration default="true" type="Tox" factoryName="Tox">
@@ -870,30 +392,10 @@
       <method />
     </configuration>
     <configuration default="true" type="js.build_tools.npm" factoryName="npm">
-      <command value="run-script" />
+      <command value="run" />
       <scripts />
       <node-interpreter value="project" />
       <envs />
-      <method />
-    </configuration>
-    <configuration default="true" type="tests" factoryName="Attests">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="Server" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Doctests">
@@ -927,15 +429,10 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Server" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PARAMS" value="" />
-      <option name="USE_PARAM" value="false" />
+      <option name="_new_regexPattern" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Unittests">
@@ -949,16 +446,9 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Server" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PUREUNITTEST" value="true" />
-      <option name="PARAMS" value="" />
-      <option name="USE_PARAM" value="false" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="py.test">
@@ -972,18 +462,10 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Server" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="testToRun" value="" />
-      <option name="keywords" value="" />
-      <option name="params" value="" />
-      <option name="USE_PARAM" value="false" />
-      <option name="USE_KEYWORD" value="false" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;.&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method />
     </configuration>
     <configuration default="false" name="Unnamed" type="PythonConfigurationType" factoryName="Python">
@@ -1002,6 +484,7 @@
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/asistencia/manage.py" />
       <option name="PARAMETERS" value="runserver" />
       <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
       <method />
     </configuration>
     <list size="2">
@@ -1013,6 +496,26 @@
         <item index="0" class="java.lang.String" itemvalue="Python.wsgi" />
       </list>
     </recent_temporary>
+    <configuration default="true" type="tests" factoryName="Attests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Server" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
@@ -1040,20 +543,20 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1308" height="784" extended-state="0" />
-    <editor active="false" />
+    <frame x="-8" y="-8" width="1282" height="784" extended-state="7" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30608973" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31096563" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3276923" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32932693" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32515338" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3276923" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32615384" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32515338" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1061,8 +564,10 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="processedProjectFiles" value="true" />
   </component>
   <component name="Vcs.Log.UiProperties">
     <option name="RECENTLY_FILTERED_USER_GROUPS">
@@ -1083,30 +588,47 @@
     <entry file="file://$PROJECT_DIR$/asistencia/core/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
-          <caret line="7" column="44" selection-start-line="7" selection-start-column="44" selection-end-line="7" selection-end-column="44" />
+          <caret line="7" column="44" lean-forward="false" selection-start-line="7" selection-start-column="44" selection-end-line="7" selection-end-column="44" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2125">
-          <caret line="125" column="0" selection-start-line="125" selection-start-column="0" selection-end-line="125" selection-end-column="0" />
-          <folding />
+          <caret line="125" column="0" lean-forward="false" selection-start-line="125" selection-start-column="0" selection-end-line="125" selection-end-column="0" />
+          <folding>
+            <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/apps.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
-          <caret line="4" column="17" selection-start-line="4" selection-start-column="17" selection-end-line="4" selection-end-column="17" />
+          <caret line="4" column="17" lean-forward="false" selection-start-line="4" selection-start-column="17" selection-end-line="4" selection-end-column="17" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="51">
-          <caret line="5" column="89" selection-start-line="5" selection-start-column="89" selection-end-line="5" selection-end-column="89" />
-          <caret line="5" column="89" selection-start-line="5" selection-start-column="89" selection-end-line="5" selection-end-column="89" />
+          <caret line="5" column="89" lean-forward="false" selection-start-line="5" selection-start-column="89" selection-end-line="5" selection-end-column="89" />
+          <caret line="5" column="89" lean-forward="false" selection-start-line="5" selection-start-column="89" selection-end-line="5" selection-end-column="89" />
           <folding />
         </state>
       </provider>
@@ -1114,23 +636,23 @@
     <entry file="file://$PROJECT_DIR$/asistencia/core/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1207">
-          <caret line="72" column="9" selection-start-line="70" selection-start-column="4" selection-end-line="73" selection-end-column="13" />
+          <caret line="72" column="9" lean-forward="false" selection-start-line="70" selection-start-column="4" selection-end-line="73" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
-          <caret line="20" column="34" selection-start-line="20" selection-start-column="34" selection-end-line="20" selection-end-column="34" />
-          <caret line="20" column="34" selection-start-line="20" selection-start-column="34" selection-end-line="20" selection-end-column="34" />
+          <caret line="20" column="34" lean-forward="false" selection-start-line="20" selection-start-column="34" selection-end-line="20" selection-end-column="34" />
+          <caret line="20" column="34" lean-forward="false" selection-start-line="20" selection-start-column="34" selection-end-line="20" selection-end-column="34" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
-          <caret line="10" column="45" selection-start-line="10" selection-start-column="45" selection-end-line="10" selection-end-column="45" />
-          <caret line="10" column="45" selection-start-line="10" selection-start-column="45" selection-end-line="10" selection-end-column="45" />
+          <caret line="10" column="45" lean-forward="false" selection-start-line="10" selection-start-column="45" selection-end-line="10" selection-end-column="45" />
+          <caret line="10" column="45" lean-forward="false" selection-start-line="10" selection-start-column="45" selection-end-line="10" selection-end-column="45" />
           <folding />
         </state>
       </provider>
@@ -1138,38 +660,55 @@
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
-          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2125">
-          <caret line="125" column="0" selection-start-line="125" selection-start-column="0" selection-end-line="125" selection-end-column="0" />
-          <folding />
+          <caret line="125" column="0" lean-forward="false" selection-start-line="125" selection-start-column="0" selection-end-line="125" selection-end-column="0" />
+          <folding>
+            <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
-          <caret line="11" column="29" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
-          <caret line="11" column="29" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
+          <caret line="11" column="29" lean-forward="false" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
+          <caret line="11" column="29" lean-forward="false" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="391">
-          <caret line="26" column="10" selection-start-line="26" selection-start-column="10" selection-end-line="26" selection-end-column="10" />
+          <caret line="26" column="10" lean-forward="false" selection-start-line="26" selection-start-column="10" selection-end-line="26" selection-end-column="10" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
-          <caret line="23" column="38" selection-start-line="23" selection-start-column="38" selection-end-line="23" selection-end-column="38" />
-          <caret line="23" column="38" selection-start-line="23" selection-start-column="38" selection-end-line="23" selection-end-column="38" />
+          <caret line="23" column="38" lean-forward="false" selection-start-line="23" selection-start-column="38" selection-end-line="23" selection-end-column="38" />
+          <caret line="23" column="38" lean-forward="false" selection-start-line="23" selection-start-column="38" selection-end-line="23" selection-end-column="38" />
           <folding />
         </state>
       </provider>
@@ -1177,37 +716,71 @@
     <entry file="file://$PROJECT_DIR$/asistencia/core/apps.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
-          <caret line="18" column="4" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
+          <caret line="18" column="4" lean-forward="false" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="680">
-          <caret line="40" column="21" selection-start-line="40" selection-start-column="21" selection-end-line="40" selection-end-column="21" />
-          <folding />
+          <caret line="40" column="21" lean-forward="false" selection-start-line="40" selection-start-column="21" selection-end-line="40" selection-end-column="21" />
+          <folding>
+            <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
-          <caret line="18" column="4" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
+          <caret line="18" column="4" lean-forward="false" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
         </state>
       </provider>
     </entry>
@@ -1216,8 +789,25 @@
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="663">
-          <caret line="39" column="10" selection-start-line="39" selection-start-column="10" selection-end-line="39" selection-end-column="10" />
-          <folding />
+          <caret line="39" column="10" lean-forward="false" selection-start-line="39" selection-start-column="10" selection-end-line="39" selection-end-column="10" />
+          <folding>
+            <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1226,8 +816,25 @@
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="663">
-          <caret line="39" column="10" selection-start-line="39" selection-start-column="10" selection-end-line="39" selection-end-column="10" />
-          <folding />
+          <caret line="39" column="10" lean-forward="false" selection-start-line="39" selection-start-column="10" selection-end-line="39" selection-end-column="10" />
+          <folding>
+            <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1236,8 +843,25 @@
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="663">
-          <caret line="39" column="10" selection-start-line="39" selection-start-column="10" selection-end-line="39" selection-end-column="10" />
-          <folding />
+          <caret line="39" column="10" lean-forward="false" selection-start-line="39" selection-start-column="10" selection-end-line="39" selection-end-column="10" />
+          <folding>
+            <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1254,112 +878,135 @@
     <entry file="file://$PROJECT_DIR$/asistencia/core/apps.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
-          <caret line="4" column="18" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
+          <caret line="4" column="18" lean-forward="false" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="765">
-          <caret line="121" column="39" selection-start-line="121" selection-start-column="39" selection-end-line="121" selection-end-column="39" />
+          <caret line="121" column="39" lean-forward="false" selection-start-line="121" selection-start-column="39" selection-end-line="121" selection-end-column="39" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/pagination.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
-          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/tests.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/wsgi.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="204">
-          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="340">
-          <caret line="21" column="11" selection-start-line="21" selection-start-column="11" selection-end-line="21" selection-end-column="20" />
-          <caret line="21" column="10" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
+          <caret line="21" column="11" lean-forward="false" selection-start-line="21" selection-start-column="11" selection-end-line="21" selection-end-column="20" />
+          <caret line="21" column="10" lean-forward="false" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/admin.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
-          <caret line="23" column="31" selection-start-line="23" selection-start-column="31" selection-end-line="23" selection-end-column="31" />
+          <caret line="23" column="31" lean-forward="false" selection-start-line="23" selection-start-column="31" selection-end-line="23" selection-end-column="31" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/manage.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
-          <caret line="4" column="26" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
+          <caret line="4" column="26" lean-forward="false" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
         </state>
       </provider>
     </entry>
     <entry file="file://C:/Python36-32/Lib/base64.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://C:/Python36-32/Lib/hashlib.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
-          <caret line="32" column="14" selection-start-line="0" selection-start-column="0" selection-end-line="830" selection-end-column="10" />
-          <folding />
+          <caret line="32" column="14" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="830" selection-end-column="10" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="221">
-          <caret line="15" column="59" selection-start-line="15" selection-start-column="59" selection-end-line="15" selection-end-column="59" />
+          <caret line="15" column="59" lean-forward="false" selection-start-line="15" selection-start-column="59" selection-end-line="15" selection-end-column="59" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="49" column="42" selection-start-line="49" selection-start-column="42" selection-end-line="49" selection-end-column="42" />
+        <state relative-caret-position="816">
+          <caret line="48" column="39" lean-forward="false" selection-start-line="48" selection-start-column="39" selection-end-line="48" selection-end-column="39" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
+            <marker date="1514987247934" expanded="true" signature="339:552" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1496:1716" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1747:2555" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2128:2316" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2588:2958" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3000:3305" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3307:3470" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/asistencia/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="28" column="38" selection-start-line="28" selection-start-column="38" selection-end-line="28" selection-end-column="38" />
-          <folding />
+        <state relative-caret-position="476">
+          <caret line="28" column="38" lean-forward="false" selection-start-line="28" selection-start-column="38" selection-end-line="28" selection-end-column="38" />
+          <folding>
+            <marker date="1514987247934" expanded="true" signature="1286:1683" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1733:2202" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1739:2199" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1876:2192" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="1912:2181" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2256:2330" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2345:2471" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2362:2469" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2475:2575" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2605:2999" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2611:2708" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2716:2803" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2811:2899" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="2907:2996" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3003:3078" ph="..." />
+            <marker date="1514987247934" expanded="true" signature="3188:3288" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/asistencia/core/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="91" column="25" selection-start-line="91" selection-start-column="25" selection-end-line="91" selection-end-column="25" />
+        <state relative-caret-position="312">
+          <caret line="135" column="0" lean-forward="false" selection-start-line="135" selection-start-column="0" selection-end-line="135" selection-end-column="0" />
           <folding />
         </state>
       </provider>
