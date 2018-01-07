@@ -124,7 +124,7 @@ public class Asistencia {
         for(int i = 0; i < senales.size(); i++){
             sbs.append(senales.get(i).toString());
             if(i < senales.size()-1){
-                sbs.append("..");
+                sbs.append("&&");
             }
         }
         return  mac + ";;" +

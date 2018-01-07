@@ -68,7 +68,8 @@ int buscarPuntoMasCercano(vector<Point> puntos, Point punto);
 double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0);
 string IntToString (int a);
 int binarioADecimal(int n);
-
+Vec3f rotationMatrixToEulerAngles(Mat &R);
+bool isRotationMatrix(Mat &R);
 
 int N = 10; //11
 int CANALES = 1;
@@ -663,7 +664,7 @@ static void decodificarParticiones( Mat& image,
                                      Point(ANCHO_TRANSF, 0),
                                      Point(ANCHO_TRANSF, ALTO_TRANSF),
                                      Point(0, ALTO_TRANSF)};
-
+    Vec3f angles;
     //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 1.0);
     preprocesar(image_c, image_c);
     //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 2.0);
@@ -677,6 +678,13 @@ static void decodificarParticiones( Mat& image,
 
             Mat mLambda = getPerspectiveTransform(origen, destino);
             warpPerspective(image_c, mParticionTransfomada, mLambda, mParticionTransfomada.size());
+
+            if(isRotationMatrix(mLambda))
+            {
+                angles = rotationMatrixToEulerAngles(mLambda);
+                __android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%s", "isRotationMatrix = true");
+            }
+            else __android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%s", "isRotationMatrix = false");
             //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 3.0);
             //Busca pixeles blancos en imagen binarizada
             findNonZero(mParticionTransfomada, puntosBlancos);
@@ -684,7 +692,7 @@ static void decodificarParticiones( Mat& image,
             float tamanio = (ANCHO_TRANSF * ALTO_TRANSF);
 
             //Calcula el procentaje de pixeles blancos contra el total de pixeles en la region
-            porcentajeBlanco = 100.0f-float((puntosBlancos.size()) * 100.0) / tamanio;
+            porcentajeBlanco = float((puntosBlancos.size()) * 100.0) / tamanio;
 
             //porcentajeBlanco = float(100.0 - porcentajeBlanco);
 
@@ -710,6 +718,11 @@ static void decodificarParticiones( Mat& image,
     //threshold(image, image, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);
     //image = image_c;
     //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 7.0);
+
+    putText(image, IntToString(angles[0]).c_str(), Point(10,25), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, IntToString(angles[1]).c_str(), Point(100,25), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+    putText(image, IntToString(angles[2]).c_str(), Point(190,25), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
+
     putText(image, string(mensajeBinario).substr(0,4).c_str(), Point(10,MAX_HEIGHT-135), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
     putText(image, string(mensajeBinario).substr(4,4).c_str(), Point(10,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
     putText(image, string(mensajeBinario).substr(8,4).c_str(), Point(10,MAX_HEIGHT-75), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
@@ -970,14 +983,56 @@ int binarioADecimal(int n)
 }
 
 bool filtradoCross(Mat& image, vector<vector<Point> >& cuadrados) {
-    if (cuadrados.size() == 1) {
-        if (Rect(cuadrados[0][0], cuadrados[0][2]).contains(Point(MAX_WIDTH/2, MAX_HEIGHT/2))){
+    if (cuadrados.size() == NUM_MATRICES) {
+        if (Rect(cuadrados[1][0], cuadrados[1][2]).contains(Point(MAX_WIDTH/2, MAX_HEIGHT/2))){
             drawMarker(image, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(0, 255, 0), MARKER_CROSS, 20, 2);
             return true;
         }
     }
     drawMarker(image, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(0, 0, 255), MARKER_CROSS, 20, 2);
     return false;
+}
+
+// Checks if a matrix is a valid rotation matrix.
+bool isRotationMatrix(Mat &R)
+{
+    Mat Rt;
+    transpose(R, Rt);
+    Mat shouldBeIdentity = Rt * R;
+    Mat I = Mat::eye(3,3, shouldBeIdentity.type());
+
+    return  norm(I, shouldBeIdentity) < 1e-6;
+}
+
+// Calculates rotation matrix to euler angles
+// The result is the same as MATLAB except the order
+// of the euler angles ( x and z are swapped ).
+Vec3f rotationMatrixToEulerAngles(Mat &R)
+{
+
+    assert(isRotationMatrix(R));
+
+    float sy = sqrt(R.at<double>(0,0) * R.at<double>(0,0) +  R.at<double>(1,0) * R.at<double>(1,0) );
+
+    bool singular = sy < 1e-6; // If
+
+    float x, y, z;
+    if (!singular)
+    {
+        x = atan2(R.at<double>(2,1) , R.at<double>(2,2));
+        y = atan2(-R.at<double>(2,0), sy);
+        z = atan2(R.at<double>(1,0), R.at<double>(0,0));
+    }
+    else
+    {
+        x = atan2(-R.at<double>(1,2), R.at<double>(1,1));
+        y = atan2(-R.at<double>(2,0), sy);
+        z = 0;
+    }
+    return Vec3f(x, y, z);
+
+
+
 }
 
 }

@@ -13,6 +13,10 @@ public class Senal {
     @Expose
     private String bssid = "";
 
+    @SerializedName("ssid")
+    @Expose
+    private String ssid = "";
+
     @SerializedName("level")
     @Expose
     private int level = 0;
@@ -45,10 +49,19 @@ public class Senal {
         this.level2 = level2;
     }
 
+    public String getSsid() {
+        return ssid;
+    }
+
+    public void setSsid(String ssid) {
+        this.ssid = ssid;
+    }
+
     @Override
     public String toString() {
-        return bssid + "^^" +
-               level + "^^" +
+        return bssid + "==" +
+               ssid + "==" +
+               level + "==" +
                level2;
     }
 }

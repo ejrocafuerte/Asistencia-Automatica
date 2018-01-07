@@ -3,11 +3,13 @@ package models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by Desarrollo on 03/01/2018.
  */
 
-public class Estudiante {
+public class Estudiante  implements Serializable {
     @SerializedName("nombres")
     @Expose
     private String nombres = "";
@@ -19,6 +21,14 @@ public class Estudiante {
     @SerializedName("matricula")
     @Expose
     private String matricula = "";
+
+    public Estudiante(){}
+
+    public Estudiante(String nombres, String apellidos, String matricula) {
+        this.nombres = nombres;
+        this.apellidos = apellidos;
+        this.matricula = matricula;
+    }
 
     public String getNombres() {
         return nombres;

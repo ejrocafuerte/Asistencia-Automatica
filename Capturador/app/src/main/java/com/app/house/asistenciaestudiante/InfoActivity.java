@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import models.Estudiante;
+
 public class InfoActivity extends AppCompatActivity {
     private Context mContext;
     private Button btn_guardar;
@@ -59,6 +61,7 @@ public class InfoActivity extends AppCompatActivity {
                 nombres = txt_nombres.getText().toString().trim();
                 apellidos = txt_apellidos.getText().toString().trim();
                 matricula = txt_matricula.getText().toString().trim();
+
                 miArchivo = new File(getFilesDir().getPath(), nombreArchivoEstudiante);
 
 
@@ -75,19 +78,21 @@ public class InfoActivity extends AppCompatActivity {
                     return;
                 }
 
-                String info = nombres + delimitador + apellidos + delimitador + matricula;
+                //String info = nombres + delimitador + apellidos + delimitador + matricula;
+                Estudiante estudiante = new Estudiante(nombres, apellidos, matricula);
 
                 try {
                     FileOutputStream fos = new FileOutputStream(miArchivo);
-                    fos.write((LobbyActivity.encrypt(info)).getBytes());
+                    //fos.write((LobbyActivity.encrypt(info)).getBytes());
+                    fos.write((/*LobbyActivity.encrypt(*/estudiante.toString()).getBytes());
                     fos.close();
-                    Toast.makeText(v.getContext(), "Datos guardados", Toast.LENGTH_SHORT).show();
-
+                    //Toast.makeText(v.getContext(), "Datos guardados", Toast.LENGTH_SHORT).show();
+                    Log.e("infoActivity writefile",estudiante.toString());
                     Intent intent = new Intent(mContext, LobbyActivity.class);
-                    intent.putExtra("intent_nombres", nombres);
-                    intent.putExtra("intent_apellidos", apellidos);
-                    intent.putExtra("intent_matricula", matricula);
-
+                    //intent.putExtra("intent_nombres", nombres);
+                    //intent.putExtra("intent_apellidos", apellidos);
+                    //intent.putExtra("intent_matricula", matricula);
+                    intent.putExtra("Estudiante", estudiante);
                     setResult(InfoActivity.RESULT_OK, intent);
                     finish();
 
@@ -102,9 +107,10 @@ public class InfoActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         if(intent != null) {
-            txt_nombres.setText(intent.getStringExtra("intent_nombres"));
-            txt_apellidos.setText(intent.getStringExtra("intent_apellidos"));
-            txt_matricula.setText(intent.getStringExtra("intent_matricula"));
+            Estudiante estudiante = (Estudiante)intent.getSerializableExtra("Estudiante");
+            txt_nombres.setText(estudiante.getNombres()/*intent.getStringExtra("intent_nombres")*/);
+            txt_apellidos.setText(estudiante.getApellidos()/*intent.getStringExtra("intent_apellidos")*/);
+            txt_matricula.setText(estudiante.getMatricula()/*intent.getStringExtra("intent_matricula")*/);
         }
 
 

@@ -47,7 +47,7 @@ public class EncryptionInterceptor implements Interceptor {
     private static String encrypt(final String message) {
         try {
             String encryptMessage = crypto.encrypt_string(message);
-            Log.e("Encrypted Message", encryptMessage);
+            Log.e(TAG, encryptMessage);
             return encryptMessage;
         } catch (InvalidKeyException e) {
             e.printStackTrace();

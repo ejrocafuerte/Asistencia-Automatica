@@ -46,6 +46,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import models.Asistencia;
 import models.Estudiante;
+import models.ResponseServer;
 import models.Senal;
 import models.Token;
 import retrofit.Connection;
@@ -65,6 +66,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private RestClient restClient = null;
     protected static Crypt crypto;
 
+    //private ListaAsistencias asistencias;
     private ArrayList<Asistencia> asistencias;
     private Asistencia asistenciaActual;
     private Estudiante estudiante;
@@ -106,6 +108,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         mContext = this;
         crypto = Crypt.getInstance();
 
+        asistencias = new ArrayList<Asistencia>();
+        //asistencias = new ListaAsistencias();
         asistenciaActual = new Asistencia();
         estudiante = new Estudiante();
         senales = new ArrayList<Senal>();
@@ -114,8 +118,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
         fileManager(mContext);
 
-        mac = getMacAddr();
-        imei = getImei();
+        asistenciaActual.setMac(getMacAddr());
+        asistenciaActual.setImei(getImei());
 
         mNetworkConReceiver = new NetworkConReceiver();
 
@@ -124,9 +128,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         btn_enviar = (Button) findViewById(R.id.benviar);
         btn_enviar.setOnClickListener(this);
 
-        //txt_asistencias = (TextView) findViewById(R.id.lasistencias);
-        //txt_asistencias.setText(getAsistenciasMessage());
-
 
         if (retrofit == null) {
             Connection.init();
@@ -134,6 +135,9 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         }
 
         scanWifiSignals();
+
+        txt_asistencias = (TextView) findViewById(R.id.lasistencias);
+        txt_asistencias.setText(getAsistenciasMessage(asistencias));
     }
 
     @Override
@@ -141,12 +145,15 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.benviar: {
                 if (validateInfo()) {
-                        infoAsistenciaActual = getAsistenciaActualMessage();
+                        //infoAsistenciaActual = getAsistenciaActualMessage();
+                    asistenciaActual.setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                    asistenciaActual.setEstudiante(estudiante);
+                    //asistencias.setAsistencias(asistenciaActual);
+
                     if(!asistenciaEnlistada) {
-                        Log.e("Existe internet, enviando server: ", "1");
                         //infoAsistencias.add(infoAsistenciaActual);
                         asistencias.add(asistenciaActual);
-                        Log.e("Existe internet, enviando server: ", "2");
+                        Log.e("Existe internet, enviando server: ", getAsistenciasMessage(asistencias));
                         asistenciaEnlistada = true;
                     }
                     else{
@@ -166,7 +173,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     }
                     //guardar info a archivo
                     else {
-                        saveFile(mContext, infoAsistencias, nombreArchivoAsistencia);
+                        saveFile(mContext, asistencias, nombreArchivoAsistencia);
                     }
                 }
                 ;
@@ -176,19 +183,20 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void sendMessage(ArrayList<Asistencia> asistencias/*String asistenciasMessage*/) {
+    /*private void sendMessage(final String msg) {
 
-        if (restClient != null) {            Log.e("sendMessage", "1");
-            Call<ArrayList<Asistencia>> request = restClient.sendMessage(asistencias/*new Token(encrypt(asistenciasMessage))*/);
+        if (restClient != null) {
+            Call<String> request = restClient.sendMessage2(msg);
 
-            request.enqueue(new Callback<ArrayList<Asistencia>>() {
+            request.enqueue(new Callback<String>() {
                 @Override
-                public void onResponse(Call<ArrayList<Asistencia>> call, Response<ArrayList<Asistencia>> response) {
+                public void onResponse(Call<String> call, Response<String> response) {
                     if (response.isSuccessful()) {
-                        String rsp = response.body().toString();
-                        switch(rsp){
+                        ArrayList<Asistencia> rsp = response.body();
+                        Log.e("onResponse", rsp.toString());
+                        switch(rsp.toString()){
                             case "0":{ //OK
-                                infoAsistencias.clear();
+                                asistencias.clear();
                                 //infoAsistenciaActual = "";
                                 _deleteFile(nombreArchivoAsistencia);
                                 Toast.makeText(mContext, "Server OK",
@@ -200,106 +208,106 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                         }
                     }
                     else{
-                        saveFile(mContext, infoAsistencias, nombreArchivoAsistencia);
+                        saveFile(mContext, asistencias, nombreArchivoAsistencia);
                         Toast.makeText(mContext, "Server NOK saving file...", Toast.LENGTH_SHORT).show();
-                        Log.e("Server NOK saving file...", infoAsistenciaActual);
+                        Log.e("Server NOK saving file...", getAsistenciasMessage(asistencias));
                     }
                 }
 
                 @Override
-                public void onFailure(Call<ArrayList<Asistencia>> call, Throwable t) {
+                public void onFailure(Call<String> call, Throwable t) {
                     Toast.makeText(mContext, "Retrofit fail!", Toast.LENGTH_SHORT).show();
-                    Log.e("Retrofit fail!", infoAsistenciaActual);
-                    saveFile(mContext, infoAsistencias, nombreArchivoAsistencia);
+                    Log.e("Retrofit fail!", t.getMessage());
+                    saveFile(mContext, asistencias, nombreArchivoAsistencia);
+                }
+            });        }
+    }*/
+
+    private void sendMessage(final ArrayList<Asistencia> asistencias/*String asistenciasMessage*/) {
+
+        if (restClient != null) {
+            Call<ResponseServer> request = restClient.sendMessage(asistencias);
+
+            request.enqueue(new Callback<ResponseServer>() {
+                @Override
+                public void onResponse(Call<ResponseServer> call, Response<ResponseServer> response) {
+                    if (response.isSuccessful()) {
+                        String rsp = response.body().getResponse();
+                        Log.e("onResponse", rsp);
+                        switch(rsp.toString()){
+                            case "0":{ //OK
+                                asistencias.clear();
+                                //infoAsistenciaActual = "";
+                                _deleteFile(nombreArchivoAsistencia);
+                                Toast.makeText(mContext, "Server OK",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            case "1":{
+
+                            }
+                        }
+                    }
+                    else{
+                        saveFile(mContext, asistencias, nombreArchivoAsistencia);
+                        Toast.makeText(mContext, "Server NOK saving file...", Toast.LENGTH_SHORT).show();
+                        Log.e("Server NOK saving file...", getAsistenciasMessage(asistencias));
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseServer> call, Throwable t) {
+                    Toast.makeText(mContext, "Retrofit fail!", Toast.LENGTH_SHORT).show();
+                    Log.e("Retrofit fail!", t.getMessage() + " " + t.getLocalizedMessage() + " "+getAsistenciasMessage(asistencias));
+                    saveFile(mContext, asistencias, nombreArchivoAsistencia);
                 }
             });        }
     }
 
-    private String getAsistenciasMessage() {
-        if (infoAsistencias.size() <= 0) return "";
-        StringBuilder message = new StringBuilder("");
-        for (int k = 0; k < infoAsistencias.size(); k++) {
-            message.append(infoAsistencias.get(k));
-            if (k < infoAsistencias.size() - 1) {
-                message.append(delimitadorNl);
-            }
-        }
-        return message.toString();
-
-        /*if(asistencias.size() <= 0) return "";
+    private String getAsistenciasMessage(ArrayList<Asistencia> asistencias) {
+        if(asistencias.size() <= 0) return "";
         StringBuilder message = new StringBuilder("");
         for (int k = 0; k < asistencias.size(); k++) {
             Asistencia a = asistencias.get(k);
 
             if(a != null) {
-                message.append(a.getMac()).append(delimitador)
-                .append(a.getImei()).appe);
-                if (k < infoAsistencias.size() - 1) {
+                message.append(a.toString());
+                if (k < asistencias.size() - 1) {
                     message.append(delimitadorNl);
                 }
             }
-        }*/
-    }
-
-    private String getAsistenciaActualMessage() {
-        StringBuilder sb = new StringBuilder("");
-        fecha = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        sb.append(mac).append(delimitador)
-                .append(imei).append(delimitador)
-                .append(nombres).append(delimitador)
-                .append(apellidos).append(delimitador)
-                .append(matricula).append(delimitador)
-                .append(fecha).append(delimitador)
-                .append(materia).append(delimitador)
-                .append(codigo).append(delimitador)
-                .append(distanciaX).append(delimitador)
-                .append(distanciaY).append(delimitador)
-                .append(senales);
-
-        asistenciaActual.setMac(mac);
-        asistenciaActual.setImei(imei);
-        estudiante.setNombres(nombres);
-        estudiante.setApellidos(apellidos);
-        estudiante.setMatricula(matricula);
-        asistenciaActual.setEstudiante(estudiante);
-        asistenciaActual.setFecha(fecha);
-        asistenciaActual.setMateria(materia);
-        asistenciaActual.setCodigo(codigo);
-        asistenciaActual.setDistanciaX(distanciaX);
-        asistenciaActual.setDistanciaY(distanciaY);
-        asistenciaActual.setSenales(senales);
-        return sb.toString();
+        }
+        return message.toString();
     }
 
     private boolean validateInfo() {
-        if (mac.isEmpty()) {
+        if (asistenciaActual.getMac().isEmpty()) {
             Toast.makeText(mContext, "Error: MAC", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (imei.isEmpty()) {
+        } else if (asistenciaActual.getImei().isEmpty()) {
             Toast.makeText(mContext, "Error: IMEI", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (nombres.isEmpty()) {
+        } else if (estudiante.getNombres().isEmpty()) {
             Toast.makeText(mContext, "Error: Nombres", Toast.LENGTH_SHORT).show();
             return false;
-        }else if (apellidos.isEmpty()) {
+        }else if (estudiante.getApellidos().isEmpty()) {
             Toast.makeText(mContext, "Error: Apellidos", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (matricula.isEmpty()) {
+        } else if (estudiante.getMatricula().isEmpty()) {
             Toast.makeText(mContext, "Error: Matricula", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (codigo.isEmpty()) {
+        } else if (asistenciaActual.getCodigo().isEmpty()) {
             Toast.makeText(mContext, "Error: Codigo", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (materia.isEmpty()) {
+        } else if (asistenciaActual.getMateria().isEmpty()) {
             Toast.makeText(mContext, "Error: Materia", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (distanciaX.isEmpty()) {
+        } else if (asistenciaActual.getDistanciaX().isEmpty()) {
             Toast.makeText(mContext, "Error: Distancia X", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (distanciaY.isEmpty()) {
+        } else if (asistenciaActual.getDistanciaY().isEmpty()) {
             Toast.makeText(mContext, "Error: Distancia Y", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (senales.isEmpty()) {
+        } else if (asistenciaActual.getSenales().isEmpty()) {
             Toast.makeText(mContext, "Error: Senales", Toast.LENGTH_SHORT).show();
             return false;
         } else
@@ -351,12 +359,12 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
             if (infoEstudiante.size() > 0) {
                 String[] info = infoEstudiante.get(0).split(delimitador);
-                /*estudiante.setNombres(info[0]);
+                estudiante.setNombres(info[0]);
                 estudiante.setApellidos(info[1]);
-                estudiante.setMatricula(info[2]);*/
-                nombres = info[0];
-                apellidos = info[1];
-                matricula = info[2];
+                estudiante.setMatricula(info[2]);
+                //nombres = info[0];
+                //apellidos = info[1];
+                //matricula = info[2];
             }
         }
 
@@ -368,46 +376,46 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         } else {
             infoAsistencias = readFile(context, nombreArchivoAsistencia);
 
-            for(String info : infoAsistencias){
-                String[] parametros = info.split(delimitador);
-                Asistencia asistencia = new Asistencia();
-                asistencia.setMac(parametros[0]);
-                asistencia.setImei(parametros[1]);
-                Estudiante estudiante = new Estudiante();
-                estudiante.setNombres(parametros[2]);
-                estudiante.setApellidos(parametros[3]);
-                estudiante.setMatricula(parametros[4]);
-                asistencia.setEstudiante(estudiante);
-                asistencia.setFecha(parametros[5]);
-                asistencia.setMateria(parametros[6]);
-                asistencia.setDistanciaX(parametros[7]);
-                asistencia.setDistanciaY(parametros[8]);
-                String[] senal = parametros[9].split("..");
+            if (infoAsistencias.size() > 0) {
+                for (String info : infoAsistencias) {
+                    String[] parametros = info.split(delimitador);
+                    Asistencia asistencia = new Asistencia();
+                    asistencia.setMac(parametros[0]);
+                    asistencia.setImei(parametros[1]);
+                    Estudiante estudiante = new Estudiante();
+                    estudiante.setNombres(parametros[2]);
+                    estudiante.setApellidos(parametros[3]);
+                    estudiante.setMatricula(parametros[4]);
+                    asistencia.setEstudiante(estudiante);
+                    asistencia.setFecha(parametros[5]);
+                    asistencia.setMateria(parametros[6]);
+                    asistencia.setCodigo(parametros[7]);
+                    asistencia.setDistanciaX(parametros[8]);
+                    asistencia.setDistanciaY(parametros[9]);
+                    String[] senales = new String(parametros[10]).split("&&");
+                    Log.e("senales " , senales[0]);
 
-                ArrayList<Senal> ls = new ArrayList<>();
-                for(String infosenal : senal){
-                    String[] paramsenal = infosenal.split("^^");
-                    Senal s = new Senal();
-                    s.setBssid(paramsenal[0]);
-                    s.setLevel(Integer.parseInt(paramsenal[1]));
-                    s.setLevel2(Integer.parseInt(paramsenal[2]));
-                    ls.add(s);
+                    ArrayList<Senal> ls = new ArrayList<>();
+                    for (String infosenal : senales) {
+                        String[] paramsenal = new String(infosenal).split("==");
+
+                        Log.e("senalesc " , paramsenal[0]);
+                        Senal s = new Senal();
+                        s.setBssid(paramsenal[0]);
+                        s.setSsid(paramsenal[1]);
+                        s.setLevel(Integer.parseInt(paramsenal[2]));
+                        s.setLevel2(Integer.parseInt(paramsenal[3]));
+                        ls.add(s);
+                    }
+                    asistencia.setSenales(ls);
+                    asistencias.add(asistencia);
                 }
-                asistencia.setSenales(ls);
-                asistencias.add(asistencia);
             }
-            /*try {
-
-                //fileAsistencia.delete();
-                //fileAsistencia.createNewFile();
-            } catch (IOException e) {
-            }*/
-
         }
     }
 
-    private void saveFile(Context context, ArrayList<String> infoAsistencia, String filename) {
-        if (infoAsistencia.size() <= 0) {
+    private void saveFile(Context context, ArrayList<Asistencia> asistencias, String filename) {
+        if (asistencias.size() <= 0) {
             Toast.makeText(context, "No infoAsistencia", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -420,8 +428,9 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 Log.e("saveFile " + filename, (infoAsistencia.get(i).toString() + "\n"));
             }*/
             for (int i = 0; i < asistencias.size(); i++) {
-                fos.write((encrypt(asistencias.get(i).toString()) + "\n").getBytes());
-                Log.e("saveFile " + filename, (infoAsistencia.get(i).toString() + "\n"));
+                fos.write((/*encrypt(*/asistencias.get(i).toString() + "\n").getBytes());
+                //Log.e("saveFile " + filename, (infoAsistencia.get(i).toString() + "\n"));
+                Log.e("saveFile " + filename, (asistencias.get(i).toString()) + "\n");
             }
             fos.close();
             Toast.makeText(context, "Datos guardados", Toast.LENGTH_SHORT).show();
@@ -444,7 +453,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 String receiveString = "";
                 while ((receiveString = bufferedReader.readLine()) != null) {
                     //stringBuilder.append(receiveString);
-                    dataList.add(crypto.decrypt_string(receiveString));
+                    dataList.add(/*crypto.decrypt_string(*/receiveString);
                     Log.e("readFile2 " + filename, receiveString);
                 }
                 fileInputStream.close();
@@ -457,7 +466,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             Log.e("IOException", "Can not read file: " + e.toString());
             return dataList;
         }
-        Log.e("Read File", dataList.get(0).toString());
+        //Log.e("Read File", dataList.get(0).toString());
         return dataList;
     }
 
@@ -484,9 +493,10 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 return true;
             case R.id.info: {
                 Intent intent = new Intent(mContext, InfoActivity.class);
-                intent.putExtra("intent_nombres", nombres);
-                intent.putExtra("intent_apellidos", apellidos);
-                intent.putExtra("intent_matricula", matricula);
+                intent.putExtra("Estudiante", estudiante);
+                //intent.putExtra("intent_nombres", nombres);
+                //intent.putExtra("intent_apellidos", apellidos);
+                //intent.putExtra("intent_matricula", matricula);
                 startActivityForResult(intent, REQUESTCODE_INFO);
                 return true;
             }
@@ -522,9 +532,10 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         if (requestCode == REQUESTCODE_INFO) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
-                    nombres = data.getStringExtra("intent_nombres");
-                    apellidos = data.getStringExtra("intent_apellidos");
-                    matricula = data.getStringExtra("intent_matricula");
+                    estudiante = (Estudiante)data.getSerializableExtra("Estudiante");
+                    //nombres = data.getStringExtra("intent_nombres");
+                    //apellidos = data.getStringExtra("intent_apellidos");
+                    // = data.getStringExtra("intent_matricula");
                     //Log.e("onActivityResult: ", "OK");
                 }
             }
@@ -584,27 +595,30 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             ScanResult scanResult = wifiList.get(i);
             Senal senal = new Senal();
             senal.setBssid(scanResult.BSSID);
+            senal.setSsid(scanResult.SSID);
             senal.setLevel(scanResult.level);
             senal.setLevel2(WifiManager.calculateSignalLevel(scanResult.level, 100));
             senales.add(senal);
+            Log.e(TAG, "scanWifiSignals: " + senal.toString());
             /*sb.append(scanResult.BSSID)
-                    .append("^^")
+                    .append("==")
                     .append(scanResult.level)
-                    .append("^^")
+                    .append("==")
                     .append(WifiManager.calculateSignalLevel(scanResult.level, 100));
             if (i < wifiList.size() - 1) {
-                sb.append("..");
+                sb.append("&&");
             }*/
         }
 
+        asistenciaActual.setSenales(senales);
         //senales = sb.toString();
-        //Log.e(TAG, "senales: " + senales);
+
     }
 
     public static String encrypt(final String message) {
         try {
             String encryptMessage = crypto.encrypt_string(message);
-            Log.e("Encrypted Message", encryptMessage);
+            Log.e("encrypt", encryptMessage);
             return encryptMessage;
         } catch (InvalidKeyException e) {
             e.printStackTrace();
@@ -624,3 +638,4 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         return "";
     }
 }
+
