@@ -73,6 +73,7 @@ int binarioADecimal(int n);
 Vec3f rotationMatrixToEulerAngles(Mat &R);
 bool isRotationMatrix(Mat &R);
 float angle(Point A, Point B);
+static double deg2Rad(double deg);
 float cal_angle (  float current_x , float current_y , float tar_x , float tar_y );
 void warpImage(const Mat &src,
                double    theta,
@@ -91,6 +92,8 @@ void warpMatrix(Size   sz,
                 double fovy,
                 Mat&   M,
                 vector<Point2f>* corners);
+void rotateFrame(const Mat &input, Mat &output, double roll, double pitch, double yaw,
+                 double dx, double dy, double dz, double f, double cx, double cy);
 
 int N = 15; //11
 int CANALES = 1;
@@ -115,44 +118,57 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                  jlong imagenRGBA,
                                                                  jlong imagenResultado,
                                                                  jlong objectSize,
-                                                                 jlong eulerAngles) {
+                                                                 jlong parameters) {
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.1);
-    Mat & mOriginal = *(Mat*)imagenRGBA;
+    Mat & mProcesado = *(Mat*)imagenRGBA;
     //Mat mPrep = mOriginal.clone();
-    Mat mOriginalCopia = mOriginal.clone();
+    Mat mOriginalCopia = mProcesado.clone();
     Mat & mResultado = *(Mat*)imagenResultado;
     Mat & mObjectSize = *(Mat*)objectSize;
-    Mat & mEulerAngles = *(Mat*)eulerAngles;
+    Mat & mParameters = *(Mat*)parameters;
     Mat warp;
     string mensajeBinario = "................................................";
     string mensajeResultado = "";
     ANCHO_OBJETO_IMAGEN = 0.0f;
     ALTO_OBJETO_IMAGEN = 0.0f;
 
-    MAX_WIDTH = mOriginal.cols;
-    MAX_HEIGHT = mOriginal.rows;
+    MAX_WIDTH = mProcesado.cols;
+    MAX_HEIGHT = mProcesado.rows;
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.2);
     vector<vector<Point> > cuadrados, cuadradosImagenCorregida;
     vector<vector<vector<Point> > > particiones;
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.4);
-    buscarCuadrados(mOriginal, cuadrados, LAPLACIAN);
+    buscarCuadrados(mProcesado, cuadrados, LAPLACIAN);
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.5);
-    dibujarCuadrados(mOriginal, cuadrados);
-    //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.6);
-
-    if(cuadrados.size() == NUM_MATRICES && filtradoCross(mOriginal, cuadrados)) {
-        particionarCuadrados(mOriginal, cuadrados, particiones);
-        decodificarParticiones(mOriginal, mOriginalCopia, particiones, mensajeBinario);
+    dibujarCuadrados(mProcesado, cuadrados);
+    //
+    __android_log_print(ANDROID_LOG_ERROR, "rotateFrame", "Tilt: %.3f, Yaw: %.3f, Roll: %.3f", mParameters.at<float>(0,0),mParameters.at<float>(0,1), mParameters.at<float>(0,2));
+    if(cuadrados.size() == NUM_MATRICES && filtradoCross(mProcesado, cuadrados)) {
+        //particionarCuadrados(mProcesado, cuadrados, particiones);
+        //decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
 
         Mat mLambda, mWarpImage;
         vector<Point2f> corners;
-        warpImage(mOriginal,
-                  -mEulerAngles.at<float>(0,2), //roll
-                  mEulerAngles.at<float>(0,0), //tilt
-                  mEulerAngles.at<float>(0,1), //pan
-                  1, 30, mWarpImage, mLambda, corners);
-        //buscarCuadrados(mOriginalCopia, cuadradosImagenCorregida, LAPLACIAN);
+        /*warpImage(mOriginal,
+                  -mParameters.at<float>(0,2), //roll
+                  mParameters.at<float>(0,0), //tilt - pitch
+                  mParameters.at<float>(0,1), //pan - yaw
+                  1, 30, mWarpImage, mLambda, corners);*/
 
+        rotateFrame(mProcesado,
+                    mWarpImage,
+                    deg2Rad(mParameters.at<float>(0,0)),
+                    0,//deg2Rad(mParameters.at<float>(0,1)),
+                    deg2Rad(-mParameters.at<float>(0,2)),
+                    0, //dx
+                    0, //dy
+                    0, //dz
+                    mParameters.at<float>(0,3), //
+
+
+
+                    MAX_WIDTH/2, //cx
+                    MAX_HEIGHT/2);//cy
         //if(cuadradosImagenCorregida.size() == NUM_MATRICES){
             ANCHO_OBJETO_IMAGEN = getWidthObjectImage(cuadrados);
             ALTO_OBJETO_IMAGEN = getHeightObjectImage(cuadrados);
@@ -164,9 +180,9 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
         //boundRect = boundingRect(corners);
         //rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
         //mResultado = mWarpImage(Rect(mWarpImage.cols/2 - MAX_WIDTH/2, mWarpImage.rows/2 - MAX_HEIGHT/2, MAX_WIDTH, MAX_HEIGHT)) ;
-        //mResultado = mWarpImage;
+        mResultado = mWarpImage;
     }
-    mResultado = mOriginal;
+    else mResultado = mProcesado;
     mObjectSize.at<float>(0,0) = ANCHO_OBJETO_IMAGEN;
     mObjectSize.at<float>(0,1) = ALTO_OBJETO_IMAGEN;
     //mResultado = warp; //mOriginal;//
@@ -214,7 +230,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 if(metodo == LAPLACIAN) {
                     /// Apply Laplace function
                     Mat dst;
-                    bitwise_not(   gray0, gray0);
+                    //bitwise_not(   gray0, gray0);
                     Laplacian(gray0, dst, CV_16S, 3, 1, 0, BORDER_DEFAULT);
                     convertScaleAbs(dst, gray);
 
@@ -1118,47 +1134,47 @@ void warpMatrix(Size   sz,
                 double fovy,
                 Mat&   M,
                 vector<Point2f>* corners){
-    double st=sin(deg2Rad(theta));
-    double ct=cos(deg2Rad(theta));
-    double sp=sin(deg2Rad(phi));
-    double cp=cos(deg2Rad(phi));
-    double sg=sin(deg2Rad(gamma));
-    double cg=cos(deg2Rad(gamma));
+    double st = sin(deg2Rad(theta));
+    double ct = cos(deg2Rad(theta));
+    double sp = sin(deg2Rad(phi));
+    double cp = cos(deg2Rad(phi));
+    double sg = sin(deg2Rad(gamma));
+    double cg = cos(deg2Rad(gamma));
 
-    double halfFovy=fovy*0.5;
-    double d=hypot(sz.width,sz.height);
-    double sideLength=scale*d/cos(deg2Rad(halfFovy));
-    double h=d/(2.0*sin(deg2Rad(halfFovy)));
-    double n=h-(d/2.0);
-    double f=h+(d/2.0);
+    double halfFovy = fovy*0.5;
+    double d = hypot(sz.width, sz.height);
+    double sideLength = scale * d / cos(deg2Rad(halfFovy));
+    double h = d / (2.0 * sin(deg2Rad(halfFovy)));
+    double n = h - (d / 2.0);
+    double f = h + (d / 2.0);
 
-    Mat F=Mat(4,4,CV_64FC1);//Allocate 4x4 transformation matrix F
-    Mat Rtheta=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around Z-axis by theta degrees
-    Mat Rphi=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around X-axis by phi degrees
-    Mat Rgamma=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around Y-axis by gamma degrees
+    Mat F = Mat(4, 4, CV_64FC1);//Allocate 4x4 transformation matrix F
+    Mat Rtheta = Mat::eye(4, 4, CV_64FC1);//Allocate 4x4 rotation matrix around Z-axis by theta degrees
+    Mat Rphi = Mat::eye(4, 4, CV_64FC1);//Allocate 4x4 rotation matrix around X-axis by phi degrees
+    Mat Rgamma = Mat::eye(4, 4, CV_64FC1);//Allocate 4x4 rotation matrix around Y-axis by gamma degrees
 
-    Mat T=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 translation matrix along Z-axis by -h units
-    Mat P=Mat::zeros(4,4,CV_64FC1);//Allocate 4x4 projection matrix
+    Mat T = Mat::eye(4, 4, CV_64FC1);//Allocate 4x4 translation matrix along Z-axis by -h units
+    Mat P = Mat::zeros(4, 4, CV_64FC1);//Allocate 4x4 projection matrix
 
     //Rtheta
-    Rtheta.at<double>(0,0)=Rtheta.at<double>(1,1)=ct;
-    Rtheta.at<double>(0,1)=-st;Rtheta.at<double>(1,0)=st;
+    Rtheta.at<double>(0,0) = Rtheta.at<double>(1,1) = ct;
+    Rtheta.at<double>(0,1) = -st;Rtheta.at<double>(1,0) = st;
     //Rphi
-    Rphi.at<double>(1,1)=Rphi.at<double>(2,2)=cp;
-    Rphi.at<double>(1,2)=-sp;Rphi.at<double>(2,1)=sp;
+    Rphi.at<double>(1,1) = Rphi.at<double>(2,2) = cp;
+    Rphi.at<double>(1,2) = -sp;Rphi.at<double>(2,1) = sp;
     //Rgamma
-    Rgamma.at<double>(0,0)=Rgamma.at<double>(2,2)=cg;
-    Rgamma.at<double>(0,2)=sg;Rgamma.at<double>(2,0)=sg;
+    Rgamma.at<double>(0,0) = Rgamma.at<double>(2,2) = cg;
+    Rgamma.at<double>(0,2) = sg;Rgamma.at<double>(2,0) = sg;
 
     //T
-    T.at<double>(2,3)=-h;
+    T.at<double>(2,3) = -h;
     //P
-    P.at<double>(0,0)=P.at<double>(1,1)=1.0/tan(deg2Rad(halfFovy));
-    P.at<double>(2,2)=-(f+n)/(f-n);
-    P.at<double>(2,3)=-(2.0*f*n)/(f-n);
-    P.at<double>(3,2)=-1.0;
+    P.at<double>(0,0) = P.at<double>(1,1) = 1.0 / tan(deg2Rad(halfFovy));
+    P.at<double>(2,2) = -(f + n) / (f - n);
+    P.at<double>(2,3) = -(2.0 * f * n) / (f - n);
+    P.at<double>(3,2) = -1.0;
     //Compose transformations
-    F=P*T*Rphi*Rtheta*Rgamma;//Matrix-multiply to produce master matrix
+    F = P * T * Rphi * Rtheta * Rgamma;//Matrix-multiply to produce master matrix
 
     //Transform 4x4 points
     double ptsIn [4*3];
@@ -1174,7 +1190,7 @@ void warpMatrix(Size   sz,
     Mat ptsInMat(1,4,CV_64FC3,ptsIn);
     Mat ptsOutMat(1,4,CV_64FC3,ptsOut);
 
-    perspectiveTransform(ptsInMat,ptsOutMat,F);//Transform points
+    perspectiveTransform(ptsInMat, ptsOutMat, F);//Transform points
 
     //Get 3x3 transform and warp image
     Point2f ptsInPt2f[4];
@@ -1187,7 +1203,7 @@ void warpMatrix(Size   sz,
         ptsOutPt2f[i] = (ptOut+Point2f(1,1))*(sideLength*0.5);
     }
 
-    M=getPerspectiveTransform(ptsInPt2f,ptsOutPt2f);
+    M = getPerspectiveTransform(ptsInPt2f, ptsOutPt2f);
 
     //Load corners vector
     if(corners){
@@ -1200,20 +1216,74 @@ void warpMatrix(Size   sz,
 }
 
 void warpImage(const Mat &src,
-               double    theta,
-               double    phi,
-               double    gamma,
+               double    theta, //roll
+               double    phi,   //tilt
+               double    gamma, //pan
                double    scale,
                double    fovy,
                Mat&      dst,
                Mat&      M,
                vector<Point2f> &corners){
-    double halfFovy=fovy*0.5;
-    double d=hypot(src.cols,src.rows);
-    double sideLength=scale*d/cos(deg2Rad(halfFovy));
+
+    double halfFovy = fovy * 0.5;
+    double d = hypot(src.cols, src.rows);
+    double sideLength = scale * d / cos(deg2Rad(halfFovy));
+
     warpMatrix(src.size(), theta, phi, gamma, scale, fovy, M, &corners);//Compute warp matrix
-    warpPerspective(src,dst,M,Size(sideLength,sideLength));//Do actual image warp
+    //warpPerspective(src, dst, M, Size(sideLength,sideLength));//Do actual image warp
+    warpPerspective(src, dst, M, src.size());
 }
+
+void rotateFrame(const Mat &input, Mat &output, double roll, double pitch, double yaw,
+                 double dx, double dy, double dz, double f, double cx, double cy){
+    Mat Rx = Mat(4, 4, CV_64FC1);
+    Mat Ry = Mat(4, 4, CV_64FC1);
+    Mat Rz = Mat(4, 4, CV_64FC1);
+    Mat T  = Mat(4, 4, CV_64FC1);
+    Mat C  = Mat(3, 4, CV_64FC1);
+    Mat CI = Mat(4, 3, CV_64FC1);
+
+    // Camera Calibration Intrinsics Matrix
+    C.at<double>(0,0) = f; C.at<double>(0,1) = 0; C.at<double>(0,2) = cx; C.at<double>(0,3) = 0;
+    C.at<double>(1,0) = 0; C.at<double>(1,1) = f; C.at<double>(1,2) = cy; C.at<double>(1,3) = 0;
+    C.at<double>(2,0) = 0; C.at<double>(2,1) = 0; C.at<double>(2,2) = 1;  C.at<double>(2,3) = 0; //??0
+
+    // Inverted Camera Calibration Intrinsics Matrix
+    CI.at<double>(0,0) = 1/f; CI.at<double>(0,1) = 0;   CI.at<double>(0,2) = -cx/f;
+    CI.at<double>(1,0) = 0;   CI.at<double>(1,1) = 1/f; CI.at<double>(1,2) = -cy/f;
+    CI.at<double>(2,0) = 0;   CI.at<double>(2,1) = 0;   CI.at<double>(2,2) = 1; //??0
+    CI.at<double>(3,0) = 0;   CI.at<double>(3,1) = 0;   CI.at<double>(3,2) = 1;
+
+    Rx.at<double>(0,0) = 1; Rx.at<double>(0,1) = 0;         Rx.at<double>(0,2) = 0;          Rx.at<double>(0,3) = 0;
+    Rx.at<double>(1,0) = 0; Rx.at<double>(1,1) = cos(roll); Rx.at<double>(1,2) = -sin(roll); Rx.at<double>(1,3) = 0;
+    Rx.at<double>(2,0) = 0; Rx.at<double>(2,1) = sin(roll); Rx.at<double>(2,2) = cos(roll);  Rx.at<double>(2,3) = 0;
+    Rx.at<double>(3,0) = 0; Rx.at<double>(3,1) = 0;         Rx.at<double>(3,2) = 0;          Rx.at<double>(3,3) = 1;
+
+    Ry.at<double>(0,0) = cos(pitch);  Ry.at<double>(0,1) = 0; Ry.at<double>(0,2) = sin(pitch); Ry.at<double>(0,3) = 0;
+    Ry.at<double>(1,0) = 0;           Ry.at<double>(1,1) = 1; Ry.at<double>(1,2) = 0;          Ry.at<double>(1,3) = 0;
+    Ry.at<double>(2,0) = -sin(pitch); Ry.at<double>(2,1) = 0; Ry.at<double>(2,2) = cos(pitch); Ry.at<double>(2,3) = 0;
+    Ry.at<double>(3,0) = 0;           Ry.at<double>(3,1) = 0; Ry.at<double>(3,2) = 0;          Ry.at<double>(3,3) = 1;
+
+    Rz.at<double>(0,0) = cos(yaw); Rz.at<double>(0,1) = -sin(yaw); Rz.at<double>(0,2) = 0; Rz.at<double>(0,3) = 0;
+    Rz.at<double>(1,0) = sin(yaw); Rz.at<double>(1,1) = cos(yaw);  Rz.at<double>(1,2) = 0; Rz.at<double>(1,3) = 0;
+    Rz.at<double>(2,0) = 0;        Rz.at<double>(2,1) = 0;         Rz.at<double>(2,2) = 1; Rz.at<double>(2,3) = 0;
+    Rz.at<double>(3,0) = 0;        Rz.at<double>(3,1) = 0;         Rz.at<double>(3,2) = 0; Rz.at<double>(3,3) = 1;
+
+    T.at<double>(0,0) = 1; T.at<double>(0,1) = 0; T.at<double>(0,2) = 0; T.at<double>(0,3) = dx;
+    T.at<double>(1,0) = 0; T.at<double>(1,1) = 1; T.at<double>(1,2) = 0; T.at<double>(1,3) = dy;
+    T.at<double>(2,0) = 0; T.at<double>(2,1) = 0; T.at<double>(2,2) = 1; T.at<double>(2,3) = dz;
+    T.at<double>(3,0) = 0; T.at<double>(3,1) = 0; T.at<double>(3,2) = 0; T.at<double>(3,3) = 1;
+
+    // Compose rotation matrix with (RX, RY, RZ)
+    Mat R = Rz * Ry * Rx;
+
+    // Final transformation matrix
+    Mat H = C * (T * (R * CI));
+
+    // Apply matrix transformation
+    warpPerspective(input, output, H, input.size(), INTER_LANCZOS4);
+}
+
 }
 
 

@@ -39,7 +39,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     private static final String TAG = "CameraActivity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
-    private Mat mRGBA, mResultado, mObjectSize, mEulerAngles;
+    private Mat mRGBA, mResultado, mObjectSize, mParameters;// mEulerAngles;
     private float anchoObjetoImagen = 0.0f;
     private float altoObjetoImagen = 0.0f;
     private float estimatedDist = 0.0f;
@@ -47,11 +47,15 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private float estimatedDistY = 0.0f;
     private String mensajeResultado = "";
     private float focalLength = 0.0f;
+    private float focalLengthPixelX = 0.0f;
+    private float focalLengthPixelY = 0.0f;
     private float horizonalAngle = 0.0f;
     private float verticalAngle = 0.0f;
     private float sensorWidth = 0.0f;
     private float sensorHeight = 0.0f;
     private float anchoObjetoReal = 1800.0f;
+    private int max_width = 0;
+    private int max_height = 0;
     private float pan = 0.0f;
     private float tilt = 0.0f;
     private float roll = 0.0f;
@@ -224,7 +228,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
 
         mObjectSize = new Mat(1, 2, CvType.CV_32FC1);
-        mEulerAngles = new Mat(1, 3, CvType.CV_32FC1);
+        //mEulerAngles = new Mat(1, 3, CvType.CV_32FC1);
+        mParameters = new Mat(1, 5, CvType.CV_32FC1);
+        max_width = width;
+        max_height = height;
         getCameraParameters();
 
     }
@@ -236,11 +243,12 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mRGBA = inputFrame.rgba();
 
         //pan = initialpan - pan;
-        mEulerAngles.put(0,0, tilt);
-        mEulerAngles.put(0,1, initialpan - pan);
-        mEulerAngles.put(0,2, roll);
+        mParameters.put(0,0, tilt);
+        mParameters.put(0,1, initialpan - pan);
+        mParameters.put(0,2, roll);
+        mParameters.put(0,3, focalLengthPixelX);
 
-        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(), mResultado.getNativeObjAddr(), mObjectSize.getNativeObjAddr(), mEulerAngles.getNativeObjAddr());
+        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(), mResultado.getNativeObjAddr(), mObjectSize.getNativeObjAddr(), mParameters.getNativeObjAddr());
 
         anchoObjetoImagen = (float) mObjectSize.get(0, 0)[0];
         altoObjetoImagen = (float) mObjectSize.get(0, 1)[0];
@@ -301,11 +309,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 //for (int focusId=0; focusId<focalLengths.length; focusId++) {
                 int focusId = 0;
                 focalLength = focalLengths[focusId];
+                focalLengthPixelX = (focalLength / sensorWidth) * max_width;
+                focalLengthPixelY = (focalLength / sensorHeight) * max_height;
                 horizonalAngle = (float) Math.toDegrees(2 * Math.atan(0.5f * sensorWidth / focalLength));
                 verticalAngle = (float) Math.toDegrees(2 * Math.atan(0.5f * sensorHeight / focalLength));
-                //Log.e("mr", "Camera " + cameraId + "/f" + focusId + " has focalLength == " + Float.toString(focalLength));
-                //Log.e("mr", "  * horizonalAngle == " + Float.toString(horizonalAngle));
-                //Log.e("mr", "  * verticalAngle == " + Float.toString(verticalAngle));
                 //}
                 //}
             } catch (CameraAccessException e) {
@@ -316,7 +323,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         }
     }
 
-    public native static String decodificar(long mRGBA, long mResultado, long mObjectSize, long mEulerAngles);
+    public native static String decodificar(long mRGBA, long mResultado, long mObjectSize, long mParameters);
 
     // Setup our SensorEventListener
     public class MySensorEventListener implements SensorEventListener {
