@@ -5,6 +5,7 @@ from rest_framework import viewsets,generics
 from .serializers import UserSerializer, GroupSerializer
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.http import JsonResponse
 
 from .models import Asistencia
 from .models import Profesor
@@ -96,18 +97,17 @@ class ParaleloList(generics.ListAPIView):
 def gestionar(request):
     if request.method == 'POST':
         try:
-            jsonmsg = json.loads(request.body)
-            mensajeencriptado = jsonmsg.get('token', '')
-            print(mensajeencriptado)
-
-            mensaje = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(mensajeencriptado)
+            mensaje = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(request.body)
             print(mensaje)
-
-            return HttpResponse("1")
+            jsonmsg = json.loads('[' + mensaje + ']')
+            print(jsonmsg)
+            #return HttpResponse({"response":"1"}, content_type='application/json')
+            return JsonResponse({'response':'0'})
         except Exception:
-            return HttpResponse("0")
+            print("Exception")
+            return JsonResponse({'response':'1'})
     else:
-        return HttpResponse("0")
+        return JsonResponse({'response':'1'})
 
 #INSTALAR DEPENDENCIA
 #pip install pycryptodome
