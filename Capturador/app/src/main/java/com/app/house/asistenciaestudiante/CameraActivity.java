@@ -265,7 +265,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         ", R: " + String.format("%.2f", roll),
                 new Point(10, 23),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Sensor size: (" +
+        /*Imgproc.putText(mResultado, "Sensor size: (" +
                         String.format("%.2f", sensorWidth) + "mm, " +
                         String.format("%.2f", sensorHeight) + "mm)", new Point(10, 50),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
@@ -274,17 +274,17 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         Imgproc.putText(mResultado, "Angle view: (" +
                         String.format("%.2f", horizonalAngle) + ", " +
                         String.format("%.2f", verticalAngle) + ")", new Point(10, 110),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);*/
         Imgproc.putText(mResultado, "Object Image Size: (" +
                         String.format("%.2f", mObjectSize.get(0, 0)[0]) + "px, " +
                         String.format("%.2f", mObjectSize.get(0, 1)[0]) + "px)",
-                new Point(10, 140),
+                new Point(10, 50), //140
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         Imgproc.putText(mResultado, "Estimated Dist: " +
                         String.format("%.2f", estimatedDist / 10) + " cm (X: " +
                         String.format("%.2f", estimatedDistX / 10) +  ", Y: "+
                         String.format("%.2f", estimatedDistY / 10)+")",
-                new Point(10, 170),
+                new Point(10, 80),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         return mResultado;
     }

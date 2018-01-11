@@ -138,18 +138,19 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.2);
     vector<vector<Point> > cuadrados, cuadradosImagenCorregida;
     vector<vector<vector<Point> > > particiones;
-    //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.4);
+    cuadrados.clear();
     buscarCuadrados(mProcesado, cuadrados, LAPLACIAN);
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.5);
     dibujarCuadrados(mProcesado, cuadrados);
-    //
+    drawMarker(mProcesado, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(0, 0, 255), MARKER_CROSS, 20, 2);
     //__android_log_print(ANDROID_LOG_ERROR, "rotateFrame", "Tilt: %.3f, Yaw: %.3f, Roll: %.3f", mParameters.at<float>(0,0),mParameters.at<float>(0,1), mParameters.at<float>(0,2));
-    if(cuadrados.size() == NUM_MATRICES && filtradoCross(mProcesado, cuadrados)) {
+    if(cuadrados.size() == 1 /*&& filtradoCross(mProcesado, cuadrados)*/) {
+
         //particionarCuadrados(mProcesado, cuadrados, particiones);
         //decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
 
         Mat mWarpImage;
-        vector<Point2f> corners;
+        //vector<Point2f> corners;
         /*warpImage(mOriginal,
                   -mParameters.at<float>(0,2), //roll
                   mParameters.at<float>(0,0), //tilt - pitch
@@ -170,42 +171,59 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
         ALTO_OBJETO_IMAGEN = getHeightObjectImage(cuadrados);
 
         Rect boundRect;
-        vector<Point2f> brPoints;
+        vector<Point> brPoints;
         brPoints.push_back(cuadrados[0][0]);
-        brPoints.push_back(cuadrados[2][1]);
-        brPoints.push_back(cuadrados[2][2]);
+        brPoints.push_back(cuadrados[0][1]);
+        brPoints.push_back(cuadrados[0][2]);
         brPoints.push_back(cuadrados[0][3]);
 
         boundRect = boundingRect(brPoints);
+        rectangle(mProcesado, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
 
-        Point2f  origen[4] = {boundRect.tl(),
+        Point2f  destino[4] = {boundRect.tl(),
                               Point(boundRect.tl().x+boundRect.width, boundRect.tl().y),
                               boundRect.br(),
                               Point(boundRect.tl().x, boundRect.tl().y+boundRect.height)  };
-        Point2f destino[4] = {Point(MAX_WIDTH/2-boundRect.width/2, MAX_HEIGHT/2-boundRect.height/2),
+        Point2f origen[4] = {cuadrados[0][0],cuadrados[0][1], cuadrados[0][2],cuadrados[0][3]};
+                /*{Point(MAX_WIDTH/2-boundRect.width/2, MAX_HEIGHT/2-boundRect.height/2),
                               Point(MAX_WIDTH/2+boundRect.width/2, MAX_HEIGHT/2-boundRect.height/2),
                               Point(MAX_WIDTH/2+boundRect.width/2, MAX_HEIGHT/2+boundRect.height/2),
                               Point(MAX_WIDTH/2-boundRect.width/2, MAX_HEIGHT/2+boundRect.height/2)
-                              };
+                              };*/
 
-        __android_log_print(ANDROID_LOG_ERROR, "origen -> ", "(%i %i)(%i %i)(%i %i)(%i %i)",
+        /*__android_log_print(ANDROID_LOG_ERROR, "origen -> ", "(%.2f %.2f)(%.2f %.2f)(%.2f %.2f)(%.2f %.2f)",
                             origen[0].x, origen[0].y,
                             origen[1].x, origen[1].y,
                             origen[2].x, origen[2].y,
                             origen[3].x, origen[3].y);
-        __android_log_print(ANDROID_LOG_ERROR, "destin -> ", "(%i %i)(%i %i)(%i %i)(%i %i)",
+        __android_log_print(ANDROID_LOG_ERROR, "destin -> ", "(%.2f %.2f)(%.2f %.2f)(%.2f %.2f)(%.2f %.2f)",
                             destino[0].x, destino[0].y,
                             destino[1].x, destino[1].y,
                             destino[2].x, destino[2].y,
-                            destino[3].x, destino[3].y);
+                            destino[3].x, destino[3].y);*/
 
-        Mat cameraMatrix,rotMatrix,transVect,rotMatrX ,rotMatrY,rotMatrZ;
-        vector<float> eulerAngles;
+        Mat projMat(3, 4, DataType<float>::type);
+        Mat cameraMatrix(3, 3, DataType<float>::type); // intrinsic parameter matrix
+        Mat rotMatrix(3, 3, DataType<float>::type); // rotation matrix
+        Mat rotMatrixX(3, 3, DataType<float>::type);
+        Mat rotMatrixY(3, 3, DataType<float>::type);
+        Mat rotMatrixZ(3, 3, DataType<float>::type);
+        Mat transVect(4, 1, DataType<float>::type); // translation vector
+        //MatOfDouble eulerAngles = new MatOfDouble(3, 1, CvType.CV_32F);
+        //Vec3f eulerAngles;
+        Mat eulerAngles(3, 1, DataType<float>::type);
         Mat mLambda = getPerspectiveTransform(origen, destino);
-        decomposeProjectionMatrix(mLambda,cameraMatrix,rotMatrix,transVect,eulerAngles);
+        //vector<float> euler;
+        projMat.at<float>(0,0) = mLambda.at<float>(0,0); projMat.at<float>(0,1) = mLambda.at<float>(0,1); projMat.at<float>(0,2) = mLambda.at<float>(0,2); projMat.at<float>(0,3) = 0.0f;
+        projMat.at<float>(1,0) = mLambda.at<float>(1,0); projMat.at<float>(1,1) = mLambda.at<float>(1,1); projMat.at<float>(1,2) = mLambda.at<float>(1,2); projMat.at<float>(1,3) = 0.0f;
+        projMat.at<float>(2,0) = mLambda.at<float>(2,0); projMat.at<float>(2,1) = mLambda.at<float>(2,1); projMat.at<float>(2,2) = mLambda.at<float>(2,2); projMat.at<float>(2,3) = 0.0f;
 
-        __android_log_print(ANDROID_LOG_ERROR, "eulerAngles -> ", "(%i %i %i)",
-                            eulerAngles[0], eulerAngles[1], eulerAngles[2]);
+        //__android_log_print(ANDROID_LOG_ERROR, "mLambda -> ", "(%i %i)", mLambda.cols, mLambda.rows);
+
+        decomposeProjectionMatrix(projMat, cameraMatrix, rotMatrix, transVect, rotMatrixX, rotMatrixY, rotMatrixZ, eulerAngles);
+        //eulerAngles = rotationMatrixToEulerAngles(rotMatrix);
+        __android_log_print(ANDROID_LOG_ERROR, "eulerAngles -> ", "(%.2f %.2f %.2f)",
+                            eulerAngles.at<float>(0,0), eulerAngles.at<float>(0,1), eulerAngles.at<float>(0,2));
 
         //if(cuadradosImagenCorregida.size() == NUM_MATRICES){
             //ANCHO_OBJETO_IMAGEN = getWidthObjectImage(cuadrados);
@@ -331,9 +349,9 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 // area may be positive or negative - in accordance with the
                 // contour orientation
                 if( approx.size() == 4 &&
+                    !filtrarCuadrado(cuadrados, approx) &&
                     fabs(contourArea(Mat(approx))) > 300 &&
-                    isContourConvex(Mat(approx)) &&
-                    !filtrarCuadrado(cuadrados, approx))
+                    isContourConvex(Mat(approx)))
                 {
                     double maxCosine = 0;
                     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 1.3);
@@ -961,7 +979,9 @@ bool filtrarCuadrado(const vector<vector<Point> >& cuadrados, vector<Point>& app
     const Point* q0 = &approx[0];
     const Point* q1 = &approx[1];
     const Point* q2 = &approx[2];
-    const Point* q3 = &approx[3];
+    const Point* q3 = &approx[3];  //(-1796805904 0)(1077542912 0)(1079148544 0)(1078165504 0)
+
+
 
     if( q0->x < TOLERANCIA || q0->y < TOLERANCIA ||
         q1->x < TOLERANCIA || q1->y < TOLERANCIA ||
@@ -981,7 +1001,7 @@ bool filtrarCuadrado(const vector<vector<Point> >& cuadrados, vector<Point>& app
         q3->x < TOLERANCIA || q3->y > MAX_HEIGHT-TOLERANCIA)
     {
         return true;
-        //__android_log_print(ANDROID_LOG_ERROR, "APPROX ERROR ---> ", "(%i %i) (%i %i) (%i %i) (%i %i) ", q0->x, q0->y,q1->x,q1->y, q2->x, q2->y, q3->x, q3->y);
+
     }
 
     //Discriminando cuadrados formados por el borde de la imagen
@@ -1098,7 +1118,7 @@ bool filtradoCross(Mat& image, vector<vector<Point> >& cuadrados) {
     }
 
 
-    drawMarker(image, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(0, 0, 255), MARKER_CROSS, 20, 2);
+
     return false;
 }
 
