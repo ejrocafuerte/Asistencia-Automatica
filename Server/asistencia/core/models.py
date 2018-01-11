@@ -37,6 +37,7 @@ class Aula(models.Model):
 class Arduino(models.Model):
     id_aula=models.ForeignKey('Aula', on_delete=models.CASCADE,)
     mac_arduino=models.CharField(max_length=17)
+
 class Materia(models.Model):
     id_facultad=models.ForeignKey('Facultad',on_delete=None)
     codigo=models.CharField(max_length=10,unique=True)
@@ -73,7 +74,11 @@ class Asistencia(models.Model):
     IMEI=models.CharField(max_length=15)
     celular_no= models.CharField(max_length=11)
     paraleloid=models.CharField(max_length=2)
-    hora_foto=models.DateTimeField()
+    fecha=models.DateTimeField()
+    materia = models.CharField(max_length=200)
+    codigo = models.CharField(max_length=200)
+    distanciax = models.FloatField(default=0.0)
+    distanciay = models.FloatField(default=0.0)
 
 
 class resumenAsistencias(models.Model):
