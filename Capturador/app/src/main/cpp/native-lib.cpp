@@ -3,6 +3,7 @@
 #include <android/log.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
 using namespace std;
@@ -142,12 +143,12 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.5);
     dibujarCuadrados(mProcesado, cuadrados);
     //
-    __android_log_print(ANDROID_LOG_ERROR, "rotateFrame", "Tilt: %.3f, Yaw: %.3f, Roll: %.3f", mParameters.at<float>(0,0),mParameters.at<float>(0,1), mParameters.at<float>(0,2));
+    //__android_log_print(ANDROID_LOG_ERROR, "rotateFrame", "Tilt: %.3f, Yaw: %.3f, Roll: %.3f", mParameters.at<float>(0,0),mParameters.at<float>(0,1), mParameters.at<float>(0,2));
     if(cuadrados.size() == NUM_MATRICES && filtradoCross(mProcesado, cuadrados)) {
         //particionarCuadrados(mProcesado, cuadrados, particiones);
         //decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
 
-        Mat mLambda, mWarpImage;
+        Mat mWarpImage;
         vector<Point2f> corners;
         /*warpImage(mOriginal,
                   -mParameters.at<float>(0,2), //roll
@@ -155,7 +156,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                   mParameters.at<float>(0,1), //pan - yaw
                   1, 30, mWarpImage, mLambda, corners);*/
 
-        rotateFrame(mProcesado,
+        /*rotateFrame(mProcesado,
                     mWarpImage,
                     deg2Rad(mParameters.at<float>(0,0)),
                     0,//deg2Rad(mParameters.at<float>(0,1)),
@@ -163,15 +164,52 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                     0, //dx
                     0, //dy
                     0, //dz
-                    mParameters.at<float>(0,3), //
+                    mParameters.at<float>(0,3), */
 
+        ANCHO_OBJETO_IMAGEN = getWidthObjectImage(cuadrados);
+        ALTO_OBJETO_IMAGEN = getHeightObjectImage(cuadrados);
 
+        Rect boundRect;
+        vector<Point2f> brPoints;
+        brPoints.push_back(cuadrados[0][0]);
+        brPoints.push_back(cuadrados[2][1]);
+        brPoints.push_back(cuadrados[2][2]);
+        brPoints.push_back(cuadrados[0][3]);
 
-                    MAX_WIDTH/2, //cx
-                    MAX_HEIGHT/2);//cy
+        boundRect = boundingRect(brPoints);
+
+        Point2f  origen[4] = {boundRect.tl(),
+                              Point(boundRect.tl().x+boundRect.width, boundRect.tl().y),
+                              boundRect.br(),
+                              Point(boundRect.tl().x, boundRect.tl().y+boundRect.height)  };
+        Point2f destino[4] = {Point(MAX_WIDTH/2-boundRect.width/2, MAX_HEIGHT/2-boundRect.height/2),
+                              Point(MAX_WIDTH/2+boundRect.width/2, MAX_HEIGHT/2-boundRect.height/2),
+                              Point(MAX_WIDTH/2+boundRect.width/2, MAX_HEIGHT/2+boundRect.height/2),
+                              Point(MAX_WIDTH/2-boundRect.width/2, MAX_HEIGHT/2+boundRect.height/2)
+                              };
+
+        __android_log_print(ANDROID_LOG_ERROR, "origen -> ", "(%i %i)(%i %i)(%i %i)(%i %i)",
+                            origen[0].x, origen[0].y,
+                            origen[1].x, origen[1].y,
+                            origen[2].x, origen[2].y,
+                            origen[3].x, origen[3].y);
+        __android_log_print(ANDROID_LOG_ERROR, "destin -> ", "(%i %i)(%i %i)(%i %i)(%i %i)",
+                            destino[0].x, destino[0].y,
+                            destino[1].x, destino[1].y,
+                            destino[2].x, destino[2].y,
+                            destino[3].x, destino[3].y);
+
+        Mat cameraMatrix,rotMatrix,transVect,rotMatrX ,rotMatrY,rotMatrZ;
+        vector<float> eulerAngles;
+        Mat mLambda = getPerspectiveTransform(origen, destino);
+        decomposeProjectionMatrix(mLambda,cameraMatrix,rotMatrix,transVect,eulerAngles);
+
+        __android_log_print(ANDROID_LOG_ERROR, "eulerAngles -> ", "(%i %i %i)",
+                            eulerAngles[0], eulerAngles[1], eulerAngles[2]);
+
         //if(cuadradosImagenCorregida.size() == NUM_MATRICES){
-            ANCHO_OBJETO_IMAGEN = getWidthObjectImage(cuadrados);
-            ALTO_OBJETO_IMAGEN = getHeightObjectImage(cuadrados);
+            //ANCHO_OBJETO_IMAGEN = getWidthObjectImage(cuadrados);
+            //ALTO_OBJETO_IMAGEN = getHeightObjectImage(cuadrados);
         //}
 
         //__android_log_print(ANDROID_LOG_ERROR, "euler", "%.2f %.2f %.2f", mEulerAngles.at<float>(0,0), mEulerAngles.at<float>(0,1), mEulerAngles.at<float>(0,2));
@@ -180,7 +218,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
         //boundRect = boundingRect(corners);
         //rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
         //mResultado = mWarpImage(Rect(mWarpImage.cols/2 - MAX_WIDTH/2, mWarpImage.rows/2 - MAX_HEIGHT/2, MAX_WIDTH, MAX_HEIGHT)) ;
-        mResultado = mWarpImage;
+        mResultado = mProcesado;
     }
     else mResultado = mProcesado;
     mObjectSize.at<float>(0,0) = ANCHO_OBJETO_IMAGEN;

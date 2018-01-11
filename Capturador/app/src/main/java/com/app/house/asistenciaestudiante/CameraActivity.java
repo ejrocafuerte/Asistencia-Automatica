@@ -137,7 +137,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Log.e(TAG, "OpenCV library found inside package. Using it!");
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        //if(mSensorManager == null) {
+        if(mSensorManager == null) {
             mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             // Build a SensorEventListener for each type of sensor (just one here):
             oriSensorEventListener = new MySensorEventListener();
@@ -169,7 +169,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             //mSensorManager.registerListener(oriSensorEventListener, sensorMagnetometer, SensorManager.SENSOR_DELAY_UI);
             mSensorManager.registerListener(oriSensorEventListener, ori_sensor, SensorManager.SENSOR_DELAY_GAME);
 
-        //}
+        }
     }
 
     @Override
