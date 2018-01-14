@@ -35,31 +35,33 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.text.DecimalFormat;
+
 public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "CameraActivity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
     private Mat mRGBA, mResultado, mObjectSize, mParameters;// mEulerAngles;
-    private float anchoObjetoImagen = 0.0f;
-    private float altoObjetoImagen = 0.0f;
-    private float estimatedDist = 0.0f;
-    private float estimatedDistX = 0.0f;
-    private float estimatedDistY = 0.0f;
+    private double anchoObjetoImagen = 0.0f;
+    private double altoObjetoImagen = 0.0f;
+    private double estimatedDist = 0.0f;
+    private double estimatedDistX = 0.0f;
+    private double estimatedDistY = 0.0f;
     private String mensajeResultado = "";
-    private float focalLength = 0.0f;
-    private float focalLengthPixelX = 0.0f;
-    private float focalLengthPixelY = 0.0f;
+    private double focalLength = 0.0f;
+    private double focalLengthPixelX = 0.0f;
+    private double focalLengthPixelY = 0.0f;
     private float horizonalAngle = 0.0f;
     private float verticalAngle = 0.0f;
-    private float sensorWidth = 0.0f;
-    private float sensorHeight = 0.0f;
+    private double sensorWidth = 0.0f;
+    private double sensorHeight = 0.0f;
     private float anchoObjetoReal = 1800.0f;
     private int max_width = 0;
     private int max_height = 0;
-    private float pan = 0.0f;
-    private float tilt = 0.0f;
-    private float roll = 0.0f;
-    private float initialpan = 135.0f;
+    private double pan = 0.0f;
+    private double tilt = 0.0f;
+    private double roll = 0.0f;
+    private double initialpan = 135.0f;
 
     private WindowManager mWindowManager;
 
@@ -227,9 +229,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mResultado = new Mat(width, height, CvType.CV_8UC4);
 
 
-        mObjectSize = new Mat(1, 2, CvType.CV_32FC1);
+        mObjectSize = new Mat(1, 2, CvType.CV_64FC1);
         //mEulerAngles = new Mat(1, 3, CvType.CV_32FC1);
-        mParameters = new Mat(1, 5, CvType.CV_32FC1);
+        mParameters = new Mat(1, 5, CvType.CV_64FC1);
         max_width = width;
         max_height = height;
         getCameraParameters();
@@ -242,10 +244,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRGBA = inputFrame.rgba();
 
-        //pan = initialpan - pan;
-        mParameters.put(0,0, tilt);
-        mParameters.put(0,1, initialpan - pan);
-        mParameters.put(0,2, roll);
+        mParameters.put(0,0, tilt);//tilt);
+        mParameters.put(0,1, initialpan - pan);//;
+        mParameters.put(0,2, roll);//;
         mParameters.put(0,3, focalLengthPixelX);
 
         mensajeResultado = decodificar(mRGBA.getNativeObjAddr(), mResultado.getNativeObjAddr(), mObjectSize.getNativeObjAddr(), mParameters.getNativeObjAddr());
@@ -253,12 +254,17 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         anchoObjetoImagen = (float) mObjectSize.get(0, 0)[0];
         altoObjetoImagen = (float) mObjectSize.get(0, 1)[0];
 
+        //tilt = mParameters.get(0,0)[0];
+        //pan = mParameters.get(0,2)[0];
+        //roll = mParameters.get(0,1)[0];
+
         //Log.e(TAG,  "mRGBA.cols()"+mRGBA.cols());
 
         estimatedDist = (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen);//??
 
         estimatedDistY = Math.abs(estimatedDist  * (float)Math.cos(Math.toRadians(initialpan - pan)) * (float)Math.cos(Math.toRadians(tilt)));
         estimatedDistX = -estimatedDistY * (float)Math.sin(Math.toRadians(initialpan - pan));
+
 
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", tilt) +
                         ", P: " + String.format("%.2f", initialpan - pan) +
