@@ -283,6 +283,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         String.format("%.2f", estimatedDistY / 10)+")",
                 new Point(10, 110),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(mResultado, "Mensaje: " + mensajeResultado,
+                new Point(10, 140),
+                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         return mResultado;
     }
 

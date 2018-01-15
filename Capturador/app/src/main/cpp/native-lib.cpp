@@ -46,7 +46,7 @@ using namespace cv;
 extern "C"
 {
 enum MetodoBusqueda {LAPLACIAN, CONVEXHULL, CANNY};
-enum MetodoDecodificacion {LETFTORIGHT, RIGHTTOLEFT, ALLINONE};
+enum MetodoDecodificacion {LEFTTORIGHT, RIGHTTOLEFT, ALLINONE};
 static void preprocesar(Mat& imagen_orig, Mat& imagen_prep);
 static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdLevel);
 static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados);
@@ -65,7 +65,7 @@ static void decodificarParticiones( Mat& image,
                                     Mat& image_c,
                                     vector<vector<vector<Point> > >& particiones,
                                     string& mensajeBinario);
-static void traducirMensaje(string& mensajeBinario, string& mensaje, int numCuadrados, int modoTraduccion);
+static void traducirMensaje(string& mensajeBinario, string& mensaje, int numCuadrados, MetodoDecodificacion metodo);
 bool filtrarCuadrado(const vector<vector<Point> >& cuadrados, vector<Point>& approx);
 float distanciaEntreDosPuntos(Point p1, Point p2);
 int buscarPuntoMasCercano(vector<Point> puntos, Point punto);
@@ -110,10 +110,11 @@ int PUNTOS_SEGMENTO_FRONTERA = 3;
 int SEGMENTOS_INTERNOS = 3;
 int PUNTOS_SEGMENTO_INTERNOS = 3;
 int DIRECCION_ORDEN_C = 1;
-int NIVEL_THRESHOLD = 50;
-float TOLERANCIA_LED_ENCENDIDO = 3.0; //(%)
+int NIVEL_THRESHOLD = 190;
+float TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
 int NUM_MATRICES = 3;
 int NUM_PARTICIONES = 16;
+int PARTICION_OFFSET = 5;
 float ANCHO_OBJETO_IMAGEN = 0.0f;
 float ALTO_OBJETO_IMAGEN = 0.0f;
 
@@ -129,12 +130,13 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     Mat & mProcesado = *(Mat*)imagenRGBA;
     //Mat mPrep = mOriginal.clone();
     Mat mOriginalCopia = mProcesado.clone();
+    Mat mOriginalCopiaB = mProcesado.clone();
     Mat & mResultado = *(Mat*)imagenResultado;
     Mat & mObjectSize = *(Mat*)objectSize;
     Mat & mParameters = *(Mat*)parameters;
 
     string mensajeBinario = "................................................";
-    string mensajeResultado = "";
+    string mensajeDecimal = "";
     ANCHO_OBJETO_IMAGEN = 0.0f;
     ALTO_OBJETO_IMAGEN = 0.0f;
     bool existeMensajeDecodificado = false;
@@ -155,11 +157,12 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
 
         Mat mWarpImage, mLambda;
 
-        if(!existeMensajeDecodificado) {
+        //if(!existeMensajeDecodificado) {
             particionarCuadrados(mProcesado, cuadrados, particiones);
             decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
-        }
-        else {
+            traducirMensaje(mensajeBinario, mensajeDecimal, NUM_MATRICES, LEFTTORIGHT);
+        //}
+        //else {
 
             vector<Point2f> corners;
 
@@ -181,7 +184,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                          boundRect.height));//getHeightObjectImage(cuadrados);
 
 
-            warpImage(mOriginalCopia,
+            warpImage(mOriginalCopiaB,
                       mParameters.at<double>(0, 0), //tilt
                       mParameters.at<double>(0, 1), //yaw
                       mParameters.at<double>(0, 2), //roll
@@ -219,7 +222,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                    boundRect2.tl().y +
                                                                    boundRect2.height)); //getHeightObjectImage(cuadradosImagenCorregida);
             }
-        }
+       // }
         mResultado = mProcesado;
     }
     else mResultado = mProcesado;
@@ -228,7 +231,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     mObjectSize.at<double>(0,3) = ALTO_OBJETO_IMAGEN;
     //mResultado = warp; //mOriginal;//
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.9);
-    return env->NewStringUTF(mensajeResultado.c_str());
+    return env->NewStringUTF(mensajeDecimal.c_str());
 }
 static void preprocesar( Mat& image, Mat& image_prep){
     Mat tmp;
@@ -281,13 +284,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
 
         }
 
-        /*if(thresholdLevel == 14){
 
-            string path = "/storage/3034-3465/DCIM/test";
-            string filename = IntToString(l+1);
-            string ext = ".jpg";
-            imwrite(path+filename+ext, gray);
-        }*/
 
         // Encuentra los contornos (mas exteriores si existen otros dentro) y los enlista
         findContours(gray, contours1, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(-1, -1)); //Point(-1 ,-1)
@@ -767,25 +764,33 @@ static void decodificarParticiones( Mat& image,
                                      Point(ANCHO_TRANSF, ALTO_TRANSF),
                                      Point(0, ALTO_TRANSF)};
     ///Vec3f angles;
-    __android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 1.0);
+    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 1.0);
     preprocesar(image_c, image_c);
-    __android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 2.0);
+    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 2.0);
 
     for(int i = 0; i < NUM_MATRICES_ACTUALES; i++) {
         for (int k = 0; k < NUM_PARTICIONES_ACTUALES; k++) {
-            origen[0] = particiones[i][k][0];
-            origen[1] = particiones[i][k][1];
-            origen[2] = particiones[i][k][2];
-            origen[3] = particiones[i][k][3];
+            origen[0] = Point(particiones[i][k][0].x + PARTICION_OFFSET, particiones[i][k][0].y + PARTICION_OFFSET); //particiones[i][k][0];
+            origen[1] = Point(particiones[i][k][1].x - PARTICION_OFFSET, particiones[i][k][1].y + PARTICION_OFFSET); //particiones[i][k][1];
+            origen[2] = Point(particiones[i][k][2].x - PARTICION_OFFSET, particiones[i][k][2].y - PARTICION_OFFSET); //particiones[i][k][2];
+            origen[3] = Point(particiones[i][k][3].x + PARTICION_OFFSET, particiones[i][k][3].y - PARTICION_OFFSET); //particiones[i][k][3];
 
             Mat mLambda = getPerspectiveTransform(origen, destino);
             warpPerspective(image_c, mParticionTransfomada, mLambda, mParticionTransfomada.size());
             //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%f %f %f", mLambda.at<float>(0,0), mLambda.at<float>(0,1), mLambda.at<float>(0,2));
 
-            __android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 3.0);
-            //Busca pixeles blancos en imagen binarizada
+            /*if(i == 0){
+
+            string path = "/storage/3034-3465/DCIM/";
+            string filename = IntToString(k+1);
+            string ext = ".jpg";
+            imwrite(path+filename+ext, mParticionTransfomada);
+        }*/
+
+            //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 3.0);
+            ////Busca pixeles blancos en imagen binarizada
             findNonZero(mParticionTransfomada, puntosBlancos);
-            __android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 4.0);
+            //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 4.0);
             float tamanio = (ANCHO_TRANSF * ALTO_TRANSF);
 
             //Calcula el procentaje de pixeles blancos contra el total de pixeles en la region
@@ -793,7 +798,7 @@ static void decodificarParticiones( Mat& image,
 
             //porcentajeBlanco = float(100.0 - porcentajeBlanco);
 
-            __android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 5.0);
+            //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", PARTICION_OFFSET.0);
 
             //mensaje[i % 3][k] = x;
 
@@ -812,9 +817,9 @@ static void decodificarParticiones( Mat& image,
     }
     //cvtColor(image, image, CV_BGR2GRAY);
     //bitwise_not(mRgba, mRgba);
-    //threshold(image, image, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);
+    //threshold(image, image, NIVEL_THRESHOLD, 2PARTICION_OFFSET5, CV_THRESH_BINARY);
     //image = image_c;
-    __android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 7.0);
+    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 7.0);
 
     //putText(image, IntToString(angles[0]).c_str(), Point(10,25), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
     //putText(image, IntToString(angles[1]).c_str(), Point(100,25), FONT_HERSHEY_DUPLEX, 1,Scalar(255,0,0), 1, LINE_4, false);
@@ -834,9 +839,10 @@ static void decodificarParticiones( Mat& image,
     putText(image, string(mensajeBinario).substr(36,4).c_str(), Point(240,MAX_HEIGHT-105), FONT_HERSHEY_DUPLEX, 0.75,Scalar(255,0,0), 2, LINE_4, false);
     putText(image, string(mensajeBinario).substr(40,4).c_str(), Point(240,MAX_HEIGHT-75), FONT_HERSHEY_DUPLEX, 0.75,Scalar(255,0,0), 2, LINE_4, false);
     putText(image, string(mensajeBinario).substr(44,4).c_str(), Point(240,MAX_HEIGHT-45), FONT_HERSHEY_DUPLEX, 0.75,Scalar(255,0,0), 2, LINE_4, false);
-    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 8.0);
+
+     //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 8.0);
 }
-static void traducirMensaje(string& mensajeBinario, string& mensaje, int numCuadrados, int modoTraduccion){
+static void traducirMensaje(string& mensajeBinario, string& mensaje, int numCuadrados, MetodoDecodificacion metodo){
     if(numCuadrados <= 0) return;
     if(mensaje == "................................................") return;
 
@@ -853,34 +859,43 @@ static void traducirMensaje(string& mensajeBinario, string& mensaje, int numCuad
     string msg_seg8 = "";
     int msg_seg1_bin = -1;
     string msg_dec = "";
+    int bits_substr = 4;
+    int seg_x_matrix = 4;
 
-    if(modoTraduccion == 0) {
-        for(int p = 0; p < numCuadrados; p++) {
-            if (p == 0) {
+    if(metodo == LEFTTORIGHT) {
+        for(int p = 0; p < NUM_MATRICES; p++) {
+            if(p == 0){
+                bits_substr = 4;
+                seg_x_matrix = 4;
 
-
-                for (int r = 0; r < 4; r++) {
-                    msg_seg1 = mensajeBinario.substr(r * 4, 4);
+                for (int r = 0; r < seg_x_matrix; r++) {
+                    msg_seg1 = mensajeBinario.substr(r*seg_x_matrix, bits_substr);
                     msg_seg1_bin = atoi(msg_seg1.c_str());
-                        msg_dec = msg_dec + IntToString(binarioADecimal(msg_seg1_bin));
+                    msg_dec = msg_dec + IntToString(binarioADecimal(msg_seg1_bin));
 
                 }
-                if(p < numCuadrados-1){
+                if(p < NUM_MATRICES-1){
                     msg_dec = msg_dec + "-";
                 }
+            }
+            else{
+                bits_substr = 8;
+                seg_x_matrix = 2;
 
-                /*//__android_log_print(ANDROID_LOG_ERROR, "tradiccion: ", "%s",
-                                    msg_dec.c_str());*/
-            } else if (p == 1) {
-                //msg_seg5 = mensajeBinario.substr(16, 4) + mensajeBinario.substr(20, 4);
-                // msg_seg6 = mensajeBinario.substr(24, 4) + mensajeBinario.substr(28, 4);
-            } else if (p == 2) {
+                for (int r = 0; r < seg_x_matrix; r++) {
+                    msg_seg1 = mensajeBinario.substr(p*seg_x_matrix*bits_substr + r*bits_substr, bits_substr);
+                    msg_seg1_bin = atoi(msg_seg1.c_str());
+                    msg_dec = msg_dec + IntToString(binarioADecimal(msg_seg1_bin)); //(char)binarioADecimal(msg_seg1_bin);//
 
-                //msg_seg7 = mensajeBinario.substr(32, 4) + mensajeBinario.substr(36, 4);
-                //msg_seg8 = mensajeBinario.substr(40, 4) + mensajeBinario.substr(44, 4);
+
+                }
+                if(p < NUM_MATRICES-1){
+                    msg_dec = msg_dec + "-";
+                }
             }
         }
     }
+    __android_log_print(ANDROID_LOG_ERROR, "mensaje", "%s", msg_dec.c_str());
     mensaje = msg_dec;
 }
 static void ordenarCuadradosPorPosicionEspacial(vector<vector<Point> >& cuadrados, int direccion){
