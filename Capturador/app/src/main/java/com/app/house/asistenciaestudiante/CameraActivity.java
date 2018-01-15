@@ -55,13 +55,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private float verticalAngle = 0.0f;
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
-    private float anchoObjetoReal = 1800.0f;
+    private float anchoObjetoReal = 1775.0f;
     private int max_width = 0;
     private int max_height = 0;
     private double pan = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
     private double initialpan = 135.0f;
+    private boolean opencvLoaded = false;
 
     private WindowManager mWindowManager;
 
@@ -132,13 +133,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public void onResume() {
         super.onResume();
-        if (!OpenCVLoader.initDebug()) {
-            Log.e(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, _baseLoaderCallback);
-        } else {
-            Log.e(TAG, "OpenCV library found inside package. Using it!");
-            _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
+            if (!OpenCVLoader.initDebug()) {
+                Log.e(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+                OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, _baseLoaderCallback);
+            } else {
+
+                Log.e(TAG, "OpenCV library found inside package. Using it!");
+                _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+            }
         if(mSensorManager == null) {
             mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             // Build a SensorEventListener for each type of sensor (just one here):
@@ -229,8 +231,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mResultado = new Mat(width, height, CvType.CV_8UC4);
 
 
-        mObjectSize = new Mat(1, 2, CvType.CV_64FC1);
-        //mEulerAngles = new Mat(1, 3, CvType.CV_32FC1);
+        mObjectSize = new Mat(1, 4, CvType.CV_64FC1);
         mParameters = new Mat(1, 5, CvType.CV_64FC1);
         max_width = width;
         max_height = height;
@@ -247,18 +248,13 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mParameters.put(0,0, tilt);//tilt);
         mParameters.put(0,1, initialpan - pan);//;
         mParameters.put(0,2, roll);//;
-        mParameters.put(0,3, focalLengthPixelX);
+        mParameters.put(0,3, horizonalAngle);
+        mParameters.put(0,4, verticalAngle);
 
         mensajeResultado = decodificar(mRGBA.getNativeObjAddr(), mResultado.getNativeObjAddr(), mObjectSize.getNativeObjAddr(), mParameters.getNativeObjAddr());
 
-        anchoObjetoImagen = (float) mObjectSize.get(0, 0)[0];
-        altoObjetoImagen = (float) mObjectSize.get(0, 1)[0];
-
-        //tilt = mParameters.get(0,0)[0];
-        //pan = mParameters.get(0,2)[0];
-        //roll = mParameters.get(0,1)[0];
-
-        //Log.e(TAG,  "mRGBA.cols()"+mRGBA.cols());
+        anchoObjetoImagen = (float) mObjectSize.get(0, 2)[0];
+        altoObjetoImagen = (float) mObjectSize.get(0, 3)[0];
 
         estimatedDist = (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen);//??
 
@@ -271,26 +267,21 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         ", R: " + String.format("%.2f", roll),
                 new Point(10, 23),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        /*Imgproc.putText(mResultado, "Sensor size: (" +
-                        String.format("%.2f", sensorWidth) + "mm, " +
-                        String.format("%.2f", sensorHeight) + "mm)", new Point(10, 50),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Focal length: " + focalLength + " mm", new Point(10, 80),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Angle view: (" +
-                        String.format("%.2f", horizonalAngle) + ", " +
-                        String.format("%.2f", verticalAngle) + ")", new Point(10, 110),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);*/
-        Imgproc.putText(mResultado, "Object Image Size: (" +
+        Imgproc.putText(mResultado, "Size Camera  : (" +
                         String.format("%.2f", mObjectSize.get(0, 0)[0]) + "px, " +
                         String.format("%.2f", mObjectSize.get(0, 1)[0]) + "px)",
                 new Point(10, 50), //140
+                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(mResultado, "Size Corrected: (" +
+                        String.format("%.2f", mObjectSize.get(0, 2)[0]) + "px, " +
+                        String.format("%.2f", mObjectSize.get(0, 3)[0]) + "px)",
+                new Point(10, 80), //140
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         Imgproc.putText(mResultado, "Estimated Dist: " +
                         String.format("%.2f", estimatedDist / 10) + " cm (X: " +
                         String.format("%.2f", estimatedDistX / 10) +  ", Y: "+
                         String.format("%.2f", estimatedDistY / 10)+")",
-                new Point(10, 80),
+                new Point(10, 110),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         return mResultado;
     }
@@ -319,6 +310,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 focalLengthPixelY = (focalLength / sensorHeight) * max_height;
                 horizonalAngle = (float) Math.toDegrees(2 * Math.atan(0.5f * sensorWidth / focalLength));
                 verticalAngle = (float) Math.toDegrees(2 * Math.atan(0.5f * sensorHeight / focalLength));
+                Log.e(TAG, horizonalAngle + " : " + verticalAngle);
                 //}
                 //}
             } catch (CameraAccessException e) {
