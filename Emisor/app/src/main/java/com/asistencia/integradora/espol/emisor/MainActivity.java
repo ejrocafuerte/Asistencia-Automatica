@@ -2,6 +2,7 @@ package com.asistencia.integradora.espol.emisor;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,9 +15,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+    public BluetoothSocket mmSocket;
+    public BluetoothDevice mmDevice;
+    public InputStream mmInStream;
+    public OutputStream mmOutStream;
+
     //Donde se cargan los elementos detectados y pareados
     ListView lv,lv2;
     //Conjunto que guarda los dispositivos pareados
@@ -32,10 +42,7 @@ public class MainActivity extends AppCompatActivity {
         EmisorSQLHelper db1 = new EmisorSQLHelper(getApplicationContext());
         System.out.println("el nombre del profesor es: "+db1.getProfesor());
 
-
         setContentView(R.layout.activity_main);
-        mPairedDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_main);
-        mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_main);
 
         TextView txt_bt = (TextView) findViewById(R.id.txt_bt);
         TextView txt_wifi = (TextView) findViewById(R.id.txt_mac);
@@ -94,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 
                 BluetoothDevice btDev = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                View v = new View();
+                v.se
                 mNewDevicesArrayAdapter.add(btDev.getName() + "\n" + btDev.getAddress());
                 //debemos tener un listado de las macs de los bluetooth para que no cargue todos los pareados sino
                 // solamente el del bloque o aula especifico
@@ -135,4 +144,89 @@ public class MainActivity extends AppCompatActivity {
             System.out.println(address);
         }
     };
+
+    private class ConnectThread extends Thread {
+        public ConnectThread(BluetoothDevice device) {
+            // Use a temporary object that is later assigned to mmSocket,
+            // because mmSocket is final
+            BluetoothSocket tmp = null;
+            mmDevice = device;
+            // Get a BluetoothSocket to connect with the given BluetoothDevice
+            try {
+                // MY_UUID is the app's UUID string, also used by the server code
+                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
+            } catch (IOException e) { }
+            mmSocket = tmp;
+        }
+        public void run() {
+            // Cancel discovery because it will slow down the connection
+            btAdap.cancelDiscovery();
+            try {
+                // Connect the device through the socket. This will block
+                // until it succeeds or throws an exception
+                mmSocket.connect();
+            } catch (IOException connectException) {
+                // Unable to connect; close the socket and get out
+                try {
+                    mmSocket.close();
+                } catch (IOException closeException) { }
+                return;
+            }
+            // Do work to manage the connection (in a separate thread)
+            manageConnectedSocket(mmSocket);
+        }
+
+        /** Will cancel an in-progress connection, and close the socket */
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) { }
+        }
+    }
+    private class ConnectedThread extends Thread {
+        public ConnectedThread(BluetoothSocket socket) {
+            mmSocket = socket;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+
+            // Get the input and output streams, using temp objects because
+            // member streams are final
+            try {
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
+            } catch (IOException e) { }
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
+        }
+        public void run() {
+            byte[] buffer = new byte[1024];  // buffer store for the stream
+            int bytes; // bytes returned from read()
+            // Keep listening to the InputStream until an exception occurs
+            while (true) {
+                try {
+                    // Read from the InputStream
+                    bytes = mmInStream.read(buffer);
+                    // Send the obtained bytes to the UI activity
+                    mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
+                            .sendToTarget();
+                } catch (IOException e) {
+                    break;
+                }
+            }
+        }
+
+        /* Call this from the main activity to send data to the remote device */
+        public void write(byte[] bytes) {
+            try {
+                mmOutStream.write(bytes);
+            } catch (IOException e) { }
+        }
+
+        /* Call this from the main activity to shutdown the connection */
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) { }
+        }
+    }
 }
