@@ -4,6 +4,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import viewsets,generics
 from .serializers import UserSerializer, GroupSerializer
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 import json
 from django.http import JsonResponse
 
@@ -94,20 +95,92 @@ class ParaleloList(generics.ListAPIView):
 
 
 @csrf_exempt
+@transaction.atomic
 def gestionar(request):
+
     if request.method == 'POST':
         try:
-            mensaje = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(request.body)
-            print(mensaje)
-            jsonmsg = json.loads('[' + mensaje + ']')
-            print(jsonmsg)
-            #return HttpResponse({"response":"1"}, content_type='application/json')
+            msg_asistencia = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(request.body)
+            msg_asistencia = json.loads(msg_asistencia)[0]
+            print(msg_asistencia)
+
+            info_estudiante = msg_asistencia.get('estudiante')
+
+            matricula = info_estudiante.get('matricula')
+            nombres   = info_estudiante.get('nombres')
+            apellidos = info_estudiante.get('apellidos')
+            mac       = info_estudiante.get('mac')
+            imei      = info_estudiante.get('imei')
+
+            estudiante, existe_estudiante = Estudiante.objects.get_or_create(matricula = matricula)
+
+            if not existe_estudiante:
+                #Estudiante.objects.create(matricula = matricula, nombres = nombres, apellidos = apellidos, mac = mac, imei = imei)
+                estudiante.nombres = nombres
+                estudiante.apellidos = apellidos
+                estudiante.mac = mac
+                estudiante.imei = imei
+                estudiante.save()
+
+            if estudiante is null:
+                raise Exception('Error al crear/obtener estudiante')
+
+            codigo_decodificado = msg_asistencia.get('codigo')
+
+              #M1      #M2       #M3a    #M3b
+            materia, profesor, paralelo, aula = get_info_codigo(codigo_decodificado)
+
+            distancia_x = msg_asistencia.get('distanciaX')
+            distancia_y = msg_asistencia.get('distanciaY')
+            fecha = msg_asistencia.get('fecha')
+
+            asistencia = Asistencia.objects.create(id_estudiante = estudiante,
+                                                   id_profesor = profesor,
+                                                   id_paralelo = paralelo,
+                                                   id_aula = aula,
+                                                   codigodecodificado = codigode_codificado,
+                                                   distanciax = distancia_x,
+                                                   distanciay = distancia_y,
+                                                   fecha = fecha,
+                                                   verificado = 0)
+
+            if asistencia is null:
+                raise Exception('Error al crear asistencia')
+
+            senales = msg_asistencia.get('senales')
+
+            for _senal in senales:
+                bssid  = _senal.get('bssid')
+                ssid   = _senal.get('ssid')
+                level  = _senal.get('level')
+                level2 = _senal.get('level2')
+
+                senal = Senal.objects.create(bssid = bssid,
+                                             ssid = ssid,
+                                             level = level,
+                                             level2 = level2,
+                                             id_asistencia = asistencia)
+
+                if senal is null:
+                    raise Exception('Error al crear senal')
+
+            aceptado = validar_asistencia(estudiante, senales, asistencia)
+
+            print ('OK')
             return JsonResponse({'response':'0'})
-        except Exception:
-            print("Exception")
+        except Exception as e:
+            print (str(e))
             return JsonResponse({'response':'1'})
     else:
         return JsonResponse({'response':'1'})
+
+    def get_info_codigo(codigo):
+        return codigo[0:3], codigo[4,7], codigo[8,9], codigo[10,11]
+
+    def validar_asistencia(estudiante, senales, asistencia):
+        return true
+
+
 
 #INSTALAR DEPENDENCIA
 #pip install pycryptodome
