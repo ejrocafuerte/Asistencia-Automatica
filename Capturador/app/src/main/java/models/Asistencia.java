@@ -32,7 +32,7 @@ public class Asistencia {
 
     @SerializedName("codigo")
     @Expose
-    private String codigo = "0110101";
+    private String codigo = "123456789012";
 
     @SerializedName("distanciaX")
     @Expose
@@ -40,7 +40,7 @@ public class Asistencia {
 
     @SerializedName("distanciaY")
     @Expose
-    private String distanciaY = "0.0";
+    private String distanciaY = "150.0";
 
     @SerializedName("senales")
     @Expose

@@ -8,13 +8,13 @@ class Profesor(models.Model):
     correo = models.CharField(max_length=60)
 
 class Estudiante(models.Model):
-    identificador = models.CharField(max_length=10,primary_key=True)
-    nombres = models.CharField(max_length=60)
-    apellidos = models.CharField(max_length=60)
-    correo = models.CharField(max_length=60)
-    nombres = models.CharField(max_length=60)
-    IMEI = models.CharField(max_length=15, null=True, blank=True)
-    celular_no = models.CharField(max_length=12)
+    matricula = models.CharField(max_length=10,primary_key=True)
+    nombres = models.CharField(max_length=200)
+    apellidos = models.CharField(max_length=200)
+    #correo = models.CharField(max_length=60)
+    imei = models.CharField(max_length=20, null=True, blank=True)
+    mac = models.CharField(max_length=20, null=True, blank=True)
+    #celular = models.CharField(max_length=12)
 
     def __str__(self):
         return self.apellidos+' '+self.nombres
@@ -68,18 +68,23 @@ class Paralelo(models.Model):
     dia3 = models.CharField(max_length=3, choices=dias_opt, default=LUNES, null=True)
 
 class Asistencia(models.Model):
-    id_paralelo=models.ForeignKey('Paralelo',on_delete=models.CASCADE)
-    id_estudiante=models.ForeignKey('Estudiante',on_delete=None)
-    #desde aqui datos capturados de la aplicacion capturador#
-    IMEI=models.CharField(max_length=15)
-    celular_no= models.CharField(max_length=11)
-    paraleloid=models.CharField(max_length=2)
-    fecha=models.DateTimeField()
-    materia = models.CharField(max_length=200)
-    codigo = models.CharField(max_length=200)
-    distanciax = models.FloatField(default=0.0)
-    distanciay = models.FloatField(default=0.0)
+    id_estudiante = models.ForeignKey('Estudiante', on_delete = None, null=False, blank=False, default=0)
+    id_profesor = models.ForeignKey('Profesor', on_delete=models.CASCADE, null=False, blank=False, default=0)
+    id_materia = models.ForeignKey('Materia', on_delete = models.CASCADE, null=False, blank=False, default=0)
+    id_paralelo = models.ForeignKey('Paralelo', on_delete = models.CASCADE, null=False, blank=False, default=0)
+    id_aula = models.ForeignKey('Aula', on_delete = None, null=False, blank=False, default=0)
+    fecha = models.DateTimeField()
+    codigodecodificado = models.CharField(max_length=200, null=True, blank=True)
+    distanciax = models.FloatField(default=0.0, null=True, blank=True)
+    distanciay = models.FloatField(default=0.0, null=True, blank=True)
+    verificado = models.PositiveSmallIntegerField(default=0,null=False, blank=False)
 
+class Senal(models.Model):
+    id_asistencia = models.ForeignKey('Asistencia', on_delete=None)
+    bssid = models.CharField(max_length=200);
+    ssid = models.CharField(max_length=200);
+    level = models.IntegerField(default=0)
+    level2 = models.IntegerField(default=0)
 
 class resumenAsistencias(models.Model):
     id_estudiante=models.ForeignKey('Estudiante',on_delete=None)

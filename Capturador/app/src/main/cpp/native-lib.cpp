@@ -101,9 +101,8 @@ void warpMatrix(Size   sz,
 void rotateFrame(const Mat &input, Mat &output, double roll, double pitch, double yaw,
                  double dx, double dy, double dz, double f, double cx, double cy);
 
-int N = 15; //11
-int CANALES = 1;
-int GAUSSIAN_FACTOR = 5;
+int N = 20; //11
+int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
 int SEGMENTOS_FRONTERA = 4;
 int PUNTOS_SEGMENTO_FRONTERA = 3;
@@ -114,10 +113,10 @@ int NIVEL_THRESHOLD = 190;
 float TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
 int NUM_MATRICES = 3;
 int NUM_PARTICIONES = 16;
-int PARTICION_OFFSET = 5;
-float ANCHO_OBJETO_IMAGEN = 0.0f;
-float ALTO_OBJETO_IMAGEN = 0.0f;
-
+int PARTICION_OFFSET = 4;
+double ANCHO_OBJETO_IMAGEN = 0.0f;
+double ALTO_OBJETO_IMAGEN = 0.0f;
+int contador=0;
 
 JNIEXPORT jstring JNICALL
 Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
@@ -126,6 +125,12 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                  jlong imagenResultado,
                                                                  jlong objectSize,
                                                                  jlong parameters) {
+
+    //TO DO LIST
+    // RESIZE CORRECTED IMAGE BEFORE SEARCH
+
+
+
     //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 0.1);
     Mat & mProcesado = *(Mat*)imagenRGBA;
     //Mat mPrep = mOriginal.clone();
@@ -158,9 +163,9 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
         Mat mWarpImage, mLambda;
 
         //if(!existeMensajeDecodificado) {
-            particionarCuadrados(mProcesado, cuadrados, particiones);
-            decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
-            traducirMensaje(mensajeBinario, mensajeDecimal, NUM_MATRICES, LEFTTORIGHT);
+            //particionarCuadrados(mProcesado, cuadrados, particiones);
+            //decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
+            //traducirMensaje(mensajeBinario, mensajeDecimal, NUM_MATRICES, LEFTTORIGHT);
         //}
         //else {
 
@@ -169,20 +174,15 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
             Rect boundRect;
             vector<Point> brPoints;
             brPoints.push_back(cuadrados[0][0]);
-            brPoints.push_back(cuadrados[2][1]);
-            brPoints.push_back(cuadrados[2][2]);
+            brPoints.push_back(cuadrados[2][1]); //2
+            brPoints.push_back(cuadrados[2][2]); //2
             brPoints.push_back(cuadrados[0][3]);
 
             boundRect = boundingRect(brPoints);
             rectangle(mProcesado, boundRect.tl(), boundRect.br(), Scalar(150, 150, 150), 2, 8, 0);
 
-            mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(
-                    Point(boundRect.tl().x, boundRect.tl().y + boundRect.height), boundRect.br());
-            mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(boundRect.tl(),
-                                                                   Point(boundRect.tl().x,
-                                                                         boundRect.tl().y +
-                                                                         boundRect.height));//getHeightObjectImage(cuadrados);
-
+            mObjectSize.at<double>(0, 0) = getWidthObjectImage(cuadrados); //Point(boundRect.tl().x, boundRect.tl().y + boundRect.height), boundRect.br()
+            mObjectSize.at<double>(0, 1) = getHeightObjectImage(cuadrados);//getHeightObjectImage(cuadrados); //boundRect.tl(), Point(boundRect.tl().x, boundRect.tl().y +  boundRect.height)
 
             warpImage(mOriginalCopiaB,
                       mParameters.at<double>(0, 0), //tilt
@@ -191,11 +191,14 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                       1,
                       mParameters.at<double>(0, 4), //sensor height
                       mWarpImage, mLambda, corners);
-            //__android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida", "%.2f", mParameters.at<double>(0,4));
+            __android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida", " %i %i", mWarpImage.rows, mWarpImage.cols );
+
+
             mWarpImage = mWarpImage(
-                    Rect(mWarpImage.cols / 2 - MAX_WIDTH / 2, mWarpImage.rows / 2 - MAX_HEIGHT / 2,
+                    Rect((mWarpImage.cols / 2) - (MAX_WIDTH / 2), (mWarpImage.rows / 2) - (MAX_HEIGHT / 2),
                          MAX_WIDTH, MAX_HEIGHT));
-            Mat croppedImage;
+
+        Mat croppedImage;
             //croppedImage = mWarpImage(Rect(boundRect.tl().x - 50, boundRect.tl().y - 40, boundRect.width + 100, boundRect.height + 80)) ;
 
             buscarCuadrados(mWarpImage, cuadradosImagenCorregida, LAPLACIAN, N);
@@ -207,23 +210,17 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 Rect boundRect2;
                 vector<Point> brPoints2;
                 brPoints2.push_back(cuadradosImagenCorregida[0][0]);
-                brPoints2.push_back(cuadradosImagenCorregida[2][1]);
-                brPoints2.push_back(cuadradosImagenCorregida[2][2]);
+                brPoints2.push_back(cuadradosImagenCorregida[2][1]); //2
+                brPoints2.push_back(cuadradosImagenCorregida[2][2]); //2
                 brPoints2.push_back(cuadradosImagenCorregida[0][3]);
                 boundRect2 = boundingRect(brPoints2);
-                rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0), 2, 8,
-                          0);
-                rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(0, 252, 200), 2, 8, 0);
-                ANCHO_OBJETO_IMAGEN = distanciaEntreDosPuntos(
-                        Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height),
-                        boundRect2.br()); //getWidthObjectImage(cuadradosImagenCorregida);
-                ALTO_OBJETO_IMAGEN = distanciaEntreDosPuntos(boundRect2.tl(),
-                                                             Point(boundRect2.tl().x,
-                                                                   boundRect2.tl().y +
-                                                                   boundRect2.height)); //getHeightObjectImage(cuadradosImagenCorregida);
+                rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0), 1, 8, 0);
+                rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(0, 252, 200), 1, 8, 0);
+                ANCHO_OBJETO_IMAGEN = getWidthObjectImage(cuadradosImagenCorregida); //distanciaEntreDosPuntos(Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height), boundRect2.br()); //
+                ALTO_OBJETO_IMAGEN = getHeightObjectImage(cuadradosImagenCorregida); //distanciaEntreDosPuntos(boundRect2.tl(), Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height)); //
             }
        // }
-        mResultado = mProcesado;
+        mResultado = mWarpImage; //mProcesado;
     }
     else mResultado = mProcesado;
 
@@ -241,7 +238,7 @@ static void preprocesar( Mat& image, Mat& image_prep){
     convertScaleAbs( tmp, image_prep );
     threshold(image_prep, image_prep, NIVEL_THRESHOLD, 255, CV_THRESH_BINARY);
 }
-static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdLevel){
+static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdFactor){
     cuadrados.clear();
 
     Mat gray0(image.size(), CV_8U);
@@ -250,7 +247,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
     Mat gray, gray2;
     vector<vector<Point> > contours1;
 
-    for( int l = 0; l < thresholdLevel; l++ )
+    for( int l = 0; l < thresholdFactor; l++ )
     {
         // hack: use Canny instead of zero threshold level.
         // Canny helps to catch squares with gradient shading
@@ -262,8 +259,15 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 /// Apply Laplace function
                 Mat dst;
                 bitwise_not(gray0, gray0);
-                Laplacian(gray0, dst, CV_16S, 3, 1, 0, BORDER_DEFAULT);
+                Laplacian(gray0, dst, CV_16S, 3, 1, 0, BORDER_DEFAULT); //
                 convertScaleAbs(dst, gray);
+                if(1){
+
+                    string path = "/storage/3034-3465/DCIM/";
+                    string filename = IntToString(1);
+                    string ext = ".jpg";
+                    imwrite(path+filename+ext, gray);
+                }
             }
             else if (metodo == CANNY) {
                 bitwise_not(gray0, gray0);
@@ -271,21 +275,25 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
             }
                 // dilate canny output to remove potential
                 // holes between edge segments
-            dilate(gray, gray, getStructuringElement(MORPH_RECT, Size(3, 3))); //Mat(), Point(-1,-1));
+            /*dilate(gray, gray, getStructuringElement(MORPH_RECT, Size(3, 3))); //Mat(), Point(-1,-1));
                 //dilate(gray2, gray2, getStructuringElement( MORPH_RECT, Size(3,3)));
                 //erode( gray, gray, getStructuringElement( MORPH_RECT, Size(3,3)) );
+            if(1){
+
+                string path = "/storage/3034-3465/DCIM/";
+                string filename = IntToString(2);
+                string ext = ".jpg";
+                imwrite(path+filename+ext, gray);
+            }*/
 
         }
         else
         {
             // apply threshold if l!=0:
             //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
-            gray = gray0 >= 255 - ((l + 1) * 255 / thresholdLevel);
+            gray = gray0 >= ((l + 1) * 255 / thresholdFactor); //255 -
 
         }
-
-
-
         // Encuentra los contornos (mas exteriores si existen otros dentro) y los enlista
         findContours(gray, contours1, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(-1, -1)); //Point(-1 ,-1)
         //findContours(gray2, contours2, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(-1 ,-1));
@@ -322,13 +330,9 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
             // contour orientation
             if( approx.size() == 4 &&
                 !filtrarCuadrado(cuadrados, approx) &&
-                fabs(contourArea(Mat(approx))) > 200 &&
+                    fabs(contourArea(Mat(approx))) > 200 &&
                 isContourConvex(Mat(approx)))
             {
-
-
-
-
                 double maxCosine = 0;
                 //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 1.3);
                 for( int j = 2; j < 5; j++ )
@@ -365,7 +369,7 @@ static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrado
         //Rect boundRect;
         //boundRect = boundingRect(cuadrados[i]);
         //rectangle(image, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
-        polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 2, 16);
+        polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 1, 16);
     }
 
 
@@ -1097,15 +1101,20 @@ int binarioADecimal(int n)
 }
 
 bool filtradoCross(Mat& image, vector<vector<Point> >& cuadrados) {
-    if (cuadrados.size() == NUM_MATRICES) {
-        if (Rect(cuadrados[1][0], cuadrados[1][2]).contains(Point(MAX_WIDTH/2, MAX_HEIGHT/2))){
+    if (cuadrados.size() == 1) {
+        if (Rect(cuadrados[0][0], cuadrados[0][2]).contains(Point(MAX_WIDTH/2, MAX_HEIGHT/2))){
+        //if (Rect(cuadrados[1][0], cuadrados[1][2]).contains(Point(MAX_WIDTH/2, MAX_HEIGHT/2))){
             drawMarker(image, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(0, 255, 0), MARKER_CROSS, 20, 2);
             return true;
         }
     }
-
-
-
+    else if(cuadrados.size() == 3){
+        if (Rect(cuadrados[1][0], cuadrados[1][2]).contains(Point(MAX_WIDTH/2, MAX_HEIGHT/2))){
+            //if (Rect(cuadrados[1][0], cuadrados[1][2]).contains(Point(MAX_WIDTH/2, MAX_HEIGHT/2))){
+            drawMarker(image, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(0, 255, 0), MARKER_CROSS, 20, 2);
+            return true;
+        }
+    }
     return false;
 }
 
@@ -1152,16 +1161,17 @@ Vec3f rotationMatrixToEulerAngles(Mat &R)
 }
 
 float getWidthObjectImage(vector<vector<Point> >& cuadrados){
-    if(cuadrados.size() != 3) return 0.0f;
-
-    return distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[2][1]);
+    if(cuadrados.size() != 1 && cuadrados.size() != 3) return 0.0f;
+    if(NUM_MATRICES == 1)
+        return distanciaEntreDosPuntos(cuadrados[0][3], cuadrados[0][2]);
+    else if(NUM_MATRICES == 3)
+        return distanciaEntreDosPuntos(cuadrados[0][3], cuadrados[2][2]);
 
 }
 
 float getHeightObjectImage(vector<vector<Point> >& cuadrados){
-    if(cuadrados.size() != 3) return 0.0f;
-
-    return distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[0][3]);
+    if(cuadrados.size() != 1 && cuadrados.size() != 3) return 0.0f;
+        return distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[0][3]);
 
 }
 
@@ -1193,7 +1203,10 @@ void warpMatrix(Size   sz,
     double n=h-(d/2.0);
     double f=h+(d/2.0);
 
+    Mat C=Mat(3,4,CV_64FC1);
+    Mat CI=Mat(4,3,CV_64FC1);
     Mat F=Mat(4,4,CV_64FC1);//Allocate 4x4 transformation matrix F
+    Mat R=Mat::eye(4,4,CV_64FC1);
     Mat Rtheta=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around Z-axis by theta degrees
     Mat Rphi=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around X-axis by phi degrees
     Mat Rgamma=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around Y-axis by gamma degrees
@@ -1212,15 +1225,18 @@ void warpMatrix(Size   sz,
     Rgamma.at<double>(0,2)=-sg;Rgamma.at<double>(2,0)=sg; ///CAMBIO !!!!!!!!
 
     //T
-    T.at<double>(2,3)=-h;//800.714;
+    T.at<double>(2,3)=-h;
     //P
     P.at<double>(0,0)=P.at<double>(1,1)=1.0/tan(deg2Rad(halfFovy));
     P.at<double>(2,2)=-(f+n)/(f-n);
     P.at<double>(2,3)=-(2.0*f*n)/(f-n);
     P.at<double>(3,2)=-1.0;
     //Compose transformations
-    F=P*T*Rphi*Rtheta*Rgamma;//Matrix-multiply to produce master matrix
-
+    //F=P*T*Rphi*Rtheta*Rgamma;//Matrix-multiply to produce master matrix
+    __android_log_print(ANDROID_LOG_ERROR, "cameraPoseFromHomography -> ", "%s", "2");
+    R=Rtheta*Rphi*Rgamma;
+    F=P*(T*R);//Matrix-multiply to produce master matrix
+    __android_log_print(ANDROID_LOG_ERROR, "cameraPoseFromHomography -> ", "%s", "3");
     //Transform 4x4 points
     double ptsIn [4*3];
     double ptsOut[4*3];
@@ -1285,37 +1301,23 @@ void rotateFrame(const Mat &input, Mat &output, double tilt, double yaw, double 
     Mat Ry = Mat(4, 4, CV_64FC1);
     Mat Rz = Mat(4, 4, CV_64FC1);
     Mat T  = Mat(4, 4, CV_64FC1);
-    Mat C  = Mat(3, 3, CV_64FC1);
-    Mat CI = Mat(3, 3, CV_64FC1);
+    Mat C  = Mat(3, 4, CV_64FC1);
+    Mat CI = Mat(4, 3, CV_64FC1);
     Mat P  = Mat(3, 4, CV_64FC1);
     Mat PI = Mat(4, 3, CV_64FC1);
 
-    Mat C2  = Mat(3, 4, CV_64FC1);
-    Mat CI2 = Mat(4, 3, CV_64FC1);
-
     // Camera Calibration Intrinsics Matrix
-    C.at<double>(0,0) = f; C.at<double>(0,1) = 0; C.at<double>(0,2) = cx;// C.at<double>(0,3) = 0;
-    C.at<double>(1,0) = 0; C.at<double>(1,1) = f; C.at<double>(1,2) = cy;// C.at<double>(1,3) = 0;
-    C.at<double>(2,0) = 0; C.at<double>(2,1) = 0; C.at<double>(2,2) = 1;//  C.at<double>(2,3) = 0; //??0
-
-    CI = C.inv();
-
-    C2.at<double>(0,0) = C.at<double>(0,0); C2.at<double>(0,1) = C.at<double>(0,1); C2.at<double>(0,2) = C.at<double>(0,2); C2.at<double>(0,3) = 0;
-    C2.at<double>(1,0) = C.at<double>(1,0); C2.at<double>(1,1) = C.at<double>(1,1); C2.at<double>(1,2) = C.at<double>(1,2); C2.at<double>(1,3) = 0;
-    C2.at<double>(2,0) = C.at<double>(2,0); C2.at<double>(2,1) = C.at<double>(2,1); C2.at<double>(2,2) = C.at<double>(2,2); C2.at<double>(2,3) = 0; //??0
-
-    CI2.at<double>(0,0) = CI.at<double>(0,0); CI2.at<double>(0,1) = CI.at<double>(0,1); CI2.at<double>(0,2) = CI.at<double>(0,2);
-    CI2.at<double>(1,0) = CI.at<double>(1,0); CI2.at<double>(1,1) = CI.at<double>(1,1); CI2.at<double>(1,2) = CI.at<double>(1,2);
-    CI2.at<double>(2,0) = CI.at<double>(2,0); CI2.at<double>(2,1) = CI.at<double>(2,1); CI2.at<double>(2,2) = CI.at<double>(2,2);
-    CI2.at<double>(3,0) = 0;                  CI2.at<double>(3,1) = 0;                  CI2.at<double>(3,2) = 0;
+    C.at<double>(0,0) = f; C.at<double>(0,1) = 0; C.at<double>(0,2) = cx; C.at<double>(0,3) = 0;
+    C.at<double>(1,0) = 0; C.at<double>(1,1) = f; C.at<double>(1,2) = cy; C.at<double>(1,3) = 0;
+    C.at<double>(2,0) = 0; C.at<double>(2,1) = 0; C.at<double>(2,2) = 1;  C.at<double>(2,3) = 0; //??0
 
 
 
     // Inverted Camera Calibration Intrinsics Matrix
-    /*CI.at<double>(0,0) = 1/f; CI.at<double>(0,1) = 0;   CI.at<double>(0,2) = -cx/f;
+    CI.at<double>(0,0) = 1/f; CI.at<double>(0,1) = 0;   CI.at<double>(0,2) = -cx/f;
     CI.at<double>(1,0) = 0;   CI.at<double>(1,1) = 1/f; CI.at<double>(1,2) = -cy/f;
-    CI.at<double>(2,0) = 0;   CI.at<double>(2,1) = 0;   CI.at<double>(2,2) = 1;
-    CI.at<double>(3,0) = 0;   CI.at<double>(3,1) = 0;   CI.at<double>(3,2) = 0;//??0*/
+    CI.at<double>(2,0) = 0;   CI.at<double>(2,1) = 0;   CI.at<double>(2,2) = 0;
+    CI.at<double>(3,0) = 0;   CI.at<double>(3,1) = 0;   CI.at<double>(3,2) = 1;//??0
 
     //cameraPoseFromHomography(CI, PI);
 
@@ -1343,7 +1345,7 @@ void rotateFrame(const Mat &input, Mat &output, double tilt, double yaw, double 
     Mat R = Rz * Ry * Rx;
 
     // Final transformation matrix
-    Mat H = C2 * (T * (R * CI2));
+    Mat H = C * (T * (R * CI));
 
     // Apply matrix transformation
     warpPerspective(input, output, H, input.size(), INTER_LANCZOS4);

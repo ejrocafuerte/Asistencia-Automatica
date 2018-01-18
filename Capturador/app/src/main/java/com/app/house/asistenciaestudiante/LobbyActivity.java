@@ -159,7 +159,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     else{
                         //infoAsistencias.remove(infoAsistencias.size()-1);
                         //infoAsistencias.add(infoAsistenciaActual);
-                        asistencias.remove(asistencias.size()-1);
+                        if(asistencias.size() > 0)
+                            asistencias.remove(asistencias.size()-1);
                         asistencias.add(asistenciaActual);
                     }
 
@@ -167,7 +168,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     if (existeInternet) {
                         Log.e("Existe internet, enviando server: ", "3");
                         sendMessage(asistencias/*getAsistenciasMessage()*/);
-                        Log.e("Existe internet, enviando server: ", "4");
 
                         Log.e("Existe internet, enviando server", infoAsistenciaActual);
                     }

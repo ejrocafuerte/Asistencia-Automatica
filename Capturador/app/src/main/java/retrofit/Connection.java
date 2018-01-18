@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Connection {
     private static final String TAG = "Connection";
-    private static final String BASE_URL_DESA = "http://192.168.0.6:8000/";
+    private static final String BASE_URL_DESA = "http://192.168.0.7:8000/";
     private static final String BASE_URL_PROD = "http://kalafitness.pythonanywhere.com/api/";
     private static Retrofit.Builder builder = null;
     private static Retrofit retrofit = null;
