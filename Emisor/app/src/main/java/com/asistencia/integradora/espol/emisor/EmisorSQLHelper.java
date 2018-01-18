@@ -3,6 +3,7 @@ package com.asistencia.integradora.espol.emisor;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -27,8 +28,8 @@ public class EmisorSQLHelper extends SQLiteOpenHelper{
     private static final String arduino="CREATE TABLE core_arduino (id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
             "mac_arduino varchar(17) NOT NULL)";
 
-    public EmisorSQLHelper(Context ctx) {
-        super(ctx,emisor_db,null,version);
+    public EmisorSQLHelper(Context ctx, String nombre_db, CursorFactory cursor, int version) {
+        super(ctx,nombre_db,cursor,version);
     }
 
     @Override
@@ -40,11 +41,18 @@ public class EmisorSQLHelper extends SQLiteOpenHelper{
         db.execSQL(arduino);
         db.execSQL("insert into core_profesor values(1,\"201021839\",\"erick joel\",\"rocafuerte villon\",\"example@example.com\")");
     }
+    public void instanciar(SQLiteDatabase db){
+        db.execSQL(facultad);
+        db.execSQL(materia);
+        db.execSQL(profesor);
+        db.execSQL(paralelo);
+        db.execSQL(arduino);
+    }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-    }
+    }/*
     public void insertFacultad(int id,String nombreF, String abreviatura){
         SQLiteDatabase db = getWritableDatabase();
         if(db != null){
@@ -96,6 +104,7 @@ public class EmisorSQLHelper extends SQLiteOpenHelper{
             System.out.print("No se puede conectar a la BD");
         }
     }
+    */
     public String getProfesor(){
         SQLiteDatabase db = getReadableDatabase();
         if(db!=null){

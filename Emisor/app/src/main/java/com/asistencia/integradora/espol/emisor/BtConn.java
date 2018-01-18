@@ -31,7 +31,7 @@ import android.widget.Toast;
  * Created by erick on 17/1/2018.
  */
 
-public class BtConn extends Fragment{
+public class BtConn{
 
     private static final String TAG = "BluetoothChatFragment";
 
@@ -70,6 +70,15 @@ public class BtConn extends Fragment{
      */
     private BtService mChatService = null;
 
+    public Intent deteccion(){
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            return enableBtIntent;
+            //startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+        return null;
+    }
+/*
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +88,7 @@ public class BtConn extends Fragment{
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
-            FragmentActivity activity = (FragmentActivity) getActivity();
+            Activity activity = this.getActivity();
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
@@ -136,21 +145,17 @@ public class BtConn extends Fragment{
         mOutEditText = (EditText) view.findViewById(R.id.edit_text_out);
         mSendButton = (Button) view.findViewById(R.id.button_send);
     }
-
+*/
     /**
      * Set up the UI and background operations for chat.
-     */
+     *//*
     private void setupChat() {
-        Log.d(TAG, "setupChat()");
-
+        //Log.d(TAG, "setupChat()");
         // Initialize the array adapter for the conversation thread
         mConversationArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
-
         mConversationView.setAdapter(mConversationArrayAdapter);
-
         // Initialize the compose field with a listener for the return key
         mOutEditText.setOnEditorActionListener(mWriteListener);
-
         // Initialize the send button with a listener that for click events
         mSendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -166,28 +171,20 @@ public class BtConn extends Fragment{
 
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BtService(getActivity(), mHandler);
-
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
     }
 
     /**
      * Makes this device discoverable for 300 seconds (5 minutes).
-     */
-    private void ensureDiscoverable() {
-        if (mBluetoothAdapter.getScanMode() !=
-                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-        }
-    }
+     *//*
 
     /**
      * Sends a message.
      *
      * @param message A string of text to send.
      */
+    /*
     private void sendMessage(String message) {
         // Check that we're actually connected before trying anything
         if (mChatService.getState() != BtService.STATE_CONNECTED) {
@@ -209,12 +206,12 @@ public class BtConn extends Fragment{
 
     /**
      * The action listener for the EditText widget, to listen for the return key
-     */
+     *//*
     private TextView.OnEditorActionListener mWriteListener
             = new TextView.OnEditorActionListener() {
         public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
             // If the action is a key-up event on the return key, send the message
-            if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
+            /*if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 String message = view.getText().toString();
                 sendMessage(message);
             }
@@ -227,8 +224,9 @@ public class BtConn extends Fragment{
      *
      * @param resId a string resource ID
      */
+    /*
     private void setStatus(int resId) {
-        FragmentActivity activity = (FragmentActivity) getActivity();
+        Activity activity = (Activity) getActivity();
         if (null == activity) {
             return;
         }
@@ -243,7 +241,7 @@ public class BtConn extends Fragment{
      * Updates the status on the action bar.
      *
      * @param subTitle status
-     */
+     *//*
     private void setStatus(CharSequence subTitle) {
         FragmentActivity activity = (FragmentActivity) getActivity();
         if (null == activity) {
@@ -259,10 +257,11 @@ public class BtConn extends Fragment{
     /**
      * The Handler that gets information back from the BluetoothChatService
      */
+    /*
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            FragmentActivity activity = (FragmentActivity) getActivity();
+            Activity activity = (Activity) getActivity();
             switch (msg.what) {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
@@ -308,7 +307,7 @@ public class BtConn extends Fragment{
             }
         }
     };
-
+/*
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE_SECURE:
@@ -337,7 +336,7 @@ public class BtConn extends Fragment{
                 }
         }
     }
-
+*/
     /**
      * Establish connection with other device
      *
@@ -353,7 +352,7 @@ public class BtConn extends Fragment{
         // Attempt to connect to the device
         mChatService.connect(device, secure);
     }
-
+/*
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.conexion, menu);
@@ -382,5 +381,5 @@ public class BtConn extends Fragment{
         }
         return false;
     }
-
+*/
 }
