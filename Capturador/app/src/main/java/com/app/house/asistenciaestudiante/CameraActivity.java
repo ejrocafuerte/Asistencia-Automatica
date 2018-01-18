@@ -55,7 +55,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private float verticalAngle = 0.0f;
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
-    private float anchoObjetoReal = 1775.0f;
+    private double area = 0.0f;
+    private float anchoObjetoReal = 1775;// mm
     private int max_width = 0;
     private int max_height = 0;
     private double pan = 0.0f;
@@ -248,7 +249,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mParameters.put(0,0, tilt);//tilt);
         mParameters.put(0,1, initialpan - pan);//;
         mParameters.put(0,2, roll);//;
-        mParameters.put(0,3, horizonalAngle);
+        mParameters.put(0,3, area);
         mParameters.put(0,4, verticalAngle);
 
         mensajeResultado = decodificar(mRGBA.getNativeObjAddr(), mResultado.getNativeObjAddr(), mObjectSize.getNativeObjAddr(), mParameters.getNativeObjAddr());
@@ -256,10 +257,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         anchoObjetoImagen = (float) mObjectSize.get(0, 2)[0];
         altoObjetoImagen = (float) mObjectSize.get(0, 3)[0];
 
-        estimatedDist = (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen);//??
+        estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
         estimatedDistY = Math.abs(estimatedDist  * (float)Math.cos(Math.toRadians(initialpan - pan)) * (float)Math.cos(Math.toRadians(tilt)));
-        estimatedDistX = -estimatedDistY * (float)Math.sin(Math.toRadians(initialpan - pan));
+        estimatedDistX = -estimatedDistY * (float)Math.sin(Math.toRadians(initialpan - pan)) * (float)Math.cos(Math.toRadians(tilt));
 
 
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", tilt) +
@@ -283,8 +284,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         String.format("%.2f", estimatedDistY / 10)+")",
                 new Point(10, 110),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Mensaje: " + mensajeResultado,
+        Imgproc.putText(mResultado, "Area: " + mParameters.put(0,3, area),
                 new Point(10, 140),
+                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(mResultado, "Mensaje: " + mensajeResultado,
+                new Point(10, 170),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         return mResultado;
     }

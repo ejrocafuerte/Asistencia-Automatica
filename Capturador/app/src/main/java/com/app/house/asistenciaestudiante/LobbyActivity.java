@@ -168,7 +168,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     if (existeInternet) {
                         Log.e("Existe internet, enviando server: ", "3");
                         sendMessage(asistencias/*getAsistenciasMessage()*/);
-                        Log.e("Existe internet, enviando server: ", "4");
 
                         Log.e("Existe internet, enviando server", infoAsistenciaActual);
                     }
