@@ -5,6 +5,7 @@ from rest_framework import viewsets,generics
 from .serializers import UserSerializer, GroupSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
+from django.core import exceptions
 import json
 from django.http import JsonResponse
 
@@ -112,18 +113,20 @@ def gestionar(request):
             mac       = info_estudiante.get('mac')
             imei      = info_estudiante.get('imei')
 
-            estudiante, existe_estudiante = Estudiante.objects.get_or_create(matricula = matricula)
+            print(info_estudiante)
 
-            if not existe_estudiante:
-                #Estudiante.objects.create(matricula = matricula, nombres = nombres, apellidos = apellidos, mac = mac, imei = imei)
-                estudiante.nombres = nombres
-                estudiante.apellidos = apellidos
-                estudiante.mac = mac
-                estudiante.imei = imei
-                estudiante.save()
+            #estudiante, existe_estudiante = Estudiante.objects.get_or_create(matricula = matricula)
+            estudiante = None
+            try:
+                estudiante = Estudiante.objects.get(matricula = matricula)
+            except DoesNotExist:
+            #if not existe_estudiante:
+                estudiante = Estudiante.objects.create(matricula = matricula, nombres = nombres, apellidos = apellidos, mac = mac, imei = imei)
 
-            if estudiante is null:
+            if estudiante is None:
                 raise Exception('Error al crear/obtener estudiante')
+
+            print ('Estudiante' + estudiante)
 
             codigo_decodificado = msg_asistencia.get('codigo')
 
@@ -134,17 +137,22 @@ def gestionar(request):
             distancia_y = msg_asistencia.get('distanciaY')
             fecha = msg_asistencia.get('fecha')
 
+            print(materia)
+            print(profesor)
+            print(paralelo)
+            print(aula)
+
             asistencia = Asistencia.objects.create(id_estudiante = estudiante,
                                                    id_profesor = profesor,
                                                    id_paralelo = paralelo,
                                                    id_aula = aula,
-                                                   codigodecodificado = codigode_codificado,
+                                                   codigodecodificado = codigo_decodificado,
                                                    distanciax = distancia_x,
                                                    distanciay = distancia_y,
                                                    fecha = fecha,
                                                    verificado = 0)
 
-            if asistencia is null:
+            if asistencia is None:
                 raise Exception('Error al crear asistencia')
 
             senales = msg_asistencia.get('senales')

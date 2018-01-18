@@ -9,8 +9,8 @@ class Profesor(models.Model):
 
 class Estudiante(models.Model):
     matricula = models.CharField(max_length=10,primary_key=True)
-    nombres = models.CharField(max_length=60)
-    apellidos = models.CharField(max_length=60)
+    nombres = models.CharField(max_length=200)
+    apellidos = models.CharField(max_length=200)
     #correo = models.CharField(max_length=60)
     imei = models.CharField(max_length=20, null=True, blank=True)
     mac = models.CharField(max_length=20, null=True, blank=True)
