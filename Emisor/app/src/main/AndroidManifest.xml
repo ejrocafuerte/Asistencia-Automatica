@@ -2,18 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.asistencia.integradora.espol.emisor">
 
-
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Permisos para uso de bluetooth 1 para administrar, 2 para deteccion-->
+    <!-- Permisos para uso de bluetooth 1 para administrar, 2 para deteccion -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-
 
     <application
         android:allowBackup="true"
@@ -29,6 +25,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".DeviceListActivity"
+            android:label="@string/title_activity_device_list"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
