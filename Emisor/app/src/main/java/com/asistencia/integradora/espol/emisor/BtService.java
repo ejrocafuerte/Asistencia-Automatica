@@ -125,6 +125,7 @@ public class BtService {
         // Start the thread to connect with the given device
         mConnectThread = new ConnectThread(device, secure);
         mConnectThread.start();
+
         // Update UI title
         updateUserInterfaceTitle();
     }
