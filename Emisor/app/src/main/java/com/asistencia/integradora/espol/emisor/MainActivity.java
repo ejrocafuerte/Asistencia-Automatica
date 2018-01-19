@@ -13,6 +13,9 @@ import android.os.Handler;
 import android.view.Menu;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.util.UUID;
+
 public class MainActivity extends Activity{
 
     public static final String TAG = "MainActivity";
@@ -25,7 +28,9 @@ public class MainActivity extends Activity{
     private static final int REQUEST_ENABLE_BT = 3;
     private static final int REQUEST_DEVICE_TO_CONNECT=4;
     private static String EXTRA_DEVICE_ADDRESS = "device_address";
-    private final BluetoothSocket btSocket = null;
+    private BluetoothSocket btSocket=null;
+    private static final UUID MY_UUID_SECURE = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+    private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     public BluetoothAdapter mBluetoothAdapter;
     public StringBuffer mStringBuffer=null;
@@ -120,11 +125,30 @@ public class MainActivity extends Activity{
                     String address=bundle.getString(EXTRA_DEVICE_ADDRESS);
                     BluetoothDevice btDev = mBluetoothAdapter.getRemoteDevice(address);
                     BtService conexion = new BtService(getApplicationContext(),manejadorUi);
-                    conexion.connect(btDev,false);
                     conexion.getState();
-                    btSocket = new BluetoothSocket();
+                    try {
+                        btSocket = btDev.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+                        if(btSocket!= null){
+                            System.out.println("Creaste el socket ahora envialo a connected thread");
+                            //conexion.connected(btSocket,btDev,"el socket");
+                            conexion.stop();
+                            //conexion.start();
+                            conexion.connect(btDev,false);
+                            //conexion.write();
+                            //conexion.connect(btDev,false);
+                            conexion.connected(btSocket,btDev,"insecure HC-05");
+                            System.out.println(conexion.getState());
 
-                    conexion.connected(btSocket,btDev,"fff");
+                            //System.out.println(btSocket.isConnected());
+                            //btSocket.close();
+                            //btSocket.connect();
+                            conexion.write("Hola".getBytes());
+
+                            System.out.println(conexion.getState());
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
         }
     }
