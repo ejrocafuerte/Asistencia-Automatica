@@ -10,7 +10,8 @@ from .models import Aula
 from .models import Estudiante
 from .models import Profesor
 from .models import Arduino
-from .models import Asistencia
+from .models import AsistenciaEstudiante
+from .models import AsistenciaProfesor
 
 # Register your models here.
 admin.site.register(Facultad)
@@ -21,4 +22,5 @@ admin.site.register(Aula)
 admin.site.register(Estudiante)
 admin.site.register(Profesor)
 admin.site.register(Arduino)
-admin.site.register(Asistencia)
+admin.site.register(AsistenciaEstudiante)
+admin.site.register(AsistenciaProfesor)

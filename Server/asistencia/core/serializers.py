@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import Asistencia
+from .models import AsistenciaEstudiante
 from .models import Profesor
 from .models import Estudiante
 from .models import Facultad
@@ -22,7 +22,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 class AsistenciaSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Asistencia
+        model = AsistenciaEstudiante
         fields = (
             'id_paralelo',
             'id_estudiante',

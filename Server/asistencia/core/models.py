@@ -2,7 +2,7 @@ from django.db import models
 from datetime import datetime
 # Create your models here.
 class Profesor(models.Model):
-    identificador = models.CharField(max_length=20)
+    identificador = models.CharField(max_length=20, unique=True, default=0)
     nombres = models.CharField(max_length=60)
     apellidos = models.CharField(max_length=60)
     correo = models.CharField(max_length=60)
@@ -20,16 +20,19 @@ class Estudiante(models.Model):
         return self.apellidos+' '+self.nombres
 
 class Facultad(models.Model):
+    identificador = models.CharField(max_length=10, unique=True, default=0)
     nombre= models.CharField(max_length=50)
     abreviatura=models.CharField(max_length=6)
 
 class Edificio(models.Model):
     id_facultad=models.ForeignKey('Facultad',on_delete=None)
+    identificador = models.CharField(max_length=10, unique=True, default=0)
     nombre=models.CharField(max_length=60)
     ayuda=models.TextField(null=True)
 
 class Aula(models.Model):
     id_edificio = models.ForeignKey('Edificio',on_delete=models.CASCADE,)
+    identificador = models.CharField(max_length=10,unique=True, default=0)
     nombre=models.CharField(max_length=10)
     descripcion=models.CharField(max_length=25)
     capacidad=models.PositiveSmallIntegerField(default=0)
@@ -40,13 +43,14 @@ class Arduino(models.Model):
 
 class Materia(models.Model):
     id_facultad=models.ForeignKey('Facultad',on_delete=None)
-    codigo=models.CharField(max_length=10,unique=True)
+    identificador=models.CharField(max_length=10,unique=True, default=0)
     nombre=models.CharField(max_length=30)
     descripcion = models.CharField(max_length=100,null=True)
 
 class Paralelo(models.Model):
     id_materia=models.ForeignKey('Materia',on_delete=None)
     id_profesor=models.ForeignKey('Profesor',on_delete=None)
+    identificador = models.CharField(max_length=10,unique=True, default=0)
     anio=models.CharField(max_length=4)
     termino=models.CharField(max_length=1)
     numero_paralelo=models.CharField(max_length=2)
@@ -67,32 +71,57 @@ class Paralelo(models.Model):
     dia2=models.CharField(max_length=3,choices=dias_opt,default=LUNES,null=True)
     dia3 = models.CharField(max_length=3, choices=dias_opt, default=LUNES, null=True)
 
-class Asistencia(models.Model):
+class AsistenciaEstudiante(models.Model):
     id_estudiante = models.ForeignKey('Estudiante', on_delete = None, null=False, blank=False, default=0)
-    id_profesor = models.ForeignKey('Profesor', on_delete=models.CASCADE, null=False, blank=False, default=0)
-    id_materia = models.ForeignKey('Materia', on_delete = models.CASCADE, null=False, blank=False, default=0)
-    id_paralelo = models.ForeignKey('Paralelo', on_delete = models.CASCADE, null=False, blank=False, default=0)
+    id_profesor = models.ForeignKey('Profesor', on_delete=None, null=False, blank=False, default=0)
+    id_materia = models.ForeignKey('Materia', on_delete = None, null=False, blank=False, default=0)
+    id_paralelo = models.ForeignKey('Paralelo', on_delete = None, null=False, blank=False, default=0)
     id_aula = models.ForeignKey('Aula', on_delete = None, null=False, blank=False, default=0)
     fecha = models.DateTimeField()
     codigodecodificado = models.CharField(max_length=200, null=True, blank=True)
     distanciax = models.FloatField(default=0.0, null=True, blank=True)
     distanciay = models.FloatField(default=0.0, null=True, blank=True)
-    verificado = models.PositiveSmallIntegerField(default=0,null=False, blank=False)
+    aprobado = models.PositiveSmallIntegerField(default=0,null=False, blank=False)
 
-class Senal(models.Model):
-    id_asistencia = models.ForeignKey('Asistencia', on_delete=None)
-    bssid = models.CharField(max_length=200);
-    ssid = models.CharField(max_length=200);
+'''
+Tabla temporal donde se encola las asistencias que envia
+el profesor en espera de las asistencias de los estudiantes
+para verificacion, si se aprueba verificacion se inserta en
+tabla AsistenciaVerificada con campo aprobado igual 1
+casocontrario 0, cuando sobrepasa el tiempo limite para
+verificacion se borra registro de tabla AsistenciaProfesor.
+'''
+class AsistenciaProfesor(models.Model):
+    id_profesor = models.ForeignKey('Profesor', on_delete=None, null=False, blank=False, default=0)
+    id_materia = models.ForeignKey('Materia', on_delete=None, null=False, blank=False, default=0)
+    id_paralelo = models.ForeignKey('Paralelo', on_delete=None, null=False, blank=False, default=0)
+    id_aula = models.ForeignKey('Aula', on_delete=None, null=False, blank=False, default=0)
+    fecha = models.DateTimeField()
+    codigo = models.CharField(max_length=200, null=True, blank=True)
+
+
+class SenalProfesor(models.Model):
+    asistencia = models.ForeignKey('AsistenciaProfesor', on_delete=None)
+    bssid = models.CharField(max_length=200)
+    ssid = models.CharField(max_length=200)
     level = models.IntegerField(default=0)
     level2 = models.IntegerField(default=0)
 
+class SenalEstudiante(models.Model):
+    asistencia = models.ForeignKey('AsistenciaEstudiante', on_delete=None)
+    bssid = models.CharField(max_length=200)
+    ssid = models.CharField(max_length=200)
+    level = models.IntegerField(default=0)
+    level2 = models.IntegerField(default=0)
+
+'''
 class resumenAsistencias(models.Model):
     id_estudiante=models.ForeignKey('Estudiante',on_delete=None)
     id_Paralelo=models.ForeignKey('Paralelo',on_delete=None)
     diasAsistidos=models.PositiveSmallIntegerField(default=0)
     diasContados=models.PositiveSmallIntegerField(default=0)
     porcentajeFaltas=models.PositiveSmallIntegerField()
-
+'''
 #def stringaFecha(self, hora, minutos):
 #    cel = models.DateTimeField()
 #    hoy = datetime.today()
