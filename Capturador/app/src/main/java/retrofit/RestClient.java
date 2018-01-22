@@ -16,10 +16,6 @@ import retrofit2.http.POST;
 
 public interface RestClient {
     //@Headers("Content-Type: application/json; charset=utf-8")
-    @POST("gestionar/")
+    @POST("gestionarestudiante/")
     Call<ResponseServer> sendMessage(@Body ArrayList<Asistencia> asistencias);
-
-    @Headers("Content-Type: application/json; charset=utf-8")
-    @POST("gestionar/")
-    Call<ResponseServer> sendMessage2(@Body ResponseBody mensaje);
 }

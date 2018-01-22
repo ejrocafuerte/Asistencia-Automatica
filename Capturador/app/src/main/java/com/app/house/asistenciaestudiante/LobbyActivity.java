@@ -78,10 +78,10 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private String apellidos = "";
     private String matricula = "";
     private String fecha = "";
-    private String materia = "CCG01INTEGRADORA";
-    private String codigo = "0110101";
-    private String distanciaX = "0.0";
-    private String distanciaY = "0.0";
+    private String materia = "";
+    private String codigo = "";
+    private String distanciaX = "";
+    private String distanciaY = "";
     //private String senales = "";
 
     private String delimitador = ";;";
@@ -494,9 +494,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             case R.id.info: {
                 Intent intent = new Intent(mContext, InfoActivity.class);
                 intent.putExtra("Estudiante", estudiante);
-                //intent.putExtra("intent_nombres", nombres);
-                //intent.putExtra("intent_apellidos", apellidos);
-                //intent.putExtra("intent_matricula", matricula);
                 startActivityForResult(intent, REQUESTCODE_INFO);
                 return true;
             }
@@ -533,15 +530,14 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             if (resultCode == RESULT_OK) {
                 if (data != null) {
                     estudiante = (Estudiante)data.getSerializableExtra("Estudiante");
-                    //nombres = data.getStringExtra("intent_nombres");
-                    //apellidos = data.getStringExtra("intent_apellidos");
-                    // = data.getStringExtra("intent_matricula");
-                    //Log.e("onActivityResult: ", "OK");
                 }
             }
         } else if (requestCode == REQUESTCODE_CAMERA) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
+                    codigo = data.getStringExtra("codigo");
+                    distanciaX = Double.toString(data.getDoubleExtra("distanciaX", 0.0));
+                    distanciaY = Double.toString(data.getDoubleExtra("distanciaY", 0.0));
                 }
             }
         }
@@ -568,6 +564,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         @Override
         public void onReceive(Context context, Intent intent) {
             ConnectivityManager conMngr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             NetworkInfo wifi = conMngr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             NetworkInfo mobile = conMngr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 
@@ -577,9 +574,11 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 Toast.makeText(context, "BroadcastReceiver: WIFI ON", Toast.LENGTH_SHORT).show();
             } else if (mobile.isConnected()/* && wifi.isConnected()*/) {
                 existeInternet = true;
+                wifiManager.setWifiEnabled(true);
                 Toast.makeText(context, "BroadcastReceiver: MOBILE ON", Toast.LENGTH_SHORT).show();
             } else {
                 existeInternet = false;
+                wifiManager.setWifiEnabled(true);
                 Toast.makeText(context, "BroadcastReceiver: MOBILE AND WIFI OFF", Toast.LENGTH_SHORT).show();
             }
         }
@@ -587,6 +586,11 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
     public void scanWifiSignals() {
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        if(!wifiManager.isWifiEnabled()){
+            wifiManager.setWifiEnabled(true);
+        }
+
         List<ScanResult> wifiList = wifiManager.getScanResults();
         StringBuilder sb = new StringBuilder("");
         senales.clear();

@@ -2,6 +2,7 @@ package com.app.house.asistenciaestudiante;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -12,6 +13,9 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -43,27 +47,28 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private CameraBridgeViewBase _cameraBridgeViewBase;
     private Mat mRGBA, mResultado, mObjectSize, mParameters;// mEulerAngles;
     private double anchoObjetoImagen = 0.0f;
-    private double altoObjetoImagen = 0.0f;
     private double estimatedDist = 0.0f;
     private double estimatedDistX = 0.0f;
     private double estimatedDistY = 0.0f;
     private String mensajeResultado = "";
     private double focalLength = 0.0f;
-    private double focalLengthPixelX = 0.0f;
-    private double focalLengthPixelY = 0.0f;
     private float horizonalAngle = 0.0f;
     private float verticalAngle = 0.0f;
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
     private double area = 0.0f;
-    private float anchoObjetoReal = 1775;// mm
-    private int max_width = 0;
-    private int max_height = 0;
+    private float anchoObjetoReal = 1750;// mm
+    private double pan_ant = 0.0f;
     private double pan = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
     private double initialpan = 135.0f;
-    private boolean opencvLoaded = false;
+    private double flickerTime = 1000;//ms
+    private double actualTime = 0;
+    private int faseDeco = 0;
+    private String[] mensajes = {"", "", ""};
+    private String mensajeFinal = "";
+    private boolean first_frame = false;
 
     private WindowManager mWindowManager;
 
@@ -131,51 +136,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         disableCamera();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-            if (!OpenCVLoader.initDebug()) {
-                Log.e(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-                OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, _baseLoaderCallback);
-            } else {
 
-                Log.e(TAG, "OpenCV library found inside package. Using it!");
-                _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-            }
-        if(mSensorManager == null) {
-            mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-            // Build a SensorEventListener for each type of sensor (just one here):
-            oriSensorEventListener = new MySensorEventListener();
-            // Get each of our Sensors (just one here):
-
-            sensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-            sensorGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-
-            if (sensorAccelerometer != null && sensorMagnetometer != null && sensorGyroscope != null){
-                // Success! There's a magnetometer.
-                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-                Log.e(TAG,  "Encontrado acelerometro, magnetometro y giroscopio");
-            }
-            else if(sensorAccelerometer != null && sensorGyroscope != null){
-                // Failure! No magnetometer.
-                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-                Log.e(TAG,  "Encontrado acelerometro y giroscopio");
-            }
-            else if(sensorAccelerometer != null && sensorMagnetometer != null){
-                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
-                Log.e(TAG,  "Encontrado acelerometro y magnetometro " + ((ori_sensor == null)?". Sensor null":""));
-            }
-            else{
-                Log.e(TAG,  "Sensores necesitados, imposible calcular angulos euler");
-            }
-
-            // Register the SensorEventListeners with their Sensor, and their SensorManager (just one here):
-            //mSensorManager.registerListener(oriSensorEventListener, sensorMagnetometer, SensorManager.SENSOR_DELAY_UI);
-            mSensorManager.registerListener(oriSensorEventListener, ori_sensor, SensorManager.SENSOR_DELAY_GAME);
-
-        }
-    }
 
     @Override
     public void onBackPressed() {
@@ -227,15 +188,13 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     public void onCameraViewStarted(int width, int height) {
-        Log.e(TAG, "Resolution: " + (width + "x" + height));
+        //Log.e(TAG, "Resolution: " + (width + "x" + height));
         mRGBA = new Mat(width, height, CvType.CV_8UC4);
         mResultado = new Mat(width, height, CvType.CV_8UC4);
 
 
         mObjectSize = new Mat(1, 4, CvType.CV_64FC1);
-        mParameters = new Mat(1, 5, CvType.CV_64FC1);
-        max_width = width;
-        max_height = height;
+        mParameters = new Mat(1, 6, CvType.CV_64FC1);
         getCameraParameters();
 
     }
@@ -249,26 +208,94 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mParameters.put(0,0, tilt);//tilt);
         mParameters.put(0,1, initialpan - pan);//;
         mParameters.put(0,2, roll);//;
-        mParameters.put(0,3, area);
+        mParameters.put(0,3, horizonalAngle);
         mParameters.put(0,4, verticalAngle);
+        mParameters.put(0,5, faseDeco);
 
-        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(), mResultado.getNativeObjAddr(), mObjectSize.getNativeObjAddr(), mParameters.getNativeObjAddr());
+        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+                mResultado.getNativeObjAddr(),
+                mObjectSize.getNativeObjAddr(),
+                mParameters.getNativeObjAddr());
 
-        anchoObjetoImagen = (float) mObjectSize.get(0, 2)[0];
-        altoObjetoImagen = (float) mObjectSize.get(0, 3)[0];
+        anchoObjetoImagen = (double) mObjectSize.get(0, 2)[0];
 
         estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
-        estimatedDistY = Math.abs(estimatedDist  * (float)Math.cos(Math.toRadians(initialpan - pan)) * (float)Math.cos(Math.toRadians(tilt)));
-        estimatedDistX = -estimatedDistY * (float)Math.sin(Math.toRadians(initialpan - pan)) * (float)Math.cos(Math.toRadians(tilt));
+        estimatedDistY = Math.abs(estimatedDist * (float) Math.cos(Math.toRadians(initialpan - pan)) * (float) Math.cos(Math.toRadians(tilt)));
+        estimatedDistX = -estimatedDist * (float) Math.sin(Math.toRadians(initialpan - pan))* (float) Math.cos(Math.toRadians(tilt));
 
+        /*if(System.currentTimeMillis() - actualTime > flickerTime) {
+
+            faseDeco = (int) mParameters.get(0, 5)[0];
+            Log.e(TAG, "Fase deco: " + faseDeco);
+
+            if(faseDeco < 4) {
+
+
+                if (!mensajeResultado.equals("")) {
+                    Log.e(TAG, "onCam Mensaje: " + mensajeResultado + " "+faseDeco);
+                    if (faseDeco > 0) {
+                        mensajes[faseDeco-1] = mensajeResultado;
+                        Log.e(TAG, "mensajes[faseDeco - 2] =" + mensajeResultado);
+                    }
+                    faseDeco++;
+                    actualTime = System.currentTimeMillis();
+                }
+
+            }
+            else if (faseDeco == 4){
+                if (mensajes[0].length() == 12 && mensajes[1].length() == 12 && mensajes[2].length() == 12) {
+
+                    Log.e(TAG, "Mensaje 1:" + mensajes[0]);
+                    Log.e(TAG, "Mensaje 2:" + mensajes[1]);
+                    Log.e(TAG, "Mensaje 3:" + mensajes[2]);
+
+                    if (mensajes[0].equals(mensajes[1]) && mensajes[0].equals(mensajes[2])) {
+                        mensajeFinal = mensajes[0];
+                        Log.e(TAG, "Mensaje decodificado: 100% accuracy");
+                    } else if (mensajes[0].equals(mensajes[1]) || mensajes[0].equals(mensajes[2])) {
+                        mensajeFinal = mensajes[0];
+                        Log.e(TAG, "Mensaje decodificado: 66% accuracy");
+                    } else {
+                        mensajeFinal = mensajes[0];
+                        Log.e(TAG, "Mensaje decodificado: 33% accuracy");
+                    }
+                }
+                else {Log.e(TAG, "Mensaje 1:" + mensajes[0]);
+                    Log.e(TAG, "Mensaje 2:" + mensajes[1]);
+                    Log.e(TAG, "Mensaje 3:" + mensajes[2]);
+                }
+
+                anchoObjetoImagen = (double) mObjectSize.get(0, 2)[0];
+
+                estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
+
+                estimatedDistY = Math.abs(estimatedDist * (float) Math.cos(Math.toRadians(initialpan - pan)) * (float) Math.cos(Math.toRadians(tilt)));
+                estimatedDistX = -estimatedDistY * (float) Math.sin(Math.toRadians(initialpan - pan)) * (float) Math.cos(Math.toRadians(tilt));
+
+                if (anchoObjetoImagen > 1 && estimatedDist > 1) {
+
+                    faseDeco = 0;
+
+                    vibrate();
+                    Log.e(TAG, "onCam ancho imagen: " + anchoObjetoImagen);
+                    Log.e(TAG, "onCam distancia: " + estimatedDist);
+                    Intent intent = new Intent(this, LobbyActivity.class);
+                    intent.putExtra("codigo", mensajeFinal);
+                    intent.putExtra("distanciaX", estimatedDistX);
+                    intent.putExtra("distanciaY", estimatedDistY);
+                    setResult(LobbyActivity.RESULT_OK, intent);
+                    finish();
+                }
+            }
+        }*/
 
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", tilt) +
                         ", P: " + String.format("%.2f", initialpan - pan) +
                         ", R: " + String.format("%.2f", roll),
                 new Point(10, 23),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Size Camera  : (" +
+        Imgproc.putText(mResultado, "Size Original  : (" +
                         String.format("%.2f", mObjectSize.get(0, 0)[0]) + "px, " +
                         String.format("%.2f", mObjectSize.get(0, 1)[0]) + "px)",
                 new Point(10, 50), //140
@@ -284,11 +311,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         String.format("%.2f", estimatedDistY / 10)+")",
                 new Point(10, 110),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Area: " + mParameters.put(0,3, area),
+        Imgproc.putText(mResultado, "Fase: " + (int)mParameters.get(0,5)[0],
                 new Point(10, 140),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         Imgproc.putText(mResultado, "Mensaje: " + mensajeResultado,
                 new Point(10, 170),
+                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(mResultado, "Tiempo: " + ((actualTime > 0)?(System.currentTimeMillis() - actualTime):0),
+                new Point(10, 200),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         return mResultado;
     }
@@ -313,11 +343,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 //for (int focusId=0; focusId<focalLengths.length; focusId++) {
                 int focusId = 0;
                 focalLength = focalLengths[focusId];
-                focalLengthPixelX = (focalLength / sensorWidth) * max_width;
-                focalLengthPixelY = (focalLength / sensorHeight) * max_height;
                 horizonalAngle = (float) Math.toDegrees(2 * Math.atan(0.5f * sensorWidth / focalLength));
                 verticalAngle = (float) Math.toDegrees(2 * Math.atan(0.5f * sensorHeight / focalLength));
-                Log.e(TAG, horizonalAngle + " : " + verticalAngle);
+
                 //}
                 //}
             } catch (CameraAccessException e) {
@@ -330,6 +358,52 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     public native static String decodificar(long mRGBA, long mResultado, long mObjectSize, long mParameters);
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.e(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, _baseLoaderCallback);
+        } else {
+
+            Log.e(TAG, "OpenCV library found inside package. Using it!");
+            _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+        if(mSensorManager == null) {
+            mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            // Build a SensorEventListener for each type of sensor (just one here):
+            oriSensorEventListener = new MySensorEventListener();
+            // Get each of our Sensors (just one here):
+
+            sensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            sensorMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+            sensorGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+            if (sensorAccelerometer != null && sensorMagnetometer != null && sensorGyroscope != null){
+                // Success! There's a magnetometer.
+                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+                Log.e(TAG,  "Encontrado acelerometro, magnetometro y giroscopio");
+            }
+            else if(sensorAccelerometer != null && sensorGyroscope != null){
+                // Failure! No magnetometer.
+                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+                Log.e(TAG,  "Encontrado acelerometro y giroscopio");
+            }
+            else if(sensorAccelerometer != null && sensorMagnetometer != null){
+                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
+                Log.e(TAG,  "Encontrado acelerometro y magnetometro " + ((ori_sensor == null)?". Sensor null":""));
+            }
+            else{
+                Log.e(TAG,  "Sensores necesitados, imposible calcular angulos euler");
+            }
+
+            // Register the SensorEventListeners with their Sensor, and their SensorManager (just one here):
+            //mSensorManager.registerListener(oriSensorEventListener, sensorMagnetometer, SensorManager.SENSOR_DELAY_UI);
+            mSensorManager.registerListener(oriSensorEventListener, ori_sensor, SensorManager.SENSOR_DELAY_UI);
+
+        }
+    }
+
     // Setup our SensorEventListener
     public class MySensorEventListener implements SensorEventListener {
 
@@ -338,21 +412,21 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             int eventType = event.sensor.getType();
 
             if (eventType == Sensor.TYPE_GAME_ROTATION_VECTOR) {
-                ori_values = event.values.clone();
+                //ori_values = event.values.clone();
                 updateOrientation(event.values);
             }
             else if (eventType == Sensor.TYPE_ROTATION_VECTOR) {
-                ori_values = event.values.clone();
+                //ori_values = event.values.clone();
                 updateOrientation(event.values);
             }
             else if (eventType == Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR) {
-                ori_values = event.values.clone();
+                //ori_values = event.values.clone();
                 updateOrientation(event.values);
             }
-
-            //float[] mRotationMatrixCurrent = new float[9];
-            //SensorManager.getRotationMatrixFromVector(mRotationMatrixCurrent, ori_values);
-
+            else if (eventType == Sensor.TYPE_ORIENTATION) {
+                //ori_values = event.values.clone();
+                updateOrientation(event.values);
+            }
         }
 
         @Override
@@ -373,18 +447,22 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         switch (mWindowManager.getDefaultDisplay().getRotation()) {
             case Surface.ROTATION_0:
             default:
+                //Log.e(TAG, "Orientation: Surface.ROTATION_0");
                 worldAxisForDeviceAxisX = SensorManager.AXIS_X;
                 worldAxisForDeviceAxisY = SensorManager.AXIS_Z;
                 break;
             case Surface.ROTATION_90:
+                //Log.e(TAG, "Orientation: Surface.ROTATION_90");
                 worldAxisForDeviceAxisX = SensorManager.AXIS_Z;
                 worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_X;
                 break;
             case Surface.ROTATION_180:
+                //Log.e(TAG, "Orientation: Surface.ROTATION_180");
                 worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_X;
                 worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_Z;
                 break;
             case Surface.ROTATION_270:
+                //Log.e(TAG, "Orientation: Surface.ROTATION_270");
                 worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Z;
                 worldAxisForDeviceAxisY = SensorManager.AXIS_X;
                 break;
@@ -403,7 +481,15 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         roll = orientation[2] * -180.0f / (float)Math.PI;
         pan = orientation[0] * -180.0f / (float)Math.PI;
 
-        //if(Math.abs(pan) > 5.0) finish();
+        //Log.e(TAG, "YAW: "+(pan-initialpan));
+    }
+
+    private void vibrate() {
+        if (Build.VERSION.SDK_INT >= 26) {
+            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(150,10));
+        } else {
+            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(150);
+        }
     }
 }
 
