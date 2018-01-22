@@ -49,7 +49,7 @@ public class MainActivity extends Activity{
         SQLiteDatabase dbEmisor = db1.getWritableDatabase();
 
         if(dbEmisor != null){
-            //dbEmisor.execSQL("insert into core_profesor values(1,\"201021839\",\"erick joel\",\"rocafuerte villon\",\"example@example.com\")");
+            dbEmisor.execSQL("insert into core_profesor values(1,\"201021839\",\"erick joel\",\"rocafuerte villon\",\"example@example.com\")");
             Cursor c = dbEmisor.rawQuery("select nombres, apellidos from core_profesor where nombres='erick joel'",null);
             c.moveToFirst();
             System.out.print(c.getString(0).isEmpty());
@@ -129,14 +129,29 @@ public class MainActivity extends Activity{
                     try {
                         btSocket = btDev.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
                         if(btSocket!= null){
-                            System.out.println("Creaste el socket ahora envialo a connected thread");
+                            System.out.println("socket creado, crear thread");
                             System.out.println(btSocket.isConnected());
                             btSocket.connect();
-                            System.out.println(btSocket.isConnected());
-                            btSocket.getOutputStream().write("holamundo".getBytes());
-                            byte[] response= new byte[10];
-                            btSocket.getInputStream().read(response);
-                            
+                            System.out.println("conectado:" +btSocket.isConnected());
+                            System.out.print("123456".getBytes());
+                            byte[] a = new byte['1','2','3','4','5','6','\n'];
+                            //byte[6] a =['1','2','3','4','5','6']
+                            btSocket.getOutputStream().write('1');
+                            btSocket.getOutputStream().write('2');
+                            btSocket.getOutputStream().write('1');
+                            btSocket.getOutputStream().write('3');
+                            btSocket.getOutputStream().write('1');
+                            btSocket.getOutputStream().write('4');
+                            btSocket.getOutputStream().write('1');
+                            btSocket.getOutputStream().write('5');
+                            btSocket.getOutputStream().write('\n');
+
+                            //byte[] response= new byte[3];
+                            //btSocket.getInputStream().read(response);
+                            //System.out.println(response.toString());
+                            System.out.println("cerrando conexion");
+                            btSocket.close();
+
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

@@ -1,6 +1,8 @@
 #include <SoftwareSerial.h>
 SoftwareSerial BT1(4,2); // RX | TX
 char c[5];
+int encendido=2000;
+int apagado=1000;
 String s=" ";
 int latchPin=8;
 int clockPin=12;
@@ -17,18 +19,27 @@ void setup() {
   Serial.println("BTserial started at 9600");
 }
 void loop() {
-  if(!BT1.available()){
-      pintarVacio(1000);
-    }
-    else{
-      /*************PARPADEO 1***********/
-      pintarLleno(5000);
-      pintarVacio(2000);
-      s= GetLineBT();
-      c=procesarCadena(s);
-      Serial.println(s);
-      s.toCharArray(c,5);
-      /*************PARPADEO 2**********/
+	/*************PARPADEO 1***********/
+    s = GetLineBT();
+    ///es string siempre enviara 12 bytes
+    //los 4 primeros son id_materia que se convertiran en 2 bytes
+    //los 4 siguientes son id_profesor que se convertiran en 2 bytes
+    //byte(c[0]<<4)+(byte(c[1])-48) codigo apto para mostrarse en matriz sin desbordamiento
+    Serial.println(s);
+	BT1..println("Mensaje recibido, mostrando en matriz.\n");
+    s.toCharArray(c, 9);
+    m[0] = byte(c[0] << 4) + (byte(c[1]) - 48);
+    m[1] = byte(c[2] << 4) + (byte(c[3]) - 48);
+    m[2] = byte(c[4] << 4) + (byte(c[5]) - 48);
+    m[3] = byte(c[6] << 4) + (byte(c[7]) - 48);
+    Serial.println(m[0]);
+    Serial.println(m[1]);
+    Serial.println(m[2]);
+    Serial.println(m[3]);
+    for(int i=0;i<10;i++){
+      pintarLleno(encendido);
+    pintarVacio(apagado);
+	/*************PARPADEO 2**********/
       digitalWrite(latchPin, 0) ; // Latch a LOW para que no
       /////M3
       shiftOut(dataPin, clockPin, LSBFIRST, espacio*0+c[5]);
@@ -40,8 +51,8 @@ void loop() {
       shiftOut(dataPin, clockPin, LSBFIRST, espacio*4+c[1]);
       shiftOut(dataPin, clockPin, LSBFIRST, espacio*5+c[0]);
       digitalWrite(latchPin, 1);
-      delay(5000);
-      pintarVacio(2000);
+      delay(encendido);
+      pintarVacio(apagado);
       /*************PARPADEO 3**********/
       digitalWrite(latchPin, 0) ; // Latch a LOW para que no
       /////M3
@@ -54,8 +65,8 @@ void loop() {
       shiftOut(dataPin, clockPin, LSBFIRST, espacio*4+c[5]);
       shiftOut(dataPin, clockPin, LSBFIRST, espacio*5+c[4]);
       digitalWrite(latchPin, 1);
-      delay(5000);
-      pintarVacio(2000);
+      delay(encendido);
+      pintarVacio(apagado);
       /*************PARPADEO 4**********/
       digitalWrite(latchPin, 0) ; // Latch a LOW para que no
       /////M3
@@ -68,8 +79,12 @@ void loop() {
       shiftOut(dataPin, clockPin, LSBFIRST, espacio*4+c[3]);
       shiftOut(dataPin, clockPin, LSBFIRST, espacio*5+c[2]);
       digitalWrite(latchPin, 1);
-      delay(5000);
-      pintarVacio(2000);
+	  delay(encendido);
+      pintarVacio(apagado);
+    }
+    BT1.println("OK\n");
+      delay(encendido);
+      pintarVacio(apagado);
     }
     if (Serial.available()){
       String S = GetLine();
@@ -133,15 +148,5 @@ int[6] procesarInfo(String datos){
   resultado[4]=datos.charAt(8)<<4+datos.charAt(9);
   resultado[5]=datos.charAt(10)<<4+datos.charAt(11);
   return resultado;
-}
-
-int calculoDesplazamiento(int num1EnChar){
-  int resultado=0;
-  if(num1EnChar>=10 && num1EnChar<=99){
-    int decena=num1EnChar/10;
-    int unidad=num1EnChar%10;
-    resultado=decena<<4+unidad;
-    return resultado;
-  }
 }
 
