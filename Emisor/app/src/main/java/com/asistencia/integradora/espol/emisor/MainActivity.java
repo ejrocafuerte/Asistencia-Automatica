@@ -1,7 +1,6 @@
 package com.asistencia.integradora.espol.emisor;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -12,6 +11,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.util.UUID;
 
 public class MainActivity extends Activity{
 
@@ -25,7 +27,9 @@ public class MainActivity extends Activity{
     private static final int REQUEST_ENABLE_BT = 3;
     private static final int REQUEST_DEVICE_TO_CONNECT=4;
     private static String EXTRA_DEVICE_ADDRESS = "device_address";
-    private final BluetoothSocket btSocket = null;
+    private BluetoothSocket btSocket=null;
+    private static final UUID MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     public BluetoothAdapter mBluetoothAdapter;
     public StringBuffer mStringBuffer=null;
@@ -119,12 +123,24 @@ public class MainActivity extends Activity{
                     Handler manejadorUi= new Handler();
                     String address=bundle.getString(EXTRA_DEVICE_ADDRESS);
                     BluetoothDevice btDev = mBluetoothAdapter.getRemoteDevice(address);
-                    BtService conexion = new BtService(getApplicationContext(),manejadorUi);
-                    conexion.connect(btDev,false);
-                    conexion.getState();
-                    btSocket = new BluetoothSocket();
 
-                    conexion.connected(btSocket,btDev,"fff");
+                    //BtService conexion = new BtService(getApplicationContext(),manejadorUi);
+                    //conexion.getState();
+                    try {
+                        btSocket = btDev.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
+                        if(btSocket!= null){
+                            System.out.println("Creaste el socket ahora envialo a connected thread");
+                            System.out.println(btSocket.isConnected());
+                            btSocket.connect();
+                            System.out.println(btSocket.isConnected());
+                            btSocket.getOutputStream().write("holamundo".getBytes());
+                            byte[] response= new byte[10];
+                            btSocket.getInputStream().read(response);
+                            
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
         }
     }
