@@ -3,9 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Capturador.iml" filepath="$PROJECT_DIR$/Capturador.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/libs.iml" filepath="$PROJECT_DIR$/libs/libs.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/openCVLibrary331/openCVLibrary331.iml" filepath="$PROJECT_DIR$/libs/openCVLibrary331/openCVLibrary331.iml" />
+      <module fileurl="file://C:\Users\erick\Documents\GitHub\Asistencia-Automatica\Capturador\Capturador.iml" filepath="C:\Users\erick\Documents\GitHub\Asistencia-Automatica\Capturador\Capturador.iml" />
+      <module fileurl="file://C:\Users\erick\Documents\GitHub\Asistencia-Automatica\Capturador\app\app.iml" filepath="C:\Users\erick\Documents\GitHub\Asistencia-Automatica\Capturador\app\app.iml" />
+      <module fileurl="file://C:\Users\erick\Documents\GitHub\Asistencia-Automatica\Capturador\libs\libs.iml" filepath="C:\Users\erick\Documents\GitHub\Asistencia-Automatica\Capturador\libs\libs.iml" />
+      <module fileurl="file://C:\Users\erick\Documents\GitHub\Asistencia-Automatica\Capturador\libs\openCVLibrary331\openCVLibrary331.iml" filepath="C:\Users\erick\Documents\GitHub\Asistencia-Automatica\Capturador\libs\openCVLibrary331\openCVLibrary331.iml" />
     </modules>
   </component>
 </project>
