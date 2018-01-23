@@ -8,52 +8,45 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
-public class MainActivity extends Activity{
+public class MainActivity extends Activity {
 
     public static final String TAG = "MainActivity";
 
-    // Whether the Log Fragment is currently shown
-    private boolean mLogShown;
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
-    private static final int REQUEST_DEVICE_TO_CONNECT=4;
+    private static final int REQUEST_DEVICE_TO_CONNECT = 4;
     private static String EXTRA_DEVICE_ADDRESS = "device_address";
-    private BluetoothSocket btSocket=null;
+    private BluetoothSocket btSocket = null;
     private static final UUID MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+    BluetoothConn conexion;
 
     public BluetoothAdapter mBluetoothAdapter;
-    public StringBuffer mStringBuffer=null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        /*if (savedInstanceState == null) {
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            BtConn fragment = new BtConn();
-            transaction.replace(R.id.sample_content_fragment, fragment);
-            transaction.commit();
-        }*/
-        EmisorSQLHelper db1 = new EmisorSQLHelper(getApplicationContext(),"emisor.db",null,1);
+        EmisorSQLHelper db1 = new EmisorSQLHelper(getApplicationContext(), "emisor.db", null, 1);
         SQLiteDatabase dbEmisor = db1.getWritableDatabase();
 
-        if(dbEmisor != null){
-            dbEmisor.execSQL("insert into core_profesor values(1,\"201021839\",\"erick joel\",\"rocafuerte villon\",\"example@example.com\")");
-            Cursor c = dbEmisor.rawQuery("select nombres, apellidos from core_profesor where nombres='erick joel'",null);
+        if (dbEmisor != null) {
+            //dbEmisor.execSQL("insert into core_profesor values(1,\"201021839\",\"erick joel\",\"rocafuerte villon\",\"example@example.com\")");
+            Cursor c = dbEmisor.rawQuery("select nombres, apellidos from core_profesor where nombres='erick joel'", null);
             c.moveToFirst();
             System.out.print(c.getString(0).isEmpty());
-            System.out.println("el nombre del profesor es: " + c.getString(0)+" "+c.getString(1));
+            System.out.println("el nombre del profesor es: " + c.getString(0) + " " + c.getString(1));
         }
         dbEmisor.close();
         db1.close();
@@ -71,12 +64,12 @@ public class MainActivity extends Activity{
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
-        }else if (!mBluetoothAdapter.isEnabled()) {
+        } else if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent,REQUEST_ENABLE_BT);
-        }else{
-            Intent selectDevice = new Intent(this.getApplication(),DeviceListActivity.class);
-            startActivityForResult(selectDevice,REQUEST_DEVICE_TO_CONNECT);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+            Intent selectDevice = new Intent(this.getApplication(), DeviceListActivity.class);
+            startActivityForResult(selectDevice, REQUEST_DEVICE_TO_CONNECT);
         }
     }
 
@@ -89,74 +82,192 @@ public class MainActivity extends Activity{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            /*case REQUEST_CONNECT_DEVICE_SECURE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    connectDevice(data, true);
-                }
-                break;
-            case REQUEST_CONNECT_DEVICE_INSECURE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    connectDevice(data, false);
-                }
-                break;*/
             case REQUEST_ENABLE_BT:
                 // When the request to enable Bluetooth returns
                 if (resultCode == Activity.RESULT_OK) {
-                    // Bluetooth is now enabled, so set up a chat session
-                    //BtConn conn= new BtConn();
-                    //BtConn.setupChat();
-                    Intent selectDevice = new Intent(this.getApplication(),DeviceListActivity.class);
-                    startActivityForResult(selectDevice,REQUEST_DEVICE_TO_CONNECT);
+                    Intent selectDevice = new Intent(this.getApplication(), DeviceListActivity.class);
+                    startActivityForResult(selectDevice, REQUEST_DEVICE_TO_CONNECT);
                 } else {
-                    // User did not enable Bluetooth or an error occurred
-                    //Log.d(TAG, "BT not enabled");
                     Toast.makeText(this, R.string.bt_not_enabled_leaving,
                             Toast.LENGTH_SHORT).show();
                     this.finish();
                 }
                 break;
             case REQUEST_DEVICE_TO_CONNECT:
-                if(resultCode==Activity.RESULT_OK){
+                if (resultCode == Activity.RESULT_OK) {
                     Bundle bundle = data.getExtras();
-                    Handler manejadorUi= new Handler();
-                    String address=bundle.getString(EXTRA_DEVICE_ADDRESS);
+                    String address = bundle.getString(EXTRA_DEVICE_ADDRESS);
                     BluetoothDevice btDev = mBluetoothAdapter.getRemoteDevice(address);
-
-                    //BtService conexion = new BtService(getApplicationContext(),manejadorUi);
-                    //conexion.getState();
-                    try {
-                        btSocket = btDev.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
-                        if(btSocket!= null){
-                            System.out.println("socket creado, crear thread");
-                            System.out.println(btSocket.isConnected());
-                            btSocket.connect();
-                            System.out.println("conectado:" +btSocket.isConnected());
-                            System.out.print("123456".getBytes());
-                            byte[] a = new byte['1','2','3','4','5','6','\n'];
-                            //byte[6] a =['1','2','3','4','5','6']
-                            btSocket.getOutputStream().write('1');
-                            btSocket.getOutputStream().write('2');
-                            btSocket.getOutputStream().write('1');
-                            btSocket.getOutputStream().write('3');
-                            btSocket.getOutputStream().write('1');
-                            btSocket.getOutputStream().write('4');
-                            btSocket.getOutputStream().write('1');
-                            btSocket.getOutputStream().write('5');
-                            btSocket.getOutputStream().write('\n');
-
-                            //byte[] response= new byte[3];
-                            //btSocket.getInputStream().read(response);
-                            //System.out.println(response.toString());
-                            System.out.println("cerrando conexion");
-                            btSocket.close();
-
-                        }
+                    conexion = new BluetoothConn(btDev);
+                    System.out.println("conectado:" + conexion.getState());
+                    System.out.println("conectado:" + conexion.getState());
+                    /*try {
+                        conexion.mmSocket.connect();
                     } catch (IOException e) {
                         e.printStackTrace();
+                        conexion.cancel();
+                    }*/
+                    conexion.start();
+                }
+/*
+
+                    if(conexion.isAlive()){
+                        if(conexion.getState()== Thread.State.RUNNABLE){
+                            System.out.println("conectado:" +conexion.getState());
+                            //conexion.run();
+                            if(!conexion.mmSocket.isConnected()){
+                                System.out.println("Socket no conectado");
+                                /*conexion.cancel();
+                                finish();*/
+                //                       System.out.println("intento 2 de conexion");
+                //conexion.run();
+                //                    }
+  /*                          if (conexion.mmSocket.isConnected()){
+                                System.out.println("conectado");
+                                //conexion.run();
+                                char[] msjInit=new char[3];
+                                byte[] a =new byte[8];
+                                a="12131415\n".getBytes();
+                                conexion.write(a);
+                                System.out.println(conexion.buffer[0]);
+                                System.out.println(conexion.buffer[1]);
+                                /*for(int i=0;i<3;i++){
+                                    try {
+                                        msjInit[i]= (char)conexion.mmInStream.read();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                if(msjInit.toString()!=null){
+                                    System.out.println("conexion establecida");
+                                }*/
+                //}
+                //                    }
+                //}
+                /*
+                    if(conexion.isAlive()){
+                        System.out.println("Cerrando conexion");
+                        conexion.cancel();
+                    }*/
+
+                //     }
+                break;
+        }
+    }
+
+
+    private class BluetoothConn extends Thread {
+        private final BluetoothSocket mmSocket;
+        private final InputStream mmInStream;
+        private final OutputStream mmOutStream;
+        int i=0;
+        byte[] buffer;
+
+        // Unique UUID for this application, you may use different
+        public BluetoothConn(BluetoothDevice device) {
+
+            BluetoothSocket tmp = null;
+
+            // Get a BluetoothSocket for a connection with the given BluetoothDevice
+            try {
+                tmp = device.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mmSocket = tmp;
+
+            //now make the socket connection in separate thread to avoid FC
+            Thread connectionThread  = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    // Always cancel discovery because it will slow down a connection
+                    mBluetoothAdapter.cancelDiscovery();
+
+                    // Make a connection to the BluetoothSocket
+                    try {
+                        // This is a blocking call and will only return on a
+                        // successful connection or an exception
+                        mmSocket.connect();
+                    } catch (IOException e) {
+                        //connection to device failed so close the socket
+                        try {
+                            mmSocket.close();
+                        } catch (IOException e2) {
+                            e2.printStackTrace();
+                        }
                     }
                 }
+            });
+
+            connectionThread.start();
+
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+
+            // Get the BluetoothSocket input and output streams
+            try {
+                tmpIn = mmSocket.getInputStream();
+                tmpOut = mmSocket.getOutputStream();
+                buffer = new byte[5];
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mmInStream = tmpIn;
+            mmOutStream = tmpOut;
+        }
+
+            public void run() {
+                while (true) {
+                    if (mmSocket.isConnected()){
+                        byte[] a =new byte[8];
+                        a="12131415\n".getBytes();
+                        conexion.write(a);
+                        System.out.println("Se escribio en el arduino");
+                        conexion.cancel();
+                        System.out.println("cerrando conexion");
+                    }else{
+                        System.out.println("espeerando conexion");
+                    }
+
+                // Keep listening to the InputStream while connected
+
+                /*try {
+                    //buffer[i]=(byte)mmInStream.read();
+                    i++;
+                    //read the data from socket stream
+                    /*int a=mmInStream.available();
+                    if(a>0){
+                        for(int i=0;i<a;i++){
+                            buffer[i]=(byte)mmInStream.read();
+                        }
+
+                    }
+                    // Send the obtained bytes to the UI Activity
+                } catch (IOException e) {
+                    //an exception here marks connection loss
+                    //send message to UI Activity
+                    break;
+                }*/
+            }
+        }
+
+        public void write(byte[] buffer) {
+            try {
+                //write the data to socket stream
+                mmOutStream.write(buffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

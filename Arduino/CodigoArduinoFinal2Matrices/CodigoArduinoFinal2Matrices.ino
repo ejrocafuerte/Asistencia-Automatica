@@ -25,7 +25,7 @@ void loop() {
   }
   else {
     /*************PARPADEO 1***********/
-    
+    BT1.println("OK");
     s = GetLineBT();
     ///es string siempre enviara 12 bytes
     //los 4 primeros son id_materia que se convertiran en 2 bytes
@@ -41,8 +41,8 @@ void loop() {
     Serial.println(m[1]);
     Serial.println(m[2]);
     Serial.println(m[3]);
-    for(int i=0;i<10;i++){
-      pintarLleno(2000);
+    for(int i=0;i<50;i++){
+      pintarLleno(1000);
     pintarVacio(1000);
 
     /*************PARPADEO 2*********/
@@ -54,7 +54,7 @@ void loop() {
     shiftOut(dataPin, clockPin, LSBFIRST, espacio * 2 + m[1]);
     shiftOut(dataPin, clockPin, LSBFIRST, espacio * 3 + m[0]);
     digitalWrite(latchPin, 1);
-    delay(2000);
+    delay(1000);
     pintarVacio(1000);
     /*************PARPADEO 3**********/
     digitalWrite(latchPin, 0) ; // Latch a LOW para que no
@@ -65,7 +65,7 @@ void loop() {
     shiftOut(dataPin, clockPin, LSBFIRST, espacio * 2 + m[3]);
     shiftOut(dataPin, clockPin, LSBFIRST, espacio * 3 + m[2]);
     digitalWrite(latchPin, 1);
-    delay(2000);
+    delay(1000);
     pintarVacio(1000);
     }
     BT1.println("OK");

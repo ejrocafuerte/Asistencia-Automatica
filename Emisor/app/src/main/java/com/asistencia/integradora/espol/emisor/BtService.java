@@ -26,7 +26,7 @@ public class BtService {
     private static final String NAME_SECURE = "BluetoothChatSecure";
     private static final String NAME_INSECURE = "BluetoothChatInsecure";
     // Unique UUID for this application
-    private static final UUID MY_UUID_SECURE = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+    private static final UUID MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
     // Member fields
     private final BluetoothAdapter mAdapter;
@@ -271,7 +271,6 @@ public class BtService {
         // The local server socket
         private final BluetoothServerSocket mmServerSocket;
         private String mSocketType;
-
         public AcceptThread(boolean secure) {
             BluetoothServerSocket tmp = null;
             mSocketType = secure ? "Secure" : "Insecure";
@@ -291,7 +290,6 @@ public class BtService {
             mmServerSocket = tmp;
             mState = STATE_LISTEN;
         }
-
         public void run() {
             Log.d(TAG, "Socket Type: " + mSocketType +
                     "BEGIN mAcceptThread" + this);
@@ -336,7 +334,6 @@ public class BtService {
             Log.i(TAG, "END mAcceptThread, socket Type: " + mSocketType);
 
         }
-
         public void cancel() {
             Log.d(TAG, "Socket Type" + mSocketType + "cancel " + this);
             try {
@@ -346,8 +343,6 @@ public class BtService {
             }
         }
     }
-
-
     /**
      * This thread runs while attempting to make an outgoing connection
      * with a device. It runs straight through; the connection either
@@ -422,7 +417,6 @@ public class BtService {
             }
         }
     }
-
     /**
      * This thread runs during a connection with a remote device.
      * It handles all incoming and outgoing transmissions.
@@ -450,7 +444,6 @@ public class BtService {
             mmOutStream = tmpOut;
             mState = STATE_CONNECTED;
         }
-
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
@@ -472,7 +465,6 @@ public class BtService {
                 }
             }
         }
-
         /**
          * Write to the connected OutStream.
          *
@@ -489,7 +481,6 @@ public class BtService {
                 Log.e(TAG, "Exception during write", e);
             }
         }
-
         public void cancel() {
             try {
                 mmSocket.close();
