@@ -65,8 +65,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private static Retrofit retrofit = null;
     private RestClient restClient = null;
     protected static Crypt crypto;
-
-    //private ListaAsistencias asistencias;
     private ArrayList<Asistencia> asistencias;
     private Asistencia asistenciaActual;
     private Estudiante estudiante;
@@ -82,7 +80,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private String codigo = "";
     private String distanciaX = "";
     private String distanciaY = "";
-    //private String senales = "";
 
     private String delimitador = ";;";
     private String delimitadorNl = "**";
@@ -182,46 +179,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 break;
         }
     }
-
-    /*private void sendMessage(final String msg) {
-
-        if (restClient != null) {
-            Call<String> request = restClient.sendMessage2(msg);
-
-            request.enqueue(new Callback<String>() {
-                @Override
-                public void onResponse(Call<String> call, Response<String> response) {
-                    if (response.isSuccessful()) {
-                        ArrayList<Asistencia> rsp = response.body();
-                        Log.e("onResponse", rsp.toString());
-                        switch(rsp.toString()){
-                            case "0":{ //OK
-                                asistencias.clear();
-                                //infoAsistenciaActual = "";
-                                _deleteFile(nombreArchivoAsistencia);
-                                Toast.makeText(mContext, "Server OK",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                            case "1":{
-
-                            }
-                        }
-                    }
-                    else{
-                        saveFile(mContext, asistencias, nombreArchivoAsistencia);
-                        Toast.makeText(mContext, "Server NOK saving file...", Toast.LENGTH_SHORT).show();
-                        Log.e("Server NOK saving file...", getAsistenciasMessage(asistencias));
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<String> call, Throwable t) {
-                    Toast.makeText(mContext, "Retrofit fail!", Toast.LENGTH_SHORT).show();
-                    Log.e("Retrofit fail!", t.getMessage());
-                    saveFile(mContext, asistencias, nombreArchivoAsistencia);
-                }
-            });        }
-    }*/
 
     private void sendMessage(final ArrayList<Asistencia> asistencias/*String asistenciasMessage*/) {
 
@@ -393,13 +350,13 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     asistencia.setDistanciaX(parametros[8]);
                     asistencia.setDistanciaY(parametros[9]);
                     String[] senales = new String(parametros[10]).split("&&");
-                    Log.e("senales " , senales[0]);
+                    //Log.e("senales " , senales[0]);
 
                     ArrayList<Senal> ls = new ArrayList<>();
                     for (String infosenal : senales) {
                         String[] paramsenal = new String(infosenal).split("==");
 
-                        Log.e("senalesc " , paramsenal[0]);
+                        //Log.e("senalesc " , paramsenal[0]);
                         Senal s = new Senal();
                         s.setBssid(paramsenal[0]);
                         s.setSsid(paramsenal[1]);
@@ -603,7 +560,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             senal.setLevel(scanResult.level);
             senal.setLevel2(WifiManager.calculateSignalLevel(scanResult.level, 100));
             senales.add(senal);
-            Log.e(TAG, "scanWifiSignals: " + senal.toString());
+            //Log.e(TAG, "scanWifiSignals: " + senal.toString());
             /*sb.append(scanResult.BSSID)
                     .append("==")
                     .append(scanResult.level)
@@ -622,7 +579,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     public static String encrypt(final String message) {
         try {
             String encryptMessage = crypto.encrypt_string(message);
-            Log.e("encrypt", encryptMessage);
+            //Log.e("encrypt", encryptMessage);
             return encryptMessage;
         } catch (InvalidKeyException e) {
             e.printStackTrace();
