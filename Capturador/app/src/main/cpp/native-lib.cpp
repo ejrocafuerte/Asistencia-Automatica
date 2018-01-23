@@ -37,8 +37,7 @@ bool filtrarCuadrado(const vector<vector<Point> >& cuadrados, vector<Point>& app
 float distanciaEntreDosPuntos(Point p1, Point p2);
 int buscarPuntoMasCercano(vector<Point> puntos, Point punto);
 double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0);
-float getWidthObjectImage(vector<vector<Point> >& cuadrados);
-float getHeightObjectImage(vector<vector<Point> >& cuadrados);
+static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados);
 string IntToString (int a);
 int binarioADecimal(int n);
 static double rad2Deg(double rad);
@@ -81,6 +80,7 @@ float TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
 int NUM_MATRICES = 3;
 int NUM_PARTICIONES = 16;
 int PARTICION_OFFSET = 1;
+int AREA_CUADRADO = 200;
 
 JNIEXPORT jstring JNICALL
 Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
@@ -212,7 +212,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
             if(metodo == LAPLACIAN) {
                 /// Apply Laplace function
                 Mat dst;
-                bitwise_not(gray0, gray0);
+                //bitwise_not(gray0, gray0);
                 Laplacian(gray0, dst, 3, 3, 1, 0, BORDER_DEFAULT); //3 depth CV_16S
                 convertScaleAbs(dst, gray);
                 /*if(1){
@@ -276,7 +276,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
             // contour orientation
             if( approx.size() == 4 &&
                 !filtrarCuadrado(cuadrados, approx) &&
-                    fabs(contourArea(Mat(approx))) > 100 &&
+                    fabs(contourArea(Mat(approx))) > AREA_CUADRADO &&
                 isContourConvex(Mat(approx)))
             {
                 double maxCosine = 0;
@@ -301,7 +301,80 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
     }
 
     ordenarCuadradosPorPosicionEspacial(cuadrados, DIRECCION_ORDEN_C);
+    obtenerCuadradosCercanos(cuadrados);
 }
+
+static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
+    if(cuadrados.size() <= 3) return;
+
+    vector<vector<Point> > cuadradosSeleccionados;
+
+    double angSeleccionado = 0,
+            angActual = 0,
+            distanciaSeleccionada = 0,
+            distanciaActual = 0;
+
+    bool busquedaExitosaSubSegmento = false,
+            busquedaExitosaSegmento = false;
+
+    try {
+
+        for (int n = 0; n < cuadrados.size() - 2; n++) {
+
+            cuadradosSeleccionados.push_back(cuadrados[n]);
+            __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback n: %i", n);
+            for (int p = n + 1; p < cuadrados.size() - 1; p++) {
+
+                cuadradosSeleccionados.push_back(cuadrados[p]);
+                __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback p: %i", p);
+                distanciaSeleccionada = distanciaEntreDosPuntos(cuadrados[n][0], cuadrados[p][0]);
+                angSeleccionado = fabs(atan2(cuadrados[p][0].y - cuadrados[n][0].y,
+                                             cuadrados[p][0].x - cuadrados[n][0].x));
+
+                for (int q = p + 1; q < cuadrados.size(); q++) {
+
+                    distanciaActual = distanciaEntreDosPuntos(cuadrados[p][0], cuadrados[q][0]);
+                    if (fabs(distanciaSeleccionada - distanciaActual) <= 10) {
+                        angActual = fabs(atan2(cuadrados[p][0].y - cuadrados[q][0].y,
+                                               cuadrados[p][0].x - cuadrados[q][0].x));
+
+                        if (fabs(angSeleccionado - angActual) <= (M_PI_4 / 2)) {
+
+                            cuadradosSeleccionados.push_back(cuadrados[q]);
+
+                         if(cuadradosSeleccionados.size() == NUM_MATRICES){
+                             cuadrados.clear();
+                             cuadrados = cuadradosSeleccionados;
+                             return;
+                         }
+                        __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback q: %i", q);
+
+                        __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "distanciaActual p-q: %.2f", fabs(distanciaSeleccionada - distanciaActual));
+                            busquedaExitosaSubSegmento = true;
+                            busquedaExitosaSegmento = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!busquedaExitosaSubSegmento) {
+                    cuadradosSeleccionados.pop_back();
+                    busquedaExitosaSubSegmento = false;
+                }
+            }
+
+            if (!busquedaExitosaSegmento) {
+                //cuadradosSeleccionados.pop_back();
+                busquedaExitosaSegmento = false;
+                cuadradosSeleccionados.clear();
+            }
+        }
+    }
+    catch(Exception e) {
+        __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "cuadrados: %s", "EXCEPTION");
+    }
+}
+
 static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados ) {
 
     for (int i = 0; i < cuadrados.size(); i++) {
@@ -311,10 +384,6 @@ static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrado
 
         putText(image, IntToString(i + 1).c_str(), Point(cuadrados[i][0].x, cuadrados[i][0].y-10),
                 FONT_HERSHEY_SIMPLEX, 0.8, Scalar(255, 0, 0), 2, LINE_AA, false);
-        //if (p->x > 3 && p->y > 3 && p->x < MAX_WIDTH -3 && p->y < MAX_HEIGHT-3) {
-        //Rect boundRect;
-        //boundRect = boundingRect(cuadrados[i]);
-        //rectangle(image, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
         polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 1, 16);
     }
 
