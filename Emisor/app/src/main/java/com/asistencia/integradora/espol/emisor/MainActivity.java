@@ -3,11 +3,13 @@ package com.asistencia.integradora.espol.emisor;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.widget.Toast;
 
@@ -30,6 +32,8 @@ public class MainActivity extends Activity {
     private static final UUID MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
     BluetoothConn conexion;
+    byte[] mensaje = new byte[12];
+
 
     public BluetoothAdapter mBluetoothAdapter;
 
@@ -94,66 +98,51 @@ public class MainActivity extends Activity {
                 }
                 break;
             case REQUEST_DEVICE_TO_CONNECT:
+                //mBluetoothAdapter.cancelDiscovery();
+                //mBluetoothAdapter.startDiscovery();
                 if (resultCode == Activity.RESULT_OK) {
                     Bundle bundle = data.getExtras();
                     String address = bundle.getString(EXTRA_DEVICE_ADDRESS);
                     BluetoothDevice btDev = mBluetoothAdapter.getRemoteDevice(address);
-                    conexion = new BluetoothConn(btDev);
-                    System.out.println("conectado:" + conexion.getState());
-                    System.out.println("conectado:" + conexion.getState());
-                    /*try {
-                        conexion.mmSocket.connect();
+                    BluetoothSocket bts = null;
+                    try {
+                        System.out.println("Creando socket");
+                        bts = btDev.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
                     } catch (IOException e) {
                         e.printStackTrace();
-                        conexion.cancel();
-                    }*/
-                    conexion.start();
+                    }
+                    if(bts!=null){
+                        try {
+                            bts.connect();
+                            System.out.println("estableciendo conexion");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            System.out.println("conexion fallida");
+                        }
+                    }
+                    if (bts.isConnected()) {
+                        System.out.println("conectado");
+                        System.out.println("enviando mensaje");
+                        mensaje = "12131415\n".getBytes();
+                        try{
+                            bts.getOutputStream().write(mensaje);
+                            System.out.println("mensaje enviado");
+                            //System.out.println(bts.getInputStream().read());
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }finally {
+                            try {
+                                bts.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    break;
                 }
-/*
-
-                    if(conexion.isAlive()){
-                        if(conexion.getState()== Thread.State.RUNNABLE){
-                            System.out.println("conectado:" +conexion.getState());
-                            //conexion.run();
-                            if(!conexion.mmSocket.isConnected()){
-                                System.out.println("Socket no conectado");
-                                /*conexion.cancel();
-                                finish();*/
-                //                       System.out.println("intento 2 de conexion");
-                //conexion.run();
-                //                    }
-  /*                          if (conexion.mmSocket.isConnected()){
-                                System.out.println("conectado");
-                                //conexion.run();
-                                char[] msjInit=new char[3];
-                                byte[] a =new byte[8];
-                                a="12131415\n".getBytes();
-                                conexion.write(a);
-                                System.out.println(conexion.buffer[0]);
-                                System.out.println(conexion.buffer[1]);
-                                /*for(int i=0;i<3;i++){
-                                    try {
-                                        msjInit[i]= (char)conexion.mmInStream.read();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                if(msjInit.toString()!=null){
-                                    System.out.println("conexion establecida");
-                                }*/
-                //}
-                //                    }
-                //}
-                /*
-                    if(conexion.isAlive()){
-                        System.out.println("Cerrando conexion");
-                        conexion.cancel();
-                    }*/
-
-                //     }
-                break;
         }
     }
+
 
 
     private class BluetoothConn extends Thread {
@@ -225,7 +214,7 @@ public class MainActivity extends Activity {
                         a="12131415\n".getBytes();
                         conexion.write(a);
                         System.out.println("Se escribio en el arduino");
-                        conexion.cancel();
+                        //conexion.cancel();
                         System.out.println("cerrando conexion");
                     }else{
                         System.out.println("espeerando conexion");
