@@ -37,8 +37,8 @@ bool filtrarCuadrado(const vector<vector<Point> >& cuadrados, vector<Point>& app
 float distanciaEntreDosPuntos(Point p1, Point p2);
 int buscarPuntoMasCercano(vector<Point> puntos, Point punto);
 double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0);
-float getWidthObjectImage(vector<vector<Point> >& cuadrados);
-float getHeightObjectImage(vector<vector<Point> >& cuadrados);
+static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados);
+static void obtenerAngulosEuler(vector<vector<Point> >& cuadrados, double& tilt, double& yaw, double& roll);
 string IntToString (int a);
 int binarioADecimal(int n);
 static double rad2Deg(double rad);
@@ -77,7 +77,8 @@ int SEGMENTOS_INTERNOS = 3;
 int PUNTOS_SEGMENTO_INTERNOS = 3;
 int DIRECCION_ORDEN_C = 1;
 int NIVEL_THRESHOLD = 50;
-float TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
+double TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
+double DISTANCE_RATIO = 0.9;
 int NUM_MATRICES = 3;
 int NUM_PARTICIONES = 16;
 int PARTICION_OFFSET = 1;
@@ -139,11 +140,17 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
             //mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[0][3]);
             mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(Point(boundRect.tl().x, boundRect.tl().y + boundRect.height), boundRect.br()); //getWidthObjectImage(cuadrados); //
             mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(boundRect.tl(), Point(boundRect.tl().x, boundRect.tl().y +  boundRect.height)); ////getHeightObjectImage(cuadrados);
+
+            double dy = cuadrados[0][3].y - cuadrados[2][2].y,
+                   dx = cuadrados[0][3].x - cuadrados[2][2].x;
+            double roll = CV_PI - atan2(dy, dx);
+            double tilt =
+        __android_log_print(ANDROID_LOG_ERROR, "roll", "%.2f", roll);
             warpFrame(mOriginalCopiaB,
                         mWarpImage,
-                        mParameters.at<double>(0, 0), //tilt,
-                        mParameters.at<double>(0, 1), //yaw,
-                        -mParameters.at<double>(0, 2), //roll,
+                        0,//mParameters.at<double>(0, 0), //tilt,
+                        0,//mParameters.at<double>(0, 1), //yaw,
+                        roll,//-mParameters.at<double>(0, 2), //roll,
                         0,
                         0,
                         1,
@@ -186,7 +193,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 mObjectSize.at<double>(0, 3) = distanciaEntreDosPuntos(boundRect2.tl(), Point(boundRect2.tl().x, boundRect2.tl().y +  boundRect2.height)); ////getHeightObjectImage(cuadrados);
 
             }
-            mResultado = mProcesado;//mWarpImage;
+            mResultado = mWarpImage;//mWarpImage;
        //}
     }
     else mResultado = mProcesado;
@@ -212,7 +219,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
             if(metodo == LAPLACIAN) {
                 /// Apply Laplace function
                 Mat dst;
-                bitwise_not(gray0, gray0);
+                //bitwise_not(gray0, gray0);
                 Laplacian(gray0, dst, 3, 3, 1, 0, BORDER_DEFAULT); //3 depth CV_16S
                 convertScaleAbs(dst, gray);
                 /*if(1){
@@ -301,9 +308,102 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
     }
 
     ordenarCuadradosPorPosicionEspacial(cuadrados, DIRECCION_ORDEN_C);
+    obtenerCuadradosCercanos(cuadrados);
+}
+static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
+
+    if(cuadrados.size() <= 3) return;
+
+    vector<vector<Point> > cuadradosSeleccionados;
+
+    double angSeleccionado = 0,
+            angActual = 0,
+            distanciaSeleccionada = 0,
+            distanciaActual = 0;
+
+    bool busquedaExitosaSubSegmento = false,
+            busquedaExitosaSegmento = false;
+
+    try {
+
+        for (int n = 0; n < cuadrados.size() - 2; n++) {
+
+            cuadradosSeleccionados.push_back(cuadrados[n]);
+
+            for (int p = n + 1; p < cuadrados.size() - 1; p++) {
+
+                cuadradosSeleccionados.push_back(cuadrados[p]);
+                //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback p: %i", p);
+                distanciaSeleccionada = distanciaEntreDosPuntos(cuadrados[n][0], cuadrados[p][0]);
+                angSeleccionado = fabs(atan2(cuadrados[p][0].y - cuadrados[n][0].y,
+                                             cuadrados[p][0].x - cuadrados[n][0].x));
+
+                for (int q = p + 1; q < cuadrados.size(); q++) {
+
+                    distanciaActual = distanciaEntreDosPuntos(cuadrados[p][0], cuadrados[q][0]);
+
+
+                    double razon = (distanciaSeleccionada >= distanciaActual) ?
+                                   (distanciaActual / distanciaSeleccionada) : (distanciaSeleccionada / distanciaActual);
+
+                    if (fabs(razon) > DISTANCE_RATIO) {
+                        angActual = fabs(atan2(cuadrados[q][0].y - cuadrados[p][0].y,
+                                               cuadrados[q][0].x - cuadrados[p][0].x));
+                        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "razon: %.2f", razon);
+                        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "%i %i %i - distancia(%.2f) - angulo(%.2f , %.2f)", n,p,q,
+                                            //razon, angSeleccionado, fabs(atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x)));
+
+                        //razon = (angSeleccionado >= angActual) ? (angActual / angSeleccionado) : (angSeleccionado / angActual);
+
+                        //if (fabs(razon) <= 0.85) {
+                        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "OK angulo");
+
+                            cuadradosSeleccionados.push_back(cuadrados[q]);
+
+                            if(cuadradosSeleccionados.size() == NUM_MATRICES){
+                                cuadrados.clear();
+                                cuadrados = cuadradosSeleccionados;
+                                return;
+                            }
+                            //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback q: %i", q);
+
+                            //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "distanciaActual p-q: %.2f", fabs(distanciaSeleccionada - distanciaActual));
+                            busquedaExitosaSubSegmento = true;
+                            busquedaExitosaSegmento = true;
+                            break;
+                       //}
+                    }
+                }
+
+                if (!busquedaExitosaSubSegmento) {
+                    cuadradosSeleccionados.pop_back();
+                    busquedaExitosaSubSegmento = false;
+                }
+            }
+
+            if (!busquedaExitosaSegmento) {
+                //cuadradosSeleccionados.pop_back();
+                busquedaExitosaSegmento = false;
+            }
+        }
+    }
+    catch(Exception e) {
+        __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "cuadrados: %s", "EXCEPTION");
+    }
+}
+
+static void obtenerAngulosEuler(vector<vector<Point> >& cuadrados, double& tilt, double& yaw, double& roll){
+    if(cuadrados.size() <= 0) return;
+
+    Point2f a = cuadrados[0][0];
+    Point2f b = cuadrados[0][1];
+    Point2f c = cuadrados[0][2];
+    Point2f d = cuadrados[0][3];
+
+    
 }
 static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados ) {
-
+    if(cuadrados.size() <= 0) return;
     for (int i = 0; i < cuadrados.size(); i++) {
 
         const Point *p = &cuadrados[i][0];
@@ -1261,7 +1361,7 @@ void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double ro
 
     tilt = deg2Rad(tilt);
     yaw = deg2Rad(yaw);
-    roll = deg2Rad(roll);
+    //roll = deg2Rad(roll);
 
     // Camera Calibration Intrinsics Matrix
     C.at<double>(0,0) = f; C.at<double>(0,1) = 0; C.at<double>(0,2) = cx; C.at<double>(0,3) = 0;
