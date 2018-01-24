@@ -34,19 +34,17 @@ static void decodificarParticiones( Mat& image,
                                     string& mensajeBinario);
 static void traducirMensaje(string& mensajeBinario, string& mensaje, int& fase);
 bool filtrarCuadrado(const vector<vector<Point> >& cuadrados, vector<Point>& approx);
-float distanciaEntreDosPuntos(Point p1, Point p2);
+double distanciaEntreDosPuntos(Point p1, Point p2);
 int buscarPuntoMasCercano(vector<Point> puntos, Point punto);
 double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0);
 static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados);
+static void obtenerAngulosEuler(Mat& image, vector<vector<Point> >& cuadrados, double f, double cx, double cy, double& tilt, double& yaw, double& roll);
+bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
 string IntToString (int a);
 int binarioADecimal(int n);
 static double rad2Deg(double rad);
-Vec3f rotationMatrixToEulerAngles(Mat &R);
-bool isRotationMatrix(Mat &R);
 float angle(Point A, Point B);
 static double deg2Rad(double deg);
-float cal_angle (  float current_x , float current_y , float tar_x , float tar_y );
-void cameraPoseFromHomography(const Mat& H, Mat& pose);
 void warpImage(const Mat &src,
                double    theta,
                double    phi,
@@ -68,7 +66,7 @@ void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double ro
                  double dx, double dy, double dz, double f, double cx, double cy);
 
 int N = 15; //11
-int GAUSSIAN_FACTOR = 5;
+int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
 int SEGMENTOS_FRONTERA = 4;
 int PUNTOS_SEGMENTO_FRONTERA = 3;
@@ -76,11 +74,12 @@ int SEGMENTOS_INTERNOS = 3;
 int PUNTOS_SEGMENTO_INTERNOS = 3;
 int DIRECCION_ORDEN_C = 1;
 int NIVEL_THRESHOLD = 50;
-float TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
+double TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
+double DISTANCE_RATIO = 0.9;
 int NUM_MATRICES = 3;
 int NUM_PARTICIONES = 16;
 int PARTICION_OFFSET = 1;
-int AREA_CUADRADO = 200;
+int SQUARE_AREA = 200;
 
 JNIEXPORT jstring JNICALL
 Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
@@ -102,7 +101,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     string mensajeBinario = "................................................";
     string mensajeDecimal = "";
     int faseDeco =  mParameters.at<double>(0, 5);
-
+    double tilt = 0, yaw = 0, roll = 0;
     MAX_WIDTH = mProcesado.cols;
     MAX_HEIGHT = mProcesado.rows;
     vector<vector<Point> > cuadrados, cuadradosImagenCorregida;
@@ -112,7 +111,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     buscarCuadrados(mProcesado, cuadrados, LAPLACIAN, N);
     dibujarCuadrados(mProcesado, cuadrados);
     drawMarker(mProcesado, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(255, 0, 0), MARKER_CROSS, 20, 2);
-
+    obtenerAngulosEuler(mProcesado, cuadrados, mParameters.at<double>(0, 6), MAX_WIDTH/2, MAX_HEIGHT/2, tilt, yaw, roll);
     if(cuadrados.size() == NUM_MATRICES && alineadoEjeFocal(mProcesado, cuadrados)) {
 
         Mat mWarpImage, mLambda;
@@ -139,11 +138,13 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
             //mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[0][3]);
             mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(Point(boundRect.tl().x, boundRect.tl().y + boundRect.height), boundRect.br()); //getWidthObjectImage(cuadrados); //
             mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(boundRect.tl(), Point(boundRect.tl().x, boundRect.tl().y +  boundRect.height)); ////getHeightObjectImage(cuadrados);
+
+
             warpFrame(mOriginalCopiaB,
                         mWarpImage,
-                        mParameters.at<double>(0, 0), //tilt,
-                        mParameters.at<double>(0, 1), //yaw,
-                        -mParameters.at<double>(0, 2), //roll,
+                        tilt,//mParameters.at<double>(0, 0), //tilt,
+                        yaw,//mParameters.at<double>(0, 1), //yaw,
+                        roll,//-mParameters.at<double>(0, 2), //roll,
                         0,
                         0,
                         1,
@@ -186,7 +187,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 mObjectSize.at<double>(0, 3) = distanciaEntreDosPuntos(boundRect2.tl(), Point(boundRect2.tl().x, boundRect2.tl().y +  boundRect2.height)); ////getHeightObjectImage(cuadrados);
 
             }
-            mResultado = mProcesado;//mWarpImage;
+            mResultado = mWarpImage;//mWarpImage;
        //}
     }
     else mResultado = mProcesado;
@@ -224,7 +225,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 }*/
             }
             else if (metodo == CANNY) {
-                bitwise_not(gray0, gray0);
+                //bitwise_not(gray0, gray0);
                 Canny(gray0, gray, 0, 15, 3, false);//10,20,3);// 0 10 5
                 /*if(1){
 
@@ -276,7 +277,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
             // contour orientation
             if( approx.size() == 4 &&
                 !filtrarCuadrado(cuadrados, approx) &&
-                    fabs(contourArea(Mat(approx))) > AREA_CUADRADO &&
+                    fabs(contourArea(Mat(approx))) > SQUARE_AREA &&
                 isContourConvex(Mat(approx)))
             {
                 double maxCosine = 0;
@@ -303,8 +304,8 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
     ordenarCuadradosPorPosicionEspacial(cuadrados, DIRECCION_ORDEN_C);
     obtenerCuadradosCercanos(cuadrados);
 }
-
 static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
+
     if(cuadrados.size() <= 3) return;
 
     vector<vector<Point> > cuadradosSeleccionados;
@@ -322,11 +323,11 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
         for (int n = 0; n < cuadrados.size() - 2; n++) {
 
             cuadradosSeleccionados.push_back(cuadrados[n]);
-            __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback n: %i", n);
+
             for (int p = n + 1; p < cuadrados.size() - 1; p++) {
 
                 cuadradosSeleccionados.push_back(cuadrados[p]);
-                __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback p: %i", p);
+                //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback p: %i", p);
                 distanciaSeleccionada = distanciaEntreDosPuntos(cuadrados[n][0], cuadrados[p][0]);
                 angSeleccionado = fabs(atan2(cuadrados[p][0].y - cuadrados[n][0].y,
                                              cuadrados[p][0].x - cuadrados[n][0].x));
@@ -334,26 +335,37 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                 for (int q = p + 1; q < cuadrados.size(); q++) {
 
                     distanciaActual = distanciaEntreDosPuntos(cuadrados[p][0], cuadrados[q][0]);
-                    if (fabs(distanciaSeleccionada - distanciaActual) <= 10) {
-                        angActual = fabs(atan2(cuadrados[p][0].y - cuadrados[q][0].y,
-                                               cuadrados[p][0].x - cuadrados[q][0].x));
 
-                        if (fabs(angSeleccionado - angActual) <= (M_PI_4 / 2)) {
+
+                    double razon = (distanciaSeleccionada >= distanciaActual) ?
+                                   (distanciaActual / distanciaSeleccionada) : (distanciaSeleccionada / distanciaActual);
+
+                    if (fabs(razon) > DISTANCE_RATIO) {
+                        angActual = fabs(atan2(cuadrados[q][0].y - cuadrados[p][0].y,
+                                               cuadrados[q][0].x - cuadrados[p][0].x));
+                        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "razon: %.2f", razon);
+                        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "%i %i %i - distancia(%.2f) - angulo(%.2f , %.2f)", n,p,q,
+                                            //razon, angSeleccionado, fabs(atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x)));
+
+                        //razon = (angSeleccionado >= angActual) ? (angActual / angSeleccionado) : (angSeleccionado / angActual);
+
+                        //if (fabs(razon) <= 0.85) {
+                        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "OK angulo");
 
                             cuadradosSeleccionados.push_back(cuadrados[q]);
 
-                         if(cuadradosSeleccionados.size() == NUM_MATRICES){
-                             cuadrados.clear();
-                             cuadrados = cuadradosSeleccionados;
-                             return;
-                         }
-                        __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback q: %i", q);
+                            if(cuadradosSeleccionados.size() == NUM_MATRICES){
+                                cuadrados.clear();
+                                cuadrados = cuadradosSeleccionados;
+                                return;
+                            }
+                            //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback q: %i", q);
 
-                        __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "distanciaActual p-q: %.2f", fabs(distanciaSeleccionada - distanciaActual));
+                            //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "distanciaActual p-q: %.2f", fabs(distanciaSeleccionada - distanciaActual));
                             busquedaExitosaSubSegmento = true;
                             busquedaExitosaSegmento = true;
                             break;
-                        }
+                       //}
                     }
                 }
 
@@ -366,7 +378,6 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
             if (!busquedaExitosaSegmento) {
                 //cuadradosSeleccionados.pop_back();
                 busquedaExitosaSegmento = false;
-                cuadradosSeleccionados.clear();
             }
         }
     }
@@ -375,8 +386,104 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
     }
 }
 
-static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados ) {
+static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, double f, double cx, double cy, double& tilt, double& yaw, double& roll){
+    if(cuadrados.size() <  3) return;
+    try {
+        Point2f a = cuadrados[0][0];
+        Point2f b = cuadrados[2][1];
+        Point2f c = cuadrados[2][2];
+        Point2f d = cuadrados[0][3];
 
+        Point2f p, q, r, s, vx, vy;
+        vx.y = 0, vx.x = 0;
+        vy.x = 0, vy.y = 0;
+
+        tilt = 0;
+        yaw = 0;
+        roll = 0;
+
+        double distance1 = distanciaEntreDosPuntos(a, d);
+        double distance2 = distanciaEntreDosPuntos(b, c);
+        double distance3 = distanciaEntreDosPuntos(a, b);
+        double distance4 = distanciaEntreDosPuntos(d, c);
+
+        p.x = a.x + (a.x - d.x) / distance1 * 5000;
+        p.y = a.y + (a.y - d.y) / distance1 * 5000;
+        q.x = b.x + (b.x - c.x) / distance2 * 5000;
+        q.y = b.y + (b.y - c.y) / distance2 * 5000;
+        r.x = a.x + (a.x - b.x) / distance3 * 5000;
+        r.y = a.y + (a.y - b.y) / distance3 * 5000;
+        s.x = d.x + (d.x - c.x) / distance4 * 5000;
+        s.y = d.y + (d.y - c.y) / distance4 * 5000;
+
+        line(image, a, p, Scalar(255, 0, 0), 1, LINE_8, 0);
+        line(image, b, q, Scalar(255, 0, 0), 1, LINE_8, 0);
+        line(image, a, r, Scalar(0, 255, 255), 1, LINE_8, 0);
+        line(image, d, s, Scalar(0, 255, 255), 1, LINE_8, 0);
+        intersection(a, p, b, q, vx);
+        intersection(a, r, d, s, vy);
+
+        Mat CI = Mat(3, 3, CV_64FC1),
+            V = Mat(3, 1, CV_64FC1),
+            R1, R2, R3;
+        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "Vx: (%.2f, %.2f)", vx.x, vx.y);
+        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "Vy: (%.2f, %.2f)", vy.x, vy.y);
+
+        CI.at<double>(0,0) = 1/f; CI.at<double>(0,1) = 0;   CI.at<double>(0,2) = -cx/f;
+        CI.at<double>(1,0) = 0;   CI.at<double>(1,1) = 1/f; CI.at<double>(1,2) = -cy/f;
+        CI.at<double>(2,0) = 0;   CI.at<double>(2,1) = 0;   CI.at<double>(2,2) = 1;
+
+        V.at<double>(0,0) = vx.x;
+        V.at<double>(1,0) = vx.y;
+        V.at<double>(2,0) = 1;
+
+        R1 = CI * V;
+        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R1: (%.2f, %.2f, %.2f)", R1.at<double>(0,0), R1.at<double>(1,0), R1.at<double>(2,0));
+
+        R1 = R1/norm(R1, NORM_L2);
+        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R1 norm: (%.2f, %.2f, %.2f)", R1.at<double>(0,0), R1.at<double>(1,0), R1.at<double>(2,0));
+
+        V.at<double>(0,0) = vy.x;
+        V.at<double>(1,0) = vy.y;
+        V.at<double>(2,0) = 1;
+
+        R2 = CI * V;
+        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R2: (%.2f, %.2f, %.2f)", R2.at<double>(0,0), R2.at<double>(1,0), R2.at<double>(2,0));
+        R2 = R2/norm(R2, NORM_L2);
+        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R2 norm: (%.2f, %.2f, %.2f)", R2.at<double>(0,0), R2.at<double>(1,0), R2.at<double>(2,0));
+
+        R3 = R1.cross(R2);
+        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R3: (%.2f, %.2f, %.2f)", R3.at<double>(0,0), R3.at<double>(1,0), R3.at<double>(2,0));
+
+        tilt = -atan(R3.at<double>(0,0)/R3.at<double>(2,0));
+        yaw = -asin(R3.at<double>(1,0));
+        roll = CV_PI - atan2(cuadrados[0][3].y - cuadrados[2][2].y, cuadrados[0][3].x - cuadrados[2][2].x);
+
+        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R3: (%.2f, %.2f, %.2f)", R3.at<double>(0,0), R3.at<double>(1,0), R3.at<double>(2,0));
+        __android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", tilt, yaw, roll);
+    }
+    catch (Exception e){}
+
+    
+}
+
+bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2,
+                  Point2f &r)
+{
+    Point2f x = o2 - o1;
+    Point2f d1 = p1 - o1;
+    Point2f d2 = p2 - o2;
+
+    float cross = d1.x*d2.y - d1.y*d2.x;
+    if (abs(cross) < 1e-8)
+        return false;
+
+    double t1 = (x.x * d2.y - x.y * d2.x)/cross;
+    r = o1 + d1 * t1;
+    return true;
+}
+static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados ) {
+    if(cuadrados.size() <= 0) return;
     for (int i = 0; i < cuadrados.size(); i++) {
 
         const Point *p = &cuadrados[i][0];
@@ -384,16 +491,16 @@ static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrado
 
         putText(image, IntToString(i + 1).c_str(), Point(cuadrados[i][0].x, cuadrados[i][0].y-10),
                 FONT_HERSHEY_SIMPLEX, 0.8, Scalar(255, 0, 0), 2, LINE_AA, false);
+        //if (p->x > 3 && p->y > 3 && p->x < MAX_WIDTH -3 && p->y < MAX_HEIGHT-3) {
+        //Rect boundRect;
+        //boundRect = boundingRect(cuadrados[i]);
+        //rectangle(image, boundRect.tl(), boundRect.br(), Scalar(100, 100, 100), 2, 8, 0);
         polylines(image, &p, &n, 1, true, Scalar(0, 255, 0), 1, 16);
     }
-
-
 }
 static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados , vector<vector<vector<Point> > >& particiones) {
 
     if(cuadrados.size() <= 0) return;
-
-
 
     vector<vector<vector<Point> > > puntosFrontera;
     vector<vector<vector<Point> > > puntosInternos;
@@ -1134,8 +1241,8 @@ int buscarPuntoMasCercano(vector<Point> puntos, Point punto){
     }
     return posicionMasCercana;
 }
-float distanciaEntreDosPuntos(Point p1, Point p2){
-    return (float)sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+double distanciaEntreDosPuntos(Point p1, Point p2){
+    return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
 
 string IntToString (int a)
@@ -1328,9 +1435,9 @@ void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double ro
     Mat C  = Mat(3, 4, CV_64FC1);
     Mat CI = Mat(4, 3, CV_64FC1);
 
-    tilt = deg2Rad(tilt);
-    yaw = deg2Rad(yaw);
-    roll = deg2Rad(roll);
+    //tilt = deg2Rad(tilt);
+    //yaw = deg2Rad(yaw);
+    //roll = deg2Rad(roll);
 
     // Camera Calibration Intrinsics Matrix
     C.at<double>(0,0) = f; C.at<double>(0,1) = 0; C.at<double>(0,2) = cx; C.at<double>(0,3) = 0;
