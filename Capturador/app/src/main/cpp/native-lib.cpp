@@ -7,12 +7,15 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <iostream>
+#include <numeric>
 
 using namespace std;
 using namespace cv;
 
 extern "C"
 {
+static vector<double> vTilt, vYaw, vRoll;
+static double accumTilt = 1.0f, accumYaw = 1.0f, accumRoll = 1.0f;
 enum MetodoBusqueda {LAPLACIAN, CONVEXHULL, CANNY};
 static void preprocesar(Mat& imagen_orig, Mat& imagen_prep);
 static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdLevel);
@@ -45,26 +48,11 @@ int binarioADecimal(int n);
 static double rad2Deg(double rad);
 float angle(Point A, Point B);
 static double deg2Rad(double deg);
-void warpImage(const Mat &src,
-               double    theta,
-               double    phi,
-               double    gamma,
-               double    scale,
-               double    fovy,
-               Mat&      dst,
-               Mat&      M,
-               vector<Point2f> &corners);
-void warpMatrix(Size   sz,
-                double theta,
-                double phi,
-                double gamma,
-                double scale,
-                double fovy,
-                Mat&   M,
-                vector<Point2f>* corners);
 void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double roll,
                  double dx, double dy, double dz, double f, double cx, double cy);
 
+
+static int counter = 1;
 int N = 15; //11
 int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
@@ -75,11 +63,11 @@ int PUNTOS_SEGMENTO_INTERNOS = 3;
 int DIRECCION_ORDEN_C = 1;
 int NIVEL_THRESHOLD = 50;
 double TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
-double DISTANCE_RATIO = 0.9;
+double DISTANCE_RATIO = 0.7;
 int NUM_MATRICES = 3;
 int NUM_PARTICIONES = 16;
 int PARTICION_OFFSET = 1;
-int SQUARE_AREA = 200;
+int SQUARE_AREA = 100;
 
 JNIEXPORT jstring JNICALL
 Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
@@ -89,8 +77,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                  jlong objectSize,
                                                                  jlong parameters) {
 
-    //TO DO LIST
-    // RESIZE CORRECTED IMAGE BEFORE SEARCH
+
     Mat & mProcesado = *(Mat*)imagenRGBA;
     Mat mOriginalCopia = mProcesado.clone();
     Mat mOriginalCopiaB = mProcesado.clone();
@@ -100,22 +87,30 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
 
     string mensajeBinario = "................................................";
     string mensajeDecimal = "";
-    int faseDeco =  mParameters.at<double>(0, 5);
-    double tilt = 0, yaw = 0, roll = 0;
+    int faseDeco =  (int)mParameters.at<double>(0, 5);
+    double tilt = 0.0f, yaw = 0.0f, roll = 0.0f;
     MAX_WIDTH = mProcesado.cols;
     MAX_HEIGHT = mProcesado.rows;
     vector<vector<Point> > cuadrados, cuadradosImagenCorregida;
     vector<vector<vector<Point> > > particiones;
     cuadrados.clear();
 
-    buscarCuadrados(mProcesado, cuadrados, LAPLACIAN, N);
+    //counter++; __android_log_print(ANDROID_LOG_ERROR, "counter", "%i", counter);
+
+    buscarCuadrados(mProcesado, cuadrados, CANNY, N);
     dibujarCuadrados(mProcesado, cuadrados);
     drawMarker(mProcesado, Point( MAX_WIDTH/2, MAX_HEIGHT/2),  Scalar(255, 0, 0), MARKER_CROSS, 20, 2);
-    obtenerAngulosEuler(mProcesado, cuadrados, mParameters.at<double>(0, 6), MAX_WIDTH/2, MAX_HEIGHT/2, tilt, yaw, roll);
+
     if(cuadrados.size() == NUM_MATRICES && alineadoEjeFocal(mProcesado, cuadrados)) {
 
         Mat mWarpImage, mLambda;
 
+        obtenerAngulosEuler(mProcesado,
+                            cuadrados,
+                            mParameters.at<double>(0, 6),
+                            MAX_WIDTH/2,
+                            MAX_HEIGHT/2,
+                            tilt, yaw, roll);
         /*if(faseDeco < 4) {
             particionarCuadrados(mProcesado, cuadrados, particiones);
             decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
@@ -142,9 +137,9 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
 
             warpFrame(mOriginalCopiaB,
                         mWarpImage,
-                        tilt,//mParameters.at<double>(0, 0), //tilt,
-                        yaw,//mParameters.at<double>(0, 1), //yaw,
-                        roll,//-mParameters.at<double>(0, 2), //roll,
+                        tilt, //tilt,
+                        yaw, //yaw,
+                        roll, //roll,
                         0,
                         0,
                         1,
@@ -191,6 +186,9 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
        //}
     }
     else mResultado = mProcesado;
+            mParameters.at<double>(0,0) = tilt;
+            mParameters.at<double>(0,1) = yaw;
+            mParameters.at<double>(0,2) = roll;
     return env->NewStringUTF(mensajeDecimal.c_str());
 }
 static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdFactor){
@@ -199,7 +197,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
     Mat gray0(image.size(), CV_8U);
     cvtColor(image, gray0, CV_BGR2GRAY);
     GaussianBlur( gray0, gray0, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
-    Mat gray, gray2;
+    Mat gray;
     vector<vector<Point> > contours1;
 
     for( int l = 0; l < thresholdFactor; l++ )
@@ -216,24 +214,18 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 //bitwise_not(gray0, gray0);
                 Laplacian(gray0, dst, 3, 3, 1, 0, BORDER_DEFAULT); //3 depth CV_16S
                 convertScaleAbs(dst, gray);
-                /*if(1){
+                if(1){
 
                     string path = "/storage/3034-3465/DCIM/";
                     string filename = IntToString(1);
-                    string ext = ".jpg";
+                    string ext = "lap.jpg";
                     imwrite(path+filename+ext, gray);
-                }*/
+                }
             }
             else if (metodo == CANNY) {
                 //bitwise_not(gray0, gray0);
                 Canny(gray0, gray, 0, 15, 3, false);//10,20,3);// 0 10 5
-                /*if(1){
 
-                    string path = "/storage/3034-3465/DCIM/";
-                    string filename = IntToString(1);
-                    string ext = ".jpg";
-                    imwrite(path+filename+ext, gray);
-                }*/
             }
                 // dilate canny output to remove potential
                 // holes between edge segments
@@ -318,8 +310,6 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
     bool busquedaExitosaSubSegmento = false,
             busquedaExitosaSegmento = false;
 
-    try {
-
         for (int n = 0; n < cuadrados.size() - 2; n++) {
 
             cuadradosSeleccionados.push_back(cuadrados[n]);
@@ -341,12 +331,7 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                                    (distanciaActual / distanciaSeleccionada) : (distanciaSeleccionada / distanciaActual);
 
                     if (fabs(razon) > DISTANCE_RATIO) {
-                        angActual = fabs(atan2(cuadrados[q][0].y - cuadrados[p][0].y,
-                                               cuadrados[q][0].x - cuadrados[p][0].x));
-                        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "razon: %.2f", razon);
-                        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "%i %i %i - distancia(%.2f) - angulo(%.2f , %.2f)", n,p,q,
-                                            //razon, angSeleccionado, fabs(atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x)));
-
+                        //angActual = fabs(atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x));
                         //razon = (angSeleccionado >= angActual) ? (angActual / angSeleccionado) : (angSeleccionado / angActual);
 
                         //if (fabs(razon) <= 0.85) {
@@ -359,9 +344,7 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                                 cuadrados = cuadradosSeleccionados;
                                 return;
                             }
-                            //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback q: %i", q);
 
-                            //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "distanciaActual p-q: %.2f", fabs(distanciaSeleccionada - distanciaActual));
                             busquedaExitosaSubSegmento = true;
                             busquedaExitosaSegmento = true;
                             break;
@@ -376,14 +359,10 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
             }
 
             if (!busquedaExitosaSegmento) {
-                //cuadradosSeleccionados.pop_back();
+                cuadradosSeleccionados.pop_back();
                 busquedaExitosaSegmento = false;
             }
         }
-    }
-    catch(Exception e) {
-        __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "cuadrados: %s", "EXCEPTION");
-    }
 }
 
 static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, double f, double cx, double cy, double& tilt, double& yaw, double& roll){
@@ -395,8 +374,6 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
         Point2f d = cuadrados[0][3];
 
         Point2f p, q, r, s, vx, vy;
-        vx.y = 0, vx.x = 0;
-        vy.x = 0, vy.y = 0;
 
         tilt = 0;
         yaw = 0;
@@ -407,64 +384,169 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
         double distance3 = distanciaEntreDosPuntos(a, b);
         double distance4 = distanciaEntreDosPuntos(d, c);
 
-        p.x = a.x + (a.x - d.x) / distance1 * 5000;
-        p.y = a.y + (a.y - d.y) / distance1 * 5000;
-        q.x = b.x + (b.x - c.x) / distance2 * 5000;
-        q.y = b.y + (b.y - c.y) / distance2 * 5000;
-        r.x = a.x + (a.x - b.x) / distance3 * 5000;
-        r.y = a.y + (a.y - b.y) / distance3 * 5000;
-        s.x = d.x + (d.x - c.x) / distance4 * 5000;
-        s.y = d.y + (d.y - c.y) / distance4 * 5000;
+        p.x = a.x + (a.x - d.x) / distance1 * 50000;
+        p.y = a.y + (a.y - d.y) / distance1 * 50000;
+        q.x = b.x + (b.x - c.x) / distance2 * 50000;
+        q.y = b.y + (b.y - c.y) / distance2 * 50000;
+        r.x = a.x + (a.x - b.x) / distance3 * 50000;
+        r.y = a.y + (a.y - b.y) / distance3 * 50000;
+        s.x = d.x + (d.x - c.x) / distance4 * 50000;
+        s.y = d.y + (d.y - c.y) / distance4 * 50000;
 
-        line(image, a, p, Scalar(255, 0, 0), 1, LINE_8, 0);
+        /*line(image, a, p, Scalar(255, 0, 0), 1, LINE_8, 0);
         line(image, b, q, Scalar(255, 0, 0), 1, LINE_8, 0);
         line(image, a, r, Scalar(0, 255, 255), 1, LINE_8, 0);
-        line(image, d, s, Scalar(0, 255, 255), 1, LINE_8, 0);
-        intersection(a, p, b, q, vx);
-        intersection(a, r, d, s, vy);
+        line(image, d, s, Scalar(0, 255, 255), 1, LINE_8, 0);*/
 
-        Mat CI = Mat(3, 3, CV_64FC1),
-            V = Mat(3, 1, CV_64FC1),
-            R1, R2, R3;
-        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "Vx: (%.2f, %.2f)", vx.x, vx.y);
-        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "Vy: (%.2f, %.2f)", vy.x, vy.y);
+        if(intersection(a, p, b, q, vx) && intersection(a, r, d, s, vy)) {
 
-        CI.at<double>(0,0) = 1/f; CI.at<double>(0,1) = 0;   CI.at<double>(0,2) = -cx/f;
-        CI.at<double>(1,0) = 0;   CI.at<double>(1,1) = 1/f; CI.at<double>(1,2) = -cy/f;
-        CI.at<double>(2,0) = 0;   CI.at<double>(2,1) = 0;   CI.at<double>(2,2) = 1;
+            Mat CI = Mat(3, 3, CV_64FC1), V = Mat(3, 1, CV_64FC1), R1, R2, R3;
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "Vx: (%.2f, %.2f)", vx.x, vx.y);
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "Vy: (%.2f, %.2f)", vy.x, vy.y);
 
-        V.at<double>(0,0) = vx.x;
-        V.at<double>(1,0) = vx.y;
-        V.at<double>(2,0) = 1;
+            CI.at<double>(0, 0) = 1 / f;
+            CI.at<double>(0, 1) = 0;
+            CI.at<double>(0, 2) = -cx / f;
+            CI.at<double>(1, 0) = 0;
+            CI.at<double>(1, 1) = 1 / f;
+            CI.at<double>(1, 2) = -cy / f;
+            CI.at<double>(2, 0) = 0;
+            CI.at<double>(2, 1) = 0;
+            CI.at<double>(2, 2) = 1;
 
-        R1 = CI * V;
-        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R1: (%.2f, %.2f, %.2f)", R1.at<double>(0,0), R1.at<double>(1,0), R1.at<double>(2,0));
+            V.at<double>(0, 0) = vx.x;
+            V.at<double>(1, 0) = vx.y;
+            V.at<double>(2, 0) = 1;
 
-        R1 = R1/norm(R1, NORM_L2);
-        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R1 norm: (%.2f, %.2f, %.2f)", R1.at<double>(0,0), R1.at<double>(1,0), R1.at<double>(2,0));
+            R1 = CI * V;
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R1: (%.2f, %.2f, %.2f)", R1.at<double>(0,0), R1.at<double>(1,0), R1.at<double>(2,0));
 
-        V.at<double>(0,0) = vy.x;
-        V.at<double>(1,0) = vy.y;
-        V.at<double>(2,0) = 1;
+            R1 = R1 / norm(R1, NORM_L2);
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R1 norm: (%.2f, %.2f, %.2f)", R1.at<double>(0,0), R1.at<double>(1,0), R1.at<double>(2,0));
 
-        R2 = CI * V;
-        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R2: (%.2f, %.2f, %.2f)", R2.at<double>(0,0), R2.at<double>(1,0), R2.at<double>(2,0));
-        R2 = R2/norm(R2, NORM_L2);
-        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R2 norm: (%.2f, %.2f, %.2f)", R2.at<double>(0,0), R2.at<double>(1,0), R2.at<double>(2,0));
+            V.at<double>(0, 0) = vy.x;
+            V.at<double>(1, 0) = vy.y;
+            V.at<double>(2, 0) = 1;
 
-        R3 = R1.cross(R2);
-        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R3: (%.2f, %.2f, %.2f)", R3.at<double>(0,0), R3.at<double>(1,0), R3.at<double>(2,0));
+            R2 = CI * V;
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R2: (%.2f, %.2f, %.2f)", R2.at<double>(0,0), R2.at<double>(1,0), R2.at<double>(2,0));
+            R2 = R2 / norm(R2, NORM_L2);
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R2 norm: (%.2f, %.2f, %.2f)", R2.at<double>(0,0), R2.at<double>(1,0), R2.at<double>(2,0));
 
-        tilt = -atan(R3.at<double>(0,0)/R3.at<double>(2,0));
-        yaw = -asin(R3.at<double>(1,0));
-        roll = CV_PI - atan2(cuadrados[0][3].y - cuadrados[2][2].y, cuadrados[0][3].x - cuadrados[2][2].x);
+            R3 = R1.cross(R2);
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R3: (%.2f, %.2f, %.2f)", R3.at<double>(0,0), R3.at<double>(1,0), R3.at<double>(2,0));
 
-        //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "R3: (%.2f, %.2f, %.2f)", R3.at<double>(0,0), R3.at<double>(1,0), R3.at<double>(2,0));
-        __android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", tilt, yaw, roll);
+            double ratio = 1;
+
+            double angTilt = -asin(R3.at<double>(1,0));
+            double angYaw = -atan(R3.at<double>(0,0) / R3.at<double>(2,0));
+            double angRoll = CV_PI - atan2(cuadrados[0][3].y - cuadrados[2][2].y, cuadrados[0][3].x - cuadrados[2][2].x);
+
+            roll = angRoll;
+            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "antes actilt: %0.2f, acyaw: %.2f, acroll: %.2f", accumTilt, accumYaw, accumRoll);
+            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", angTilt, angYaw, angRoll);
+
+                /*if(angTilt > 0 && accumTilt > 0){
+                    if(angTilt >= accumTilt)
+                        ratio = accumTilt / angTilt;
+                    else
+                        ratio = angTilt / accumTilt;
+                }
+                else if(angTilt < 0 && accumTilt < 0){
+                    if(angTilt >= accumTilt)
+                        ratio = angTilt / accumTilt;
+                    else
+                        ratio = accumTilt / angTilt;
+                }
+                else if(angTilt > 0 && accumTilt < 0){
+                    ratio = fabs(accumTilt / angTilt);
+                }
+                else if(angTilt < 0 && accumTilt > 0){
+                    ratio = fabs(angTilt / accumTilt);
+                }*/
+
+                        /*(angTilt > 0 && accumTilt > 0) ?
+                            (((angTilt >= accumTilt) ? (accumTilt / angTilt) : (angTilt / accumTilt) :
+                                ((angTilt < 0 && accumTilt < 0) ?
+                                            (angTilt >= accumTilt) ? (angTilt / accumTilt) : (accumTilt / angTilt) :
+                                                ((angTilt > 0 && accumTilt < 0) ? fabs(accumTilt / angTilt) :
+                                                    (angTilt < 0 && accumTilt > 0) ? fabs(angTilt / accumTilt) : 1)));*/
+            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio tilt: %0.2f", ratio);
+                //if (ratio >= 0.2)
+                    vTilt.push_back(angTilt);
+
+                /*ratio = (angYaw > 0 && accumYaw > 0) ?
+                        ((angYaw >= accumYaw) ? (accumYaw / angYaw) : (angYaw / accumYaw)) :
+                        (angYaw < 0 && accumYaw < 0) ?
+                        ((angYaw >= accumYaw) ? (angYaw / accumYaw) : (accumYaw / angYaw)) :
+                        (angYaw > 0 && accumYaw < 0) ? fabs(accumYaw / angYaw) :
+                        (angYaw < 0 && accumYaw > 0) ? fabs(angYaw / accumYaw) : 1;*/
+            /*if(angYaw > 0 && accumYaw > 0){
+                if(angYaw >= accumYaw)
+                    ratio = accumYaw / angYaw;
+                else
+                    ratio = angYaw / accumYaw;
+            }
+            else if(angYaw < 0 && accumYaw < 0){
+                if(angYaw >= accumYaw)
+                    ratio = angYaw / accumYaw;
+                else
+                    ratio = accumYaw / angYaw;
+            }
+            else if(angYaw > 0 && accumYaw < 0){
+                ratio = fabs(accumYaw / angYaw);
+            }
+            else if(angYaw < 0 && accumYaw > 0){
+                ratio = fabs(angYaw / accumYaw);
+            }*/
+            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio yaw: %0.2f", ratio);
+                //if (ratio >= 0.2)
+            vYaw.push_back(angYaw);
+
+                /*ratio = (angRoll > 0 && accumRoll > 0) ?
+                        ((angRoll >= accumRoll) ? (accumRoll / angRoll) : (angRoll / accumRoll)) :
+                        (angRoll < 0 && accumRoll < 0) ?
+                        ((angRoll >= accumRoll) ? (angRoll / accumRoll) : (accumRoll / angRoll)):
+                        (angRoll > 0 && accumRoll < angRoll) ? fabs(accumRoll / angRoll) :
+                        (angRoll < 0 && accumRoll > 0) ? fabs(angRoll / accumRoll) : 1;*/
+            /*if(angRoll > 0 && accumRoll > 0){
+                if(angRoll >= accumRoll)
+                    ratio = accumRoll / angRoll;
+                else
+                    ratio = angRoll / accumRoll;
+            }
+            else if(angRoll < 0 && accumRoll < 0){
+                if(angRoll >= accumRoll)
+                    ratio = angRoll / accumRoll;
+                else
+                    ratio = accumRoll / angRoll;
+            }
+            else if(angRoll > 0 && accumRoll < 0){
+                ratio = fabs(accumRoll / angRoll);
+            }
+            else if(angRoll < 0 && accumRoll > 0){
+                ratio = fabs(angRoll / accumRoll);
+            }*/
+            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio roll: %0.2f", ratio);
+                //if (ratio >= 0.2)
+             //vRoll.push_back(angRoll);
+
+            if(vTilt.size() > 0){
+                accumTilt = accumulate(vTilt.begin(), vTilt.end(), 0.0f);
+                tilt = accumTilt / vTilt.size();
+            }
+            if(vYaw.size() > 0){
+                accumYaw = accumulate(vYaw.begin(), vYaw.end(), 0.0f);
+                yaw =  accumYaw / vYaw.size();
+            }
+            /*if(vRoll.size() > 0){
+                accumRoll = accumulate(vRoll.begin(), vRoll.end(), 0.0f);
+                roll = accumRoll / vRoll.size();
+            }*/
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", tilt, yaw, roll);
+        }
     }
     catch (Exception e){}
-
-    
 }
 
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2,
@@ -1228,7 +1310,7 @@ static void ordenarVerticesCuadrado(vector<Point> &verticesCuadrado){
 
 }
 int buscarPuntoMasCercano(vector<Point> puntos, Point punto){
-    float distancia = MAXFLOAT, distanciaTemporal = 0;
+    double distancia = MAXFLOAT, distanciaTemporal = 0;
     int posicionMasCercana = 0;
 
     //Encontrar punto mas cercano al origen Punto(0,0) que sera el punto de orden inicial
@@ -1277,7 +1359,7 @@ bool alineadoEjeFocal(Mat& image, vector<vector<Point> >& cuadrados) {
             return true;
         }*/
     }
-    else if(cuadrados.size() == 3)
+    else if(cuadrados.size() == 3) // MEJORAR ESTE ALGORITMO
     {
         if(pointPolygonTest( cuadrados[1], Point2f(MAX_WIDTH/2, MAX_HEIGHT/2), false ) > 0){
             return true;
@@ -1308,123 +1390,6 @@ float getHeightObjectImage(vector<vector<Point> >& cuadrados){
 
 static double rad2Deg(double rad){return rad*(180/M_PI);}//Convert radians to degrees
 static double deg2Rad(double deg){return deg*(M_PI/180);}//Convert degrees to radians
-
-
-
-
-void warpMatrix(Size   sz,
-                double theta,
-                double phi,
-                double gamma,
-                double scale,
-                double fovy,
-                Mat&   M,
-                vector<Point2f>* corners){
-    double st=sin(deg2Rad(theta));
-    double ct=cos(deg2Rad(theta));
-    double sp=sin(deg2Rad(phi));
-    double cp=cos(deg2Rad(phi));
-    double sg=sin(deg2Rad(gamma));
-    double cg=cos(deg2Rad(gamma));
-
-    double halfFovy=fovy*0.5;
-    double d=hypot(sz.width,sz.height);
-    double sideLength=scale*d/cos(deg2Rad(halfFovy));
-    double h=d/(2.0*sin(deg2Rad(halfFovy)));
-    double n=h-(d/2.0);
-    double f=h+(d/2.0);
-
-    Mat C=Mat(3,4,CV_64FC1);
-    Mat CI=Mat(4,3,CV_64FC1);
-    Mat F=Mat(4,4,CV_64FC1);//Allocate 4x4 transformation matrix F
-    Mat R=Mat::eye(4,4,CV_64FC1);
-    Mat Rtheta=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around Z-axis by theta degrees
-    Mat Rphi=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around X-axis by phi degrees
-    Mat Rgamma=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 rotation matrix around Y-axis by gamma degrees
-
-    Mat T=Mat::eye(4,4,CV_64FC1);//Allocate 4x4 translation matrix along Z-axis by -h units
-    Mat P=Mat::zeros(4,4,CV_64FC1);//Allocate 4x4 projection matrix
-
-    //Rtheta
-    Rtheta.at<double>(0,0)=Rtheta.at<double>(1,1)=ct;
-    Rtheta.at<double>(0,1)=st;Rtheta.at<double>(1,0)=-st;
-    //Rphi
-    Rphi.at<double>(1,1)=Rphi.at<double>(2,2)=cp;
-    Rphi.at<double>(1,2)=sp;Rphi.at<double>(2,1)=-sp;
-    //Rgamma
-    Rgamma.at<double>(0,0)=Rgamma.at<double>(2,2)=cg;
-    Rgamma.at<double>(0,2)=-sg;Rgamma.at<double>(2,0)=sg; ///CAMBIO !!!!!!!!
-
-    //T
-    T.at<double>(2,3)=-h;//*cos(deg2Rad(gamma));
-    //P
-    P.at<double>(0,0)=P.at<double>(1,1)=1.0/tan(deg2Rad(halfFovy));
-    P.at<double>(2,2)=-(f+n)/(f-n);
-    P.at<double>(2,3)=-(2.0*f*n)/(f-n);
-    P.at<double>(3,2)=-1.0;
-    //Compose transformations
-    //F=P*T*Rphi*Rtheta*Rgamma;//Matrix-multiply to produce master matrix
-    //__android_log_print(ANDROID_LOG_ERROR, "cameraPoseFromHomography -> ", "%s", "2");
-    R=(Rtheta*(Rphi*Rgamma));
-    F=P*(T*R);//Matrix-multiply to produce master matrix
-    //__android_log_print(ANDROID_LOG_ERROR, "cameraPoseFromHomography -> ", "%s", "3");
-    //Transform 4x4 points
-    double ptsIn [4*3];
-    double ptsOut[4*3];
-    double halfW=sz.width/2, halfH=sz.height/2;
-
-    ptsIn[0]=-halfW;ptsIn[ 1]= halfH;
-    ptsIn[3]= halfW;ptsIn[ 4]= halfH;
-    ptsIn[6]= halfW;ptsIn[ 7]=-halfH;
-    ptsIn[9]=-halfW;ptsIn[10]=-halfH;
-    ptsIn[2]=ptsIn[5]=ptsIn[8]=ptsIn[11]=0;//Set Z component to zero for all 4 components
-
-    Mat ptsInMat(1,4,CV_64FC3,ptsIn);
-    Mat ptsOutMat(1,4,CV_64FC3,ptsOut);
-
-    perspectiveTransform(ptsInMat,ptsOutMat,F);//Transform points
-
-    //Get 3x3 transform and warp image
-    Point2f ptsInPt2f[4];
-    Point2f ptsOutPt2f[4];
-
-    for(int i=0;i<4;i++){
-        Point2f ptIn (ptsIn [i*3+0], ptsIn [i*3+1]);
-        Point2f ptOut(ptsOut[i*3+0], ptsOut[i*3+1]);
-        ptsInPt2f[i]  = ptIn+Point2f(halfW,halfH);
-        ptsOutPt2f[i] = (ptOut+Point2f(1,1))*(sideLength*0.5);
-    }
-
-    M=getPerspectiveTransform(ptsInPt2f,ptsOutPt2f);
-
-    //Load corners vector
-    if(corners){
-        corners->clear();
-        corners->push_back(ptsOutPt2f[0]);//Push Top Left corner
-        corners->push_back(ptsOutPt2f[1]);//Push Top Right corner
-        corners->push_back(ptsOutPt2f[2]);//Push Bottom Right corner
-        corners->push_back(ptsOutPt2f[3]);//Push Bottom Left corner
-    }
-}
-
-void warpImage(const Mat &src,
-               double    phi, //roll
-               double    gamma,   //tilt
-               double    theta, //theta
-               double    scale,
-               double    fovy,
-               Mat&      dst,
-               Mat&      M,
-               vector<Point2f> &corners){
-
-    double halfFovy=fovy*0.5;
-    double d=hypot(src.cols,src.rows);
-    double sideLength=scale*d/cos(deg2Rad(halfFovy));
-
-    warpMatrix(src.size(),theta,phi,gamma, scale,fovy,M,&corners);//Compute warp matrix
-    warpPerspective(src,dst,M,Size(sideLength,sideLength));//Do actual image warp
-    //warpPerspective(src, dst, M, src.size());
-}
 
 void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double roll,
                  double dx, double dy, double dz, double f, double cx, double cy){

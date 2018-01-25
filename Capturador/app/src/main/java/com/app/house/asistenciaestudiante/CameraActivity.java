@@ -58,7 +58,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
     private double focalPx = 0.0f;
-    private float anchoObjetoReal = 1660;//1750;// mm
+    private float anchoObjetoReal = 216;//1750;// mm
     private double yaw = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
@@ -207,11 +207,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRGBA = inputFrame.rgba();
         
-        if(ori_sensor == null)
+        /*if(ori_sensor == null)
 
             finalYaw = yaw;
         else
-            finalYaw = initialYaw - yaw;
+            finalYaw = initialYaw - yaw;*/
 
         mParameters.put(0,0, tilt);
         mParameters.put(0,1, finalYaw);
@@ -226,13 +226,16 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 mObjectSize.getNativeObjAddr(),
                 mParameters.getNativeObjAddr());
 
-        anchoObjetoImagen = mObjectSize.get(0, 2)[0] *
-                Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
+       tilt = mParameters.get(0,0)[0];
+       finalYaw = mParameters.get(0,1)[0];
+       roll = mParameters.get(0,2)[0];
+
+        anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
 
         estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
-        estimatedDistY = Math.abs(estimatedDist * Math.cos(Math.toRadians(finalYaw)) * Math.cos(Math.toRadians(tilt)));
-        estimatedDistX = -estimatedDist * Math.sin(Math.toRadians(finalYaw)) * Math.cos(Math.toRadians(tilt));
+        estimatedDistY = Math.abs(estimatedDist * Math.cos(finalYaw) * Math.cos(tilt));
+        estimatedDistX = -estimatedDist * Math.sin(finalYaw) * Math.cos(tilt);
 ////////////////////////
         /*if(System.currentTimeMillis() - actualTime > flickerTime) {
             mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
@@ -309,9 +312,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             }
         }*/
 
-        Imgproc.putText(mResultado, "T: " + String.format("%.2f", tilt) +
-                        ", P: " + String.format("%.2f", finalYaw) +
-                        ", R: " + String.format("%.2f", roll),
+        Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
+                        ", P: " + String.format("%.2f", Math.toDegrees(finalYaw)) +
+                        ", R: " + String.format("%.2f", 360-Math.toDegrees(roll)),
                 new Point(10, 23),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         Imgproc.putText(mResultado, "Size Original  : (" +
