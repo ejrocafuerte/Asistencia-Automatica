@@ -18,7 +18,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +72,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private Asistencia asistenciaActual;
     private Estudiante estudiante;
     private ArrayList<Senal> senales;
+    ArrayAdapter<Asistencia> adapter;
 
     private String mac = "";
     private String imei = "";
@@ -133,8 +137,18 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
         scanWifiSignals();
 
-        txt_asistencias = (TextView) findViewById(R.id.lasistencias);
-        txt_asistencias.setText(getAsistenciasMessage(asistencias));
+        // Get the reference of movies
+        ListView asistenciasLV = (ListView)findViewById(R.id.listAsistencias);
+
+        // Create The Adapter with passing ArrayList as 3rd parameter
+        adapter = new ArrayAdapter<Asistencia>(this, R.layout.simple_list_item, asistencias);
+        // Set The Adapter
+
+        if(asistencias.size() <= 0){
+            asistenciasLV.setEmptyView((View)findViewById(R.id.emptyview));
+        }
+            //
+        asistenciasLV.setAdapter(adapter);
     }
 
     @Override
@@ -142,12 +156,27 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.benviar: {
                 if (validateInfo()) {
-                        //infoAsistenciaActual = getAsistenciaActualMessage();
-                    asistenciaActual.setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-                    asistenciaActual.setEstudiante(estudiante);
-                    //asistencias.setAsistencias(asistenciaActual);
 
-                    if(!asistenciaEnlistada) {
+
+                    asistenciaActual.setEstudiante(estudiante);
+
+                    int index = getAsistenciaByCodigo(asistenciaActual);
+                    if(false){//index >= 0) {
+                        asistencias.get(index).setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                        asistencias.get(index).setEstudiante(estudiante);
+                        Toast.makeText(mContext, "Asistencia duplicada!", Toast.LENGTH_SHORT).show();
+
+                    }else{
+                        asistenciaActual.setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                        asistencias.add(asistenciaActual);
+                        if(adapter != null)
+                            adapter.notifyDataSetChanged();
+                        Toast.makeText(mContext, "Added asistencia!", Toast.LENGTH_SHORT).show();
+                    }
+
+
+
+                    /*if(!asistenciaEnlistada) {
                         //infoAsistencias.add(infoAsistenciaActual);
                         asistencias.add(asistenciaActual);
                         Log.e("Existe internet, enviando server: ", getAsistenciasMessage(asistencias));
@@ -159,12 +188,12 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                         if(asistencias.size() > 0)
                             asistencias.remove(asistencias.size()-1);
                         asistencias.add(asistenciaActual);
-                    }
+                    }*/
 
                     //enviar asistencia servidor web
                     if (existeInternet) {
                         Log.e("Existe internet, enviando server: ", "3");
-                        sendMessage(asistencias/*getAsistenciasMessage()*/);
+                        sendMessage();
 
                         Log.e("Existe internet, enviando server", infoAsistenciaActual);
                     }
@@ -180,7 +209,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void sendMessage(final ArrayList<Asistencia> asistencias/*String asistenciasMessage*/) {
+    private void sendMessage(/*String asistenciasMessage*/) {
 
         if (restClient != null) {
             Call<ResponseServer> request = restClient.sendMessage(asistencias);
@@ -527,9 +556,9 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
             if (wifi.isConnected()) {
                 existeInternet = true;
-                //sendMessage(getAsistenciasMessage());
+                sendMessage();
                 Toast.makeText(context, "BroadcastReceiver: WIFI ON", Toast.LENGTH_SHORT).show();
-            } else if (mobile.isConnected()/* && wifi.isConnected()*/) {
+            } else if (mobile.isConnected()) {
                 existeInternet = true;
                 wifiManager.setWifiEnabled(true);
                 Toast.makeText(context, "BroadcastReceiver: MOBILE ON", Toast.LENGTH_SHORT).show();
@@ -545,7 +574,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         if(!wifiManager.isWifiEnabled()){
-            wifiManager.setWifiEnabled(true);
+            //wifiManager.setWifiEnabled(true);
         }
 
         List<ScanResult> wifiList = wifiManager.getScanResults();
@@ -597,6 +626,18 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             e.printStackTrace();
         }
         return "";
+    }
+
+    int getAsistenciaByCodigo(Asistencia asistenciaActual){
+        if(asistenciaActual == null || asistencias.size() <= 0) return -1;
+        for (int i = 0; i <= asistencias.size(); i++) {
+            Asistencia a = asistencias.get(i);
+            if (a.getCodigo().equals(asistenciaActual.getCodigo()) &&
+                a.getMac().equals(asistenciaActual.getMac()) &&
+                a.getEstudiante().getMatricula().equals(asistenciaActual.getEstudiante().getMatricula()))
+                return i;
+        }
+        return -1;
     }
 }
 

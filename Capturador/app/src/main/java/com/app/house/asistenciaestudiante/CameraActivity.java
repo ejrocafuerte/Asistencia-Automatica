@@ -58,7 +58,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
     private double focalPx = 0.0f;
-    private float anchoObjetoReal = 216;//1750;// mm
+    private float anchoObjetoReal = 750;//1750;// mm
     private double yaw = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
@@ -70,16 +70,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private String[] mensajes = {"", "", ""};
     private String mensajeFinal = "";
     private boolean firstFrame = false;
-    private boolean activeSensor = false;
-
-    private WindowManager mWindowManager;
-
-    //Setup variables for the SensorManger, the SensorEventListeners,
-    // the Sensors, and the arrays to hold the resultant sensor values
-    private SensorManager mSensorManager;
-    private MySensorEventListener oriSensorEventListener;
-    Sensor ori_sensor, sensorAccelerometer, sensorMagnetometer, sensorGyroscope ;
-    float[] ori_values = new float[3];
 
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -113,7 +103,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        mWindowManager = getWindow().getWindowManager();
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(CameraActivity.this,
                 new String[]{Manifest.permission.CAMERA},
@@ -130,10 +119,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     @Override
     public void onPause() {
-        if(mSensorManager != null) {
-            mSensorManager.unregisterListener(oriSensorEventListener);
-            mSensorManager = null;
-        }
         super.onPause();
         disableCamera();
     }
@@ -176,10 +161,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     public void onDestroy() {
-        if(mSensorManager != null) {
-            mSensorManager.unregisterListener(oriSensorEventListener);
-            mSensorManager = null;
-        }
         super.onDestroy();
         disableCamera();
     }
@@ -234,8 +215,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
         estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
-        estimatedDistY = Math.abs(estimatedDist * Math.cos(finalYaw) * Math.cos(tilt));
         estimatedDistX = -estimatedDist * Math.sin(finalYaw) * Math.cos(tilt);
+        estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) /*Math.cos(finalYaw) */* Math.cos(tilt));
 ////////////////////////
         /*if(System.currentTimeMillis() - actualTime > flickerTime) {
             mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
@@ -383,118 +364,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Log.e(TAG, "OpenCV library found inside package. Using it!");
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        if(mSensorManager == null) {
-            mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-            // Build a SensorEventListener for each type of sensor (just one here):
-            oriSensorEventListener = new MySensorEventListener();
-            // Get each of our Sensors (just one here):
 
-            sensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-            sensorGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-
-            if (sensorAccelerometer != null && sensorMagnetometer != null && sensorGyroscope != null){
-                // Success! There's a magnetometer.
-                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-                Log.e(TAG,  "Encontrado acelerometro, magnetometro y giroscopio");
-                activeSensor = true;
-            }
-            else if(sensorAccelerometer != null && sensorGyroscope != null){
-                // Failure! No magnetometer.
-                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
-                Log.e(TAG,  "Encontrado acelerometro y giroscopio");
-                activeSensor = true;
-            }
-            else if(sensorAccelerometer != null && sensorMagnetometer != null){
-                ori_sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
-                Log.e(TAG,  "Encontrado acelerometro y magnetometro " + ((ori_sensor == null)?". Sensor null":""));
-                activeSensor = true;
-            }
-            else{
-                Log.e(TAG,  "Sensores necesitados, imposible calcular angulos euler");
-            }
-
-            // Register the SensorEventListeners with their Sensor, and their SensorManager (just one here):
-            //mSensorManager.registerListener(oriSensorEventListener, sensorMagnetometer, SensorManager.SENSOR_DELAY_UI);
-            mSensorManager.registerListener(oriSensorEventListener, ori_sensor, SensorManager.SENSOR_DELAY_NORMAL);
-
-        }
-    }
-
-    // Setup our SensorEventListener
-    public class MySensorEventListener implements SensorEventListener {
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            int eventType = event.sensor.getType();
-
-            if (eventType == Sensor.TYPE_GAME_ROTATION_VECTOR) {
-                updateOrientation(event.values);
-            }
-            else if (eventType == Sensor.TYPE_ROTATION_VECTOR) {
-                updateOrientation(event.values);
-            }
-            else if (eventType == Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR) {
-                updateOrientation(event.values);
-            }
-            else if (eventType == Sensor.TYPE_ORIENTATION) {
-                updateOrientation(event.values);
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-        }
-    }
-
-    private void updateOrientation(float[] rotationVector) {
-        float[] rotationMatrix = new float[9];
-        SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationVector);
-
-        final int worldAxisForDeviceAxisX;
-        final int worldAxisForDeviceAxisY;
-
-        // Remap the axes as if the device screen was the instrument panel,
-        // and adjust the rotation matrix for the device orientation.
-        switch (mWindowManager.getDefaultDisplay().getRotation()) {
-            case Surface.ROTATION_0:
-            default:
-                //Log.e(TAG, "Orientation: Surface.ROTATION_0");
-                worldAxisForDeviceAxisX = SensorManager.AXIS_X;
-                worldAxisForDeviceAxisY = SensorManager.AXIS_Z;
-                break;
-            case Surface.ROTATION_90:
-                //Log.e(TAG, "Orientation: Surface.ROTATION_90");
-                worldAxisForDeviceAxisX = SensorManager.AXIS_Z;
-                worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_X;
-                break;
-            case Surface.ROTATION_180:
-                //Log.e(TAG, "Orientation: Surface.ROTATION_180");
-                worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_X;
-                worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_Z;
-                break;
-            case Surface.ROTATION_270:
-                //Log.e(TAG, "Orientation: Surface.ROTATION_270");
-                worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Z;
-                worldAxisForDeviceAxisY = SensorManager.AXIS_X;
-                break;
-        }
-
-        float[] adjustedRotationMatrix = new float[9];
-        SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
-                worldAxisForDeviceAxisY, adjustedRotationMatrix);
-
-        // Transform rotation matrix into azimuth/pitch/roll
-        float[] orientation = new float[3];
-        SensorManager.getOrientation(adjustedRotationMatrix, orientation);
-
-        // Convert radians to degrees
-        tilt = orientation[1] * -180.0f / (float)Math.PI;
-        roll = orientation[2] * -180.0f / (float)Math.PI;
-        yaw = orientation[0] * -180.0f / (float)Math.PI;
-
-        //Log.e(TAG, "YAW: "+(yaw-initialYaw));
     }
 
     private void vibrate() {

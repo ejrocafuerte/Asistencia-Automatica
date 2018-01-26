@@ -10,12 +10,12 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by HouSe on 15/08/2017.
+ * Created by HouSe on 15/01/2018.
  */
 
 public class Connection {
     private static final String TAG = "Connection";
-    private static final String BASE_URL_DESA = "http://192.168.0.7:8000/";
+    private static final String BASE_URL_DESA = "http://192.168.0.9:8000/";
     private static final String BASE_URL_PROD = "http://kalafitness.pythonanywhere.com/api/";
     private static Retrofit.Builder builder = null;
     private static Retrofit retrofit = null;
