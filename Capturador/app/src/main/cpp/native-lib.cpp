@@ -16,7 +16,7 @@ extern "C"
 {
 static vector<double> vTilt, vYaw, vRoll;
 static double accumTilt = 1.0f, accumYaw = 1.0f, accumRoll = 1.0f;
-enum MetodoBusqueda {LAPLACIAN, CONVEXHULL, CANNY};
+enum MetodoBusqueda {LAPLACIAN, CANNY};
 static void preprocesar(Mat& imagen_orig, Mat& imagen_prep);
 static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdLevel);
 static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados);
@@ -58,13 +58,13 @@ int SEGMENTOS_FRONTERA = 4;
 int PUNTOS_SEGMENTO_FRONTERA = 3;
 int SEGMENTOS_INTERNOS = 3;
 int PUNTOS_SEGMENTO_INTERNOS = 3;
-int DIRECCION_ORDEN_C = 1;
-int NIVEL_THRESHOLD = 50;
-double TOLERANCIA_LED_ENCENDIDO = 5.0; //(%)
+int DIRECCION_ORDEN_C = 1; //RIGHT
+int NIVEL_THRESHOLD = 50; //50
+double TOLERANCIA_LED_ENCENDIDO = 6.0; //(%)
 double DISTANCE_RATIO = 0.7;
 int NUM_MATRICES = 3;
 int NUM_PARTICIONES = 16;
-int PARTICION_OFFSET = 1;
+int PARTICION_OFFSET = 2;
 int SQUARE_AREA = 100;
 
 JNIEXPORT jstring JNICALL
@@ -102,96 +102,117 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     if(cuadrados.size() == NUM_MATRICES){
         if(alineadoEjeFocal(mProcesado, cuadrados)) {
 
-        Mat mWarpImage, mLambda;
+            Mat mWarpImage;
 
-        obtenerAngulosEuler(mProcesado,
-                            cuadrados,
-                            mParameters.at<double>(0, 6),
-                            MAX_WIDTH/2,
-                            MAX_HEIGHT/2,
-                            tilt, yaw, roll);
-        /*if(faseDeco < 4) {
-            particionarCuadrados(mProcesado, cuadrados, particiones);
-            decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
-            traducirMensaje(mensajeBinario, mensajeDecimal, faseDeco);
+            if (faseDeco < 4) {
+                particionarCuadrados(mProcesado, cuadrados, particiones);
+                decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
+                traducirMensaje(mensajeBinario, mensajeDecimal, faseDeco);
+                mResultado = mProcesado;
+            } else if(faseDeco == 4){
+                vector<Point2f> corners;
+
+                Rect boundRect;
+                vector<Point> brPoints;
+                brPoints.push_back(cuadrados[0][0]);
+                brPoints.push_back(cuadrados[2][1]);
+                brPoints.push_back(cuadrados[2][2]);
+                brPoints.push_back(cuadrados[0][3]);
+
+                boundRect = boundingRect(brPoints);
+
+                //mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(cuadrados[0][3], cuadrados[2][2]); //getWidthObjectImage(cuadrados); //
+                //mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[0][3]);
+                mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(
+                        Point(boundRect.tl().x, boundRect.tl().y + boundRect.height),
+                        boundRect.br()); //getWidthObjectImage(cuadrados); //
+                mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(boundRect.tl(),
+                                                                       Point(boundRect.tl().x,
+                                                                             boundRect.tl().y +
+                                                                             boundRect.height)); ////getHeightObjectImage(cuadrados);
+
+                obtenerAngulosEuler(mProcesado,
+                                    cuadrados,
+                                    mParameters.at<double>(0, 6),
+                                    MAX_WIDTH / 2,
+                                    MAX_HEIGHT / 2,
+                                    tilt, yaw, roll);
+
+                warpFrame(mOriginalCopiaB,
+                          mWarpImage,
+                          tilt,
+                          yaw, //yaw,
+                          roll, //roll,
+                          0,
+                          0,
+                          1,
+                          mParameters.at<double>(0, 6), //focal length in pixels
+                          MAX_WIDTH / 2,
+                          MAX_HEIGHT / 2);
+                //mWarpImage = mWarpImage(Rect((mWarpImage.cols / 2) - (MAX_WIDTH / 2), (mWarpImage.rows / 2) - (MAX_HEIGHT / 2),MAX_WIDTH, MAX_HEIGHT));
+
+                //Mat croppedImage;
+                //croppedImage = mWarpImage(Rect(boundRect.tl().x - 50, boundRect.tl().y - 40, boundRect.width + 100, boundRect.height + 80)) ;
+
+                buscarCuadrados(mWarpImage, cuadradosImagenCorregida, LAPLACIAN, N);
+                //dibujarCuadrados(croppedImage, cuadradosImagenCorregida);
+
+                //__android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida", "%i", cuadradosImagenCorregida.size());
+                if (cuadradosImagenCorregida.size() == NUM_MATRICES) {
+
+                    Rect boundRect2;
+                    vector<Point> brPoints2;
+                    brPoints2.push_back(cuadradosImagenCorregida[0][0]);
+                    brPoints2.push_back(cuadradosImagenCorregida[2][1]); //2
+                    brPoints2.push_back(cuadradosImagenCorregida[2][2]); //2
+                    brPoints2.push_back(cuadradosImagenCorregida[0][3]);
+                    boundRect2 = boundingRect(brPoints2);
+                    rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0), 1,
+                              8, 0);
+                    rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(0, 255, 200), 1, 8,
+                              0);
+
+                    circle(mWarpImage, cuadradosImagenCorregida[0][3], 2, Scalar(255, 0, 255), 2,
+                           8);
+                    circle(mWarpImage, cuadradosImagenCorregida[2][2], 2, Scalar(255, 0, 255), 2,
+                           8);
+                    circle(mWarpImage,
+                           Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height), 2,
+                           Scalar(0, 0, 255), 2, 8);
+                    circle(mWarpImage, boundRect2.br(), 2, Scalar(0, 0, 255), 2, 8);
+
+                    //mObjectSize.at<double>(0, 2) = distanciaEntreDosPuntos(cuadradosImagenCorregida[0][3], cuadradosImagenCorregida[2][2]); //getWidthObjectImage(cuadrados); //
+                    //__android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida sin", "(%i %i) (%i %i)", cuadradosImagenCorregida[0][3].x, cuadradosImagenCorregida[0][3].y,cuadradosImagenCorregida[2][2].x,cuadradosImagenCorregida[2][2].y );
+                    //mObjectSize.at<double>(0, 3) = distanciaEntreDosPuntos(cuadradosImagenCorregida[0][0], cuadradosImagenCorregida[0][3]);
+                    mObjectSize.at<double>(0, 2) = distanciaEntreDosPuntos(
+                            Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height),
+                            boundRect2.br()); //getWidthObjectImage(cuadrados); //
+                    //__android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida corr", "(%i %i) (%i %i)",Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height).x,
+                    //                                                                                        Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height).y,
+                    //                boundRect2.br().x, boundRect2.br().y);
+                    mObjectSize.at<double>(0, 3) = distanciaEntreDosPuntos(boundRect2.tl(),
+                                                                           Point(boundRect2.tl().x,
+                                                                                 boundRect2.tl().y +
+                                                                                 boundRect2.height)); ////getHeightObjectImage(cuadrados);
+
+                }
+                mResultado = mWarpImage;//mWarpImage;
+            }
+        }
+        else {
+            resetAngles();
             mResultado = mProcesado;
         }
-        else {*/
-            vector<Point2f> corners;
-
-            Rect boundRect;
-            vector<Point> brPoints;
-            brPoints.push_back(cuadrados[0][0]);
-            brPoints.push_back(cuadrados[2][1]);
-            brPoints.push_back(cuadrados[2][2]);
-            brPoints.push_back(cuadrados[0][3]);
-
-            boundRect = boundingRect(brPoints);
-
-            //mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(cuadrados[0][3], cuadrados[2][2]); //getWidthObjectImage(cuadrados); //
-            //mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[0][3]);
-            mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(Point(boundRect.tl().x, boundRect.tl().y + boundRect.height), boundRect.br()); //getWidthObjectImage(cuadrados); //
-            mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(boundRect.tl(), Point(boundRect.tl().x, boundRect.tl().y +  boundRect.height)); ////getHeightObjectImage(cuadrados);
-
-
-            warpFrame(mOriginalCopiaB,
-                        mWarpImage,
-                        tilt,
-                        yaw, //yaw,
-                        roll, //roll,
-                        0,
-                        0,
-                        1,
-                        mParameters.at<double>(0, 6), //focal length in pixels
-                        MAX_WIDTH/2,
-                        MAX_HEIGHT/2);
-            //mWarpImage = mWarpImage(Rect((mWarpImage.cols / 2) - (MAX_WIDTH / 2), (mWarpImage.rows / 2) - (MAX_HEIGHT / 2),MAX_WIDTH, MAX_HEIGHT));
-
-            //Mat croppedImage;
-            //croppedImage = mWarpImage(Rect(boundRect.tl().x - 50, boundRect.tl().y - 40, boundRect.width + 100, boundRect.height + 80)) ;
-
-            buscarCuadrados(mWarpImage, cuadradosImagenCorregida, LAPLACIAN, N);
-            //dibujarCuadrados(croppedImage, cuadradosImagenCorregida);
-
-            //__android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida", "%i", cuadradosImagenCorregida.size());
-            if (cuadradosImagenCorregida.size() == NUM_MATRICES) {
-
-                Rect boundRect2;
-                vector<Point> brPoints2;
-                brPoints2.push_back(cuadradosImagenCorregida[0][0]);
-                brPoints2.push_back(cuadradosImagenCorregida[2][1]); //2
-                brPoints2.push_back(cuadradosImagenCorregida[2][2]); //2
-                brPoints2.push_back(cuadradosImagenCorregida[0][3]);
-                boundRect2 = boundingRect(brPoints2);
-                rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0), 1, 8, 0);
-                rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(0, 255, 200), 1, 8, 0);
-
-                circle(mWarpImage, cuadradosImagenCorregida[0][3], 2, Scalar(255, 0, 255), 2, 8);
-                circle(mWarpImage, cuadradosImagenCorregida[2][2], 2, Scalar(255, 0, 255), 2, 8);
-                circle(mWarpImage, Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height), 2, Scalar(0, 0, 255), 2, 8);
-                circle(mWarpImage, boundRect2.br(), 2, Scalar(0, 0, 255), 2, 8);
-
-                //mObjectSize.at<double>(0, 2) = distanciaEntreDosPuntos(cuadradosImagenCorregida[0][3], cuadradosImagenCorregida[2][2]); //getWidthObjectImage(cuadrados); //
-                //__android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida sin", "(%i %i) (%i %i)", cuadradosImagenCorregida[0][3].x, cuadradosImagenCorregida[0][3].y,cuadradosImagenCorregida[2][2].x,cuadradosImagenCorregida[2][2].y );
-                //mObjectSize.at<double>(0, 3) = distanciaEntreDosPuntos(cuadradosImagenCorregida[0][0], cuadradosImagenCorregida[0][3]);
-                mObjectSize.at<double>(0, 2) = distanciaEntreDosPuntos(Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height), boundRect2.br()); //getWidthObjectImage(cuadrados); //
-                //__android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida corr", "(%i %i) (%i %i)",Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height).x,
-                  //                                                                                        Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height).y,
-                    //                boundRect2.br().x, boundRect2.br().y);
-                mObjectSize.at<double>(0, 3) = distanciaEntreDosPuntos(boundRect2.tl(), Point(boundRect2.tl().x, boundRect2.tl().y +  boundRect2.height)); ////getHeightObjectImage(cuadrados);
-
-            }
-            mResultado = mWarpImage;//mWarpImage;
-       }
-        else {resetAngles(); mResultado = mProcesado;}
     }
     else {
         mResultado = mProcesado;
-
     }
-            mParameters.at<double>(0,0) = tilt;
-            mParameters.at<double>(0,1) = yaw;
-            mParameters.at<double>(0,2) = roll;
+
+    mParameters.at<double>(0,0) = tilt;
+    mParameters.at<double>(0,1) = yaw;
+    mParameters.at<double>(0,2) = roll;
+    mParameters.at<double>(0,5) = faseDeco;
+    __android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida", "%.2f %.2f %.2f", tilt, yaw, roll);
     return env->NewStringUTF(mensajeDecimal.c_str());
 }
 static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdFactor){
@@ -217,17 +238,17 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
                 bitwise_not(gray0, gray0);
                 Laplacian(gray0, dst, 3, 3, 1, 0, BORDER_DEFAULT); //3 depth CV_16S
                 convertScaleAbs(dst, gray);
-                if(1){
+                /*if(1){
 
                     string path = "/storage/3034-3465/DCIM/";
                     string filename = IntToString(1);
                     string ext = "lap.jpg";
                     imwrite(path+filename+ext, gray);
-                }
+                }*/
             }
             else if (metodo == CANNY) {
                 bitwise_not(gray0, gray0);
-                Canny(gray0, gray, 0, 15, 3, false);//10,20,3);// 0 10 5
+                Canny(gray0, gray, 0, 10, 3, true);//10,20,3);// 0 10 5
 
             }
                 // dilate canny output to remove potential
@@ -250,10 +271,8 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
 
         }
         // Encuentra los contornos (mas exteriores si existen otros dentro) y los enlista
-        findContours(gray, contours1, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(-1, -1)); //Point(-1 ,-1)
-        //findContours(gray2, contours2, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(-1 ,-1));
-        //printf("contours1: %i, contours2: %i\n",contours1.size(), contours2.size());
-        //contours1.insert(contours1.end(), contours2.begin(), contours2.end());
+        findContours(gray, contours1, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(1, 1)); //Point(-1 ,-1)
+
         vector<Point> approx, _approx;
 
         // test each contour
@@ -370,6 +389,7 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
 
 static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, double f, double cx, double cy, double& tilt, double& yaw, double& roll){
     if(cuadrados.size() <  3) return;
+
     try {
         Point2f a = cuadrados[0][0];
         Point2f b = cuadrados[2][1];
@@ -446,10 +466,10 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
             double angRoll = CV_PI - atan2(cuadrados[0][3].y - cuadrados[2][2].y, cuadrados[0][3].x - cuadrados[2][2].x);
 
             roll = angRoll;
-            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "antes actilt: %0.2f, acyaw: %.2f, acroll: %.2f", accumTilt, accumYaw, accumRoll);
-            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", angTilt, angYaw, angRoll);
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "antes actilt: %0.2f, acyaw: %.2f, acroll: %.2f", accumTilt, accumYaw, accumRoll);
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", angTilt, angYaw, angRoll);
 
-                /*if(angTilt > 0 && accumTilt > 0){
+                if(angTilt > 0 && accumTilt > 0){
                     if(angTilt >= accumTilt)
                         ratio = accumTilt / angTilt;
                     else
@@ -466,35 +486,36 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
                 }
                 else if(angTilt < 0 && accumTilt > 0){
                     ratio = fabs(angTilt / accumTilt);
-                }*/
+                }
 
-                        /*(angTilt > 0 && accumTilt > 0) ?
-                            (((angTilt >= accumTilt) ? (accumTilt / angTilt) : (angTilt / accumTilt) :
-                                ((angTilt < 0 && accumTilt < 0) ?
-                                            (angTilt >= accumTilt) ? (angTilt / accumTilt) : (accumTilt / angTilt) :
-                                                ((angTilt > 0 && accumTilt < 0) ? fabs(accumTilt / angTilt) :
-                                                    (angTilt < 0 && accumTilt > 0) ? fabs(angTilt / accumTilt) : 1)));*/
-            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio tilt: %0.2f", ratio);
-                //if (ratio >= 0.2)
-                    vTilt.push_back(angTilt);
+            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio tilt: %0.2f", ratio);
+            if (ratio >= 0.2)
+                vTilt.push_back(angTilt);
 
-                /*ratio = (angYaw > 0 && accumYaw > 0) ?
-                        ((angYaw >= accumYaw) ? (accumYaw / angYaw) : (angYaw / accumYaw)) :
-                        (angYaw < 0 && accumYaw < 0) ?
-                        ((angYaw >= accumYaw) ? (angYaw / accumYaw) : (accumYaw / angYaw)) :
-                        (angYaw > 0 && accumYaw < 0) ? fabs(accumYaw / angYaw) :
-                        (angYaw < 0 && accumYaw > 0) ? fabs(angYaw / accumYaw) : 1;*/
-            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio yaw: %0.2f", ratio);
-                //if (ratio >= 0.2)
-            vYaw.push_back(angYaw);
 
-                /*ratio = (angRoll > 0 && accumRoll > 0) ?
-                        ((angRoll >= accumRoll) ? (accumRoll / angRoll) : (angRoll / accumRoll)) :
-                        (angRoll < 0 && accumRoll < 0) ?
-                        ((angRoll >= accumRoll) ? (angRoll / accumRoll) : (accumRoll / angRoll)):
-                        (angRoll > 0 && accumRoll < angRoll) ? fabs(accumRoll / angRoll) :
-                        (angRoll < 0 && accumRoll > 0) ? fabs(angRoll / accumRoll) : 1;*/
-            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio roll: %0.2f", ratio);
+            if(angYaw > 0 && accumYaw > 0){
+                if(angYaw >= accumYaw)
+                    ratio = accumYaw / angYaw;
+                else
+                    ratio = angYaw / accumYaw;
+            }
+            else if(angYaw < 0 && accumYaw < 0){
+                if(angYaw >= accumYaw)
+                    ratio = angYaw / accumYaw;
+                else
+                    ratio = accumYaw / angYaw;
+            }
+            else if(angYaw > 0 && accumYaw < 0){
+                ratio = fabs(accumYaw / angYaw);
+            }
+            else if(angYaw < 0 && accumYaw > 0){
+                ratio = fabs(angYaw / accumYaw);
+            }
+
+            if (ratio >= 0.2)
+                vYaw.push_back(angYaw);
+
+
                 //if (ratio >= 0.2)
              //vRoll.push_back(angRoll);
 
@@ -925,7 +946,7 @@ static void preprocesar( Mat& image, Mat& image_prep){
     //imwrite("/storage/3034-3465/DCIM/prep0.jpg", image_prep);
     GaussianBlur( image_prep, image_prep, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
     //imwrite("/storage/3034-3465/DCIM/prep1.jpg", image_prep);
-    //Laplacian( image_prep, tmp, CV_16S, 1, 1, 0, BORDER_DEFAULT );
+    //Laplacian( image_prep, tmp, 2, 1, 1, 0, BORDER_DEFAULT );
     //imwrite("/storage/3034-3465/DCIM/prep2.jpg", tmp);
     //convertScaleAbs( tmp, image_prep );
     //Mat m = tmp.clone();
@@ -933,9 +954,9 @@ static void preprocesar( Mat& image, Mat& image_prep){
     //imwrite("/storage/3034-3465/DCIM/prep3.jpg", image_prep);
     //bitwise_not(image_prep, image_prep);
     //imwrite("/storage/3034-3465/DCIM/prep4.jpg", image_prep);
-    threshold(image_prep, image_prep, NIVEL_THRESHOLD, 255, CV_THRESH_OTSU);
+    threshold(image_prep, image_prep, 0, 255, CV_THRESH_OTSU);
 
-    imwrite("/storage/3034-3465/DCIM/prep4.jpg", image_prep);
+    //imwrite("/storage/3034-3465/DCIM/prep4.jpg", image_prep);
     //erode(image_prep, image_prep, getStructuringElement(MORPH_RECT, Size(3, 3)));
     //imwrite("/storage/3034-3465/DCIM/prep5.jpg", image_prep);
     //dilate(image_prep, image_prep, getStructuringElement(MORPH_RECT, Size(3, 3)));
@@ -968,50 +989,45 @@ static void decodificarParticiones( Mat& image,
 
     if(particiones.size() <= 0 ) return;
     if(particiones[0].size() <= 0 ) return;
-    int NUM_MATRICES_ACTUALES = (int)particiones.size();
-    int NUM_PARTICIONES_ACTUALES = (int)particiones[0].size();
     float porcentajeBlanco = 0;
     vector<Point> puntosBlancos;
     Point2f origen[4];
 
     preprocesar(image_c, image_c);
 
-    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 2.0);
-
+    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%i %i", image_c.cols, image_c.rows);
+    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%i %i", image_c.cols/4, image_c.rows/4);
     for(int i = 0; i < NUM_MATRICES; i++) {
         for (int k = 0; k < NUM_PARTICIONES; k++) {
-            origen[0] = particiones[i][k][0]; //oint(particiones[i][k][0].x + PARTICION_OFFSET, particiones[i][k][0].y + PARTICION_OFFSET); //particiones[i][k][0];
-            origen[1] = particiones[i][k][1]; //Point(particiones[i][k][1].x - PARTICION_OFFSET, particiones[i][k][1].y + PARTICION_OFFSET); //particiones[i][k][1];
-            origen[2] = particiones[i][k][2]; //Point(particiones[i][k][2].x - PARTICION_OFFSET, particiones[i][k][2].y - PARTICION_OFFSET); //particiones[i][k][2];
-            origen[3] = particiones[i][k][3]; // Point(particiones[i][k][3].x + PARTICION_OFFSET, particiones[i][k][3].y - PARTICION_OFFSET); //particiones[i][k][3];
+            origen[0] = particiones[i][k][0];
+            origen[1] = particiones[i][k][1];
+            origen[2] = particiones[i][k][2];
+            origen[3] = particiones[i][k][3];
 
-            Mat mParticion = image_c(
-                    Rect(particiones[i][k][0].x+PARTICION_OFFSET,
-                         particiones[i][k][0].y+PARTICION_OFFSET,
-                         particiones[i][k][1].x - particiones[i][k][0].x-PARTICION_OFFSET,
-                         particiones[i][k][3].y - particiones[i][k][0].y-PARTICION_OFFSET));
-            if(i == 1){
-            string path = "/storage/3034-3465/DCIM/";
-            string filename = IntToString(k+1);
-            string ext = ".jpg";
-            imwrite(path+filename+ext, mParticion);
-        }
-            dilate(mParticion, mParticion, getStructuringElement(MORPH_RECT, Size(3, 3)));
-            //dilate(mParticion, mParticion, getStructuringElement(MORPH_RECT, Size(3, 3)));
-            //int morph_size =1;
-            //Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
-            //morphologyEx( mParticion, mParticion, MORPH_OPEN, element, Point(-1,-1));
-            /*if(i == 1){
+            int X = particiones[i][k][0].x + PARTICION_OFFSET,
+                Y = particiones[i][k][0].y + PARTICION_OFFSET,
+                W = particiones[i][k][1].x - X - PARTICION_OFFSET,
+                H = particiones[i][k][3].y - Y - PARTICION_OFFSET;
+            Mat mParticion = image_c(Rect(X, Y, W, H));
+
+            float tamanio = W * H;
+
+            if(tamanio > 36.0){
+                dilate(mParticion, mParticion, getStructuringElement(MORPH_RECT, Size(3, 3)));
+            }
+
+            /*if(i < NUM_MATRICES){
                 string path = "/storage/3034-3465/DCIM/";
-                string filename = IntToString(k+1);
-                string ext = "_.jpg";
-                imwrite(path+filename+ext, mParticion);
+                string filename0 = IntToString(i+1);
+                string filename1 = IntToString(k+1);
+                string ext = ".jpg";
+                imwrite(path+filename0+"_"+filename1+ext, mParticion);
             }*/
 
             ////Busca pixeles blancos en imagen binarizada
             findNonZero(mParticion, puntosBlancos);
             //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 4.0);
-            float tamanio = ((particiones[i][k][1].x - particiones[i][k][0].x) * (particiones[i][k][3].y - particiones[i][k][0].y));
+
 
             //Calcula el procentaje de pixeles blancos contra el total de pixeles en la region
             porcentajeBlanco = float((puntosBlancos.size()) * 100.0) / tamanio;
@@ -1044,7 +1060,6 @@ static void decodificarParticiones( Mat& image,
 static void traducirMensaje(string& mensajeBinario, string& mensaje, int& fase){
     if(mensajeBinario == "................................................") return;
     if(mensajeBinario == "000000000000000000000000000000000000000000000000") return;
-
     mensaje = "";
 
     string msg_seg = "";
@@ -1058,17 +1073,28 @@ static void traducirMensaje(string& mensajeBinario, string& mensaje, int& fase){
 
 
 
+    if(mensajeBinario == "000000000000000000000000000000001111111111111111") {
+        msg_matriz_1 = "0000";
+        msg_matriz_2 = "0000";
+        msg_matriz_3 = "9999";
+        fase = 0;
+    }
+
     //RECONOCER PATRON INICIO(TODOS LOS LEDS ENCENDIDOS)
     if(fase == 0){
-        if(mensajeBinario == "111111111111111111111111111111111111111111111111") {
-            msg_matriz_1 = msg_matriz_2 = msg_matriz_3 = "9999";
+        if(mensajeBinario == "000000000000000000000000000000001111111111111111") {
+            //msg_matriz_1 = msg_matriz_2 = msg_matriz_3 = "9999";
+
+            msg_matriz_1 = "0000";
+            msg_matriz_2 = "0000";
+            msg_matriz_3 = "9999";
             //__android_log_print(ANDROID_LOG_ERROR, "mensaje", "Fase 1");
         }
     }
     // RECONOCER PATRON de LECTURA DE IZQUIERDA A DERECHA y VICEVERSA
     else if(fase == 1 || fase == 2 || fase == 3){
 
-        __android_log_print(ANDROID_LOG_ERROR, "traduciendo fase", "%i", fase);
+        //__android_log_print(ANDROID_LOG_ERROR, "traduciendo fase", "%i", fase);
 
         for(int m = 0; m < NUM_MATRICES; m++) {
 

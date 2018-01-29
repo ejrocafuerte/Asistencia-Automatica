@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Camera;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -41,12 +43,23 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "CameraActivity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
     private Mat mRGBA, mResultado, mObjectSize, mParameters;// mEulerAngles;
+    private FpsMeter fpsMeter = new FpsMeter();
+    private static final String CODIGO_INICIO = "000000009999";
+    private static int amountFrameEstDistance = 0;
+    private static int actualGeneralFrame = 0;
+    private static int actualFaseFrame = 0;
+    private static double fps = 0.0f;
     private double anchoObjetoImagen = 0.0f;
     private double estimatedDist = 0.0f;
     private double estimatedDistX = 0.0f;
@@ -58,18 +71,23 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
     private double focalPx = 0.0f;
-    private float anchoObjetoReal = 750;//1750;// mm
+    private float anchoObjetoReal = 1400;//1750;// mm
     private double yaw = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
     private double initialYaw = 135.0f;
-    private  double finalYaw = 0.0f;
-    private double flickerTime = 2000;//ms
+    private double finalYaw = 0.0f;
+    private double flickerTime = 1000;//ms
     private double actualTime = 0;
     private int faseDeco = 0;
+    private int sizeList = 3;
     private String[] mensajes = {"", "", ""};
     private String mensajeFinal = "";
-    private boolean firstFrame = false;
+    private String mensajeAnteriorDecodificado = "";
+    private ArrayList<String> mensajeListaFase0 = new ArrayList<>(),
+                              mensajeListaFase1 = new ArrayList<>(),
+                              mensajeListaFase2 = new ArrayList<>(),
+                              mensajeListaFase3 = new ArrayList<>();
 
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
@@ -89,7 +107,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 }
             }
         }
-    };
+};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,6 +131,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         _cameraBridgeViewBase.setCvCameraViewListener(this);
         _cameraBridgeViewBase.setMaxFrameSize(640, 640);
         _cameraBridgeViewBase.enableFpsMeter();
+
 
 
     }
@@ -187,22 +206,24 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRGBA = inputFrame.rgba();
-        
-        /*if(ori_sensor == null)
+        fpsMeter.measure();
+        fps = fpsMeter.getFps();
+        //actualGeneralFrame++;
+        //actualFaseFrame++;
+        //Log.e(TAG, "FPS: " + fpsMeter.getFps());
 
-            finalYaw = yaw;
-        else
-            finalYaw = initialYaw - yaw;*/
+        //mFrequency = Core.getTickFrequency();//  FRAMERATE
+        //mprevFrameTime = Core.getTickCount();
 
-        mParameters.put(0,0, tilt);
-        mParameters.put(0,1, finalYaw);
-        mParameters.put(0,2, roll);
-        mParameters.put(0,3, horizonalAngle);
-        mParameters.put(0,4, verticalAngle);
-        mParameters.put(0,5, faseDeco);
-        mParameters.put(0,6, focalPx);
+        mParameters.put(0, 0, tilt);
+        mParameters.put(0, 1, finalYaw);
+        mParameters.put(0, 2, roll);
+        mParameters.put(0, 3, horizonalAngle);
+        mParameters.put(0, 4, verticalAngle);
+        mParameters.put(0, 5, faseDeco);
+        mParameters.put(0, 6, focalPx);
 ///////////////////////
-       mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+       /*mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
                 mResultado.getNativeObjAddr(),
                 mObjectSize.getNativeObjAddr(),
                 mParameters.getNativeObjAddr());
@@ -216,82 +237,211 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
         estimatedDistX = -estimatedDist * Math.sin(finalYaw) * Math.cos(tilt);
-        estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) /*Math.cos(finalYaw) */* Math.cos(tilt));
+        estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) *Math.cos(finalYaw) * Math.cos(tilt));*/
 ////////////////////////
-        /*if(System.currentTimeMillis() - actualTime > flickerTime) {
-            mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
-                    mResultado.getNativeObjAddr(),
-                    mObjectSize.getNativeObjAddr(),
-                    mParameters.getNativeObjAddr());
-
-            faseDeco = (int) mParameters.get(0, 5)[0];
-            //Log.e(TAG, "Fase deco: " + faseDeco);
-
-            if(faseDeco < 4) {
+        //System.currentTimeMillis() - actualTime > flickerTime) {
 
 
-                if (!mensajeResultado.equals("")) {
-                    Log.e(TAG, "onCam Mensaje: " + mensajeResultado + ", fasedeco: "+faseDeco);
-                    if (faseDeco > 0) {
-                        mensajes[faseDeco-1] = mensajeResultado;
-                        Log.e(TAG, "mensajes[faseDeco - 2] =" + mensajeResultado);
-                    }
 
-                    //if(faseDeco == 2){ faseDeco = 3; vibrate();}
+        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+                                        mResultado.getNativeObjAddr(),
+                                        mObjectSize.getNativeObjAddr(),
+                                        mParameters.getNativeObjAddr());
 
-                    faseDeco++;
-                    actualTime = System.currentTimeMillis();
-                }
+        faseDeco = (int) mParameters.get(0, 5)[0];
 
-            }
-            else if (faseDeco == 4){
-                if (mensajes[0].length() == 12 && mensajes[1].length() == 12 && mensajes[2].length() == 12) {
-
-                    Log.e(TAG, "Mensaje 1: " + mensajes[0]);
-                    Log.e(TAG, "Mensaje 2: " + mensajes[1]);
-                    Log.e(TAG, "Mensaje 3: " + mensajes[2]);
-
-                    if (mensajes[0].equals(mensajes[1]) && mensajes[0].equals(mensajes[2])) {
-                        mensajeFinal = mensajes[0];
-                        Log.e(TAG, "Mensaje decodificado: 100% accuracy: "+mensajeFinal);
-                    } else if (mensajes[0].equals(mensajes[1]) || mensajes[0].equals(mensajes[2])) {
-                        mensajeFinal = mensajes[0];
-                        Log.e(TAG, "Mensaje decodificado: 66% accuracy: "+mensajeFinal);
-                    } else {
-                        mensajeFinal = mensajes[0];
-                        Log.e(TAG, "Mensaje decodificado: 33% accuracy: "+mensajeFinal);
-                    }
-                }
-                else {Log.e(TAG, "Mensaje 1:" + mensajes[0]);
-                    Log.e(TAG, "Mensaje 2:" + mensajes[1]);
-                    Log.e(TAG, "Mensaje 3:" + mensajes[2]);
-                }
-
-                        anchoObjetoImagen = mObjectSize.get(0, 2)[0] *
-                Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
-
-                estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
-
-                estimatedDistY = Math.abs(estimatedDist * Math.cos(Math.toRadians(finalYaw)) * Math.cos(Math.toRadians(tilt)));
-                estimatedDistX = -estimatedDist * Math.sin(Math.toRadians(finalYaw)) * Math.cos(Math.toRadians(tilt));
-
-                if (anchoObjetoImagen > 1 && estimatedDist > 1) {
-
-                    faseDeco = 0;
-
-                    vibrate();
-                    //Toast.makeText(this, mensajeFinal, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "onCam ancho imagen: " + anchoObjetoImagen);
-                    Log.e(TAG, "onCam distancia: " + estimatedDist);
-                    Intent intent = new Intent(this, LobbyActivity.class);
-                    intent.putExtra("codigo", mensajeFinal);
-                    intent.putExtra("distanciaX", estimatedDistX);
-                    intent.putExtra("distanciaY", estimatedDistY);
-                    setResult(LobbyActivity.RESULT_OK, intent);
-                    finish();
-                }
-            }
+        Log.e(TAG, "Fase deco: " + faseDeco);
+        /*if(mensajeResultado.equals(CODIGO_INICIO)) {
+            faseDeco = 0;
+            //reset list
         }*/
+
+        if (faseDeco == 5) {
+            mensajeListaFase1.clear();
+            mensajeListaFase2.clear();
+            mensajeListaFase3.clear();
+            actualFaseFrame = 0;
+            actualGeneralFrame = 0;
+            faseDeco = 0;
+        }
+
+        if(!mensajeResultado.equals("") && fps > 3.0f){
+            if(faseDeco == 0){
+                Log.e(TAG, "Empezando Fase 0, fps: " + fps);
+                if(mensajeResultado.equals(CODIGO_INICIO)){
+                    //if (avg >= 0.5) {
+                    faseDeco++;
+                    vibrate();
+                    mensajeAnteriorDecodificado = mensajeResultado;
+                    actualFaseFrame = 0;
+                    actualGeneralFrame = 0;
+                    Log.e(TAG, "FASE 0 OK");
+                }
+                else Log.e(TAG, "MSG FASE 0 NOK: "+mensajeResultado);
+
+                mensajeListaFase1.clear();
+                mensajeListaFase2.clear();
+                mensajeListaFase3.clear();
+            }
+            else if (faseDeco == 1) {
+
+                if(mensajeResultado.equals(CODIGO_INICIO)) {
+                    faseDeco = 5;
+                    Log.e(TAG, "En Fase 1 msg igual a msg Fase 0: " +mensajeResultado);
+                }
+                else if(!mensajeAnteriorDecodificado.equals(mensajeResultado)) {
+
+                    mensajeListaFase1.add(mensajeResultado);
+
+
+
+                    if(actualFaseFrame == 0){
+
+                        //Log.e(TAG, "Empezando Fase 1, fps: " + fpsMeter.getFps());
+                        actualGeneralFrame = (int)Math.floor(fpsMeter.getFps() * (flickerTime/1000));//  -1;
+                        Log.e(TAG, "Fase 1, Size list: " + mensajeListaFase1.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
+
+                        actualFaseFrame++;
+                    }
+
+                    Log.e(TAG, "Mensaje"+mensajeListaFase1.size()+" Fase 1: " +mensajeResultado);
+                    if (mensajeListaFase1.size() >= actualGeneralFrame) {
+                        mensajes[faseDeco - 1] = mensajeResultado;
+                        faseDeco++;
+                        actualFaseFrame = 0;
+                        actualGeneralFrame = 0;
+                        mensajeAnteriorDecodificado = mensajeResultado;
+                        vibrate();
+                        Log.e(TAG, "Mensaje OK fase 1: , size list: " + mensajeListaFase1.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
+                    }
+
+
+
+                    }
+            } else if (faseDeco == 2) {
+
+                if(mensajeResultado.equals(CODIGO_INICIO)) {
+                    faseDeco = 5;
+                    Log.e(TAG, "En Fase 2 msg igual a msg Fase 1: " +mensajeResultado);
+                }
+                else if(!mensajeAnteriorDecodificado.equals(mensajeResultado)) {
+
+                    mensajeListaFase2.add(mensajeResultado);
+
+
+                    if(actualFaseFrame == 0){
+                        //Log.e(TAG, "Empezando Fase 2, fps: " + fpsMeter.getFps());
+                        actualGeneralFrame = (int)Math.floor(fpsMeter.getFps() * (flickerTime/1000));//  -1;
+                        Log.e(TAG, "Fase 2, Size list: " + mensajeListaFase2.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
+
+                        actualFaseFrame++;
+                    }
+
+                    Log.e(TAG, "Mensaje"+mensajeListaFase2.size()+" Fase 2: " +mensajeResultado);
+                    if (mensajeListaFase2.size() >= actualGeneralFrame) {
+                        mensajes[faseDeco - 1] = mensajeResultado;
+                        faseDeco++;
+                        actualFaseFrame = 0;
+                        actualGeneralFrame = 0;
+                        mensajeAnteriorDecodificado = mensajeResultado;
+                        vibrate();
+                        Log.e(TAG, "Mensaje OK fase 2, size list: " + mensajeListaFase1.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
+                    }
+                }
+            } else if (faseDeco == 3) {
+                faseDeco++;
+
+                if(mensajeResultado.equals(CODIGO_INICIO)) {
+                    faseDeco = 5;
+                    Log.e(TAG, "En Fase 3 msg igual a msg Fase 2: " +mensajeResultado);
+                }
+                else if(!mensajeAnteriorDecodificado.equals(mensajeResultado)) {
+
+                    mensajeListaFase3.add(mensajeResultado);
+
+                    if(actualFaseFrame == 0){
+
+                        //Log.e(TAG, "Empezando Fase 3, fps: " + fpsMeter.getFps());
+                        actualGeneralFrame = (int)Math.floor(fpsMeter.getFps() * (flickerTime/1000));//  -1;
+                        Log.e(TAG, "Fase 3, Size list: " + mensajeListaFase3.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
+
+                        actualFaseFrame++;
+                    }
+                    Log.e(TAG, "Mensaje"+mensajeListaFase3.size()+" Fase 3: " +mensajeResultado);
+                    if (mensajeListaFase3.size() >= actualGeneralFrame) {
+                        mensajes[faseDeco - 1] = mensajeResultado;
+                        faseDeco++;
+                        actualFaseFrame = 0;
+                        actualGeneralFrame = 0;
+                        mensajeAnteriorDecodificado = mensajeResultado;
+                        vibrate();
+                        Log.e(TAG, "Mensaje OK fase 3, size list: " + mensajeListaFase1.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
+                    }
+                }
+                else{
+                    Log.e(TAG, "Mensaje anterior fase 3 igual al anterior de fase 2: " +mensajeResultado);
+                }
+            }
+        }
+
+        if (faseDeco == 4){
+            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 /*&& mensajeListaFase3.size() > 0*/) {
+
+                mensajeFinal = mostCommon(mensajeListaFase1)+mostCommon(mensajeListaFase2)/*+mostCommon(mensajeListaFase3)*/;
+
+                Log.e(TAG, "Mensaje Final: " + mensajeResultado);
+            }
+            else{
+                Log.e(TAG, "Algunas de las lista esta vacia.");
+            }
+
+            amountFrameEstDistance++;
+
+            if(amountFrameEstDistance > 10) {
+                amountFrameEstDistance = 0;
+                tilt = mParameters.get(0, 0)[0];
+                finalYaw = mParameters.get(0, 1)[0];
+                roll = mParameters.get(0, 2)[0];
+
+                anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
+
+                if (anchoObjetoImagen > 1) {
+
+                    estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
+
+                    estimatedDistX = -estimatedDist * Math.sin(finalYaw) * Math.cos(tilt);
+                    estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) * Math.cos(finalYaw) * Math.cos(tilt));
+
+                    Log.e(TAG, "Width image: " + anchoObjetoImagen + " , distance: " + estimatedDist);
+
+                    if (estimatedDist > 1) {
+
+                        faseDeco++;
+
+                        vibrate();
+                        //mensajeListaFase0.clear();
+                        mensajeListaFase1.clear();
+                        mensajeListaFase2.clear();
+                        mensajeListaFase3.clear();
+                        actualFaseFrame = 0;
+                        actualGeneralFrame = 0;
+                        //Toast.makeText(this, mensajeFinal, Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "onCam ancho imagen: " + anchoObjetoImagen);
+                        Log.e(TAG, "onCam distancia: " + estimatedDist);
+                        Intent intent = new Intent(this, LobbyActivity.class);
+                        intent.putExtra("codigo", mensajeFinal);
+                        intent.putExtra("distanciaX", estimatedDistX);
+                        intent.putExtra("distanciaY", estimatedDistY);
+                        setResult(LobbyActivity.RESULT_OK, intent);
+                        finish();
+                    }
+                }
+            }else{
+
+                Log.e(TAG, "Frame <= 10, actual: "+ amountFrameEstDistance);
+            }
+        }
+
 
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
                         ", P: " + String.format("%.2f", Math.toDegrees(finalYaw)) +
@@ -314,13 +464,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         String.format("%.2f", estimatedDistY / 10)+")",
                 new Point(10, 110),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Fase: " + (int)mParameters.get(0,5)[0],
+        Imgproc.putText(mResultado, "Fase: " + faseDeco,
                 new Point(10, 140),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         Imgproc.putText(mResultado, "Mensaje: " + mensajeResultado,
                 new Point(10, 170),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Tiempo: " + ((actualTime > 0)?(System.currentTimeMillis() - actualTime):0),
+
+        Imgproc.putText(mResultado, "Calc. distancia: " + amountFrameEstDistance,
                 new Point(10, 200),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         return mResultado;
@@ -369,10 +520,66 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     private void vibrate() {
         if (Build.VERSION.SDK_INT >= 26) {
-            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(150,10));
+            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(50,50));
         } else {
-            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(150);
+            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(50);
         }
+    }
+
+    public class FpsMeter {
+        private static final int STEP = 20;
+        private final DecimalFormat FPS_FORMAT = new DecimalFormat("0.00");
+
+        private int mFramesCounter;
+        private double mFrequency;
+        private long mprevFrameTime;
+        private double fps;
+        boolean mIsInitialized = false;
+
+        public void init() {
+            mFramesCounter = 0;
+            mFrequency = Core.getTickFrequency();
+            mprevFrameTime = Core.getTickCount();
+        }
+
+        public void measure() {
+            if (!mIsInitialized) {
+                init();
+                mIsInitialized = true;
+            } else {
+                mFramesCounter++;
+                if (mFramesCounter % STEP == 0) {
+                    long time = Core.getTickCount();
+                    fps = STEP * mFrequency / (time - mprevFrameTime);
+                    mprevFrameTime = time;
+
+                }
+            }
+        }
+
+        public double getFps() {
+            return fps;
+        }
+    }
+
+    public static String mostCommon(List<String> list) {
+        Map<String, Integer> map = new HashMap<>();
+
+        for (String t : list) {
+            Integer val = map.get(t);
+            map.put(t, val == null ? 1 : val + 1);
+        }
+
+        Map.Entry<String, Integer> max = null;
+
+        for (Map.Entry<String, Integer> e : map.entrySet()) {
+            if (max == null || e.getValue() > max.getValue())
+                max = e;
+        }
+        /*if(map.size() == list.size()){
+            return "";
+        }*/
+        return max.getKey();
     }
 }
 
