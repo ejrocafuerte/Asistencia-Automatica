@@ -138,7 +138,7 @@ def gestionar_estudiante(request):
 
             senal_pro = senales_profesor.filter(bssid = bssid_est).first()
 
-            if senal_pro and not senal_pro.level2 in range(level2_est - 5, level2_est + 5):
+            if senal_pro and not senal_pro.level2 in range(level2_est - 7, level2_est + 7):
                 raise Exception("Error potencia senal fuera de rango. Senal profesor(" + senal_pro.bssid + "): " + str(senal_pro.level2) +
                                 ". Senal estudiante(" + bssid_est + "): " + str(level2_est))
             if senal_pro:
@@ -149,113 +149,129 @@ def gestionar_estudiante(request):
         return True
 
     if request.method == 'POST':
+        aprobado = 1
         try:
-            msg_asistencia = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(request.body)
-            msg_asistencia = json.loads(msg_asistencia)[0]
-            print(msg_asistencia)
+            msg_asistencias = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(request.body)
+            msg_asistencias = json.loads(msg_asistencias)
 
-            codigo_decodificado = msg_asistencia.get('codigo')
+            for msg_asistencia in msg_asistencias:
 
+                print(msg_asistencia)
 
-            asistencia_prof = AsistenciaProfesor.objects.filter(codigo = codigo_decodificado).first()
+                codigo_decodificado = msg_asistencia.get('codigo')
 
-            if not asistencia_prof:
-                raise Exception('Error, Codigo no existe')
+                #Busco en la tabla de asistencia profesor por el codigo
+                asistencia_prof = AsistenciaProfesor.objects.filter(codigo = codigo_decodificado).first()
 
-            print('Codigo: ' + asistencia_prof.codigo)
+                if not asistencia_prof:
+                    aprobado = 0
+                    #raise Exception('Error, Codigo decodificado no existe en tabla asistencia profesor')
+                    print ('Error, Codigo decodificado no existe en tabla asistencia profesor')
 
-            info_estudiante = msg_asistencia.get('estudiante')
+                print('Codigo: ' + asistencia_prof.codigo)
 
-            matricula   = info_estudiante.get('matricula')
-            nombres     = info_estudiante.get('nombres')
-            apellidos   = info_estudiante.get('apellidos')
-            mac         = msg_asistencia.get('mac')
-            imei        = msg_asistencia.get('imei')
-            distancia_x = msg_asistencia.get('distanciaX')
-            distancia_y = msg_asistencia.get('distanciaY')
-            fecha       = msg_asistencia.get('fecha')
-            senales     = msg_asistencia.get('senales')
+                info_estudiante = msg_asistencia.get('estudiante')
 
-            if len(senales) <= 0:
-                raise Exception('Error no existe lectura de senales WIFI')
+                matricula   = info_estudiante.get('matricula')
+                nombres     = info_estudiante.get('nombres')
+                apellidos   = info_estudiante.get('apellidos')
+                mac         = msg_asistencia.get('mac')
+                imei        = msg_asistencia.get('imei')
+                distancia_x = msg_asistencia.get('distanciaX')
+                distancia_y = msg_asistencia.get('distanciaY')
+                fecha       = msg_asistencia.get('fecha')
+                senales     = msg_asistencia.get('senales')
 
-            #estudiante, existe_estudiante = Estudiante.objects.get_or_create(matricula = matricula)
-            estudiante = None
-            try:
-                estudiante = Estudiante.objects.get(matricula = matricula)
-            except ObjectDoesNotExist:
-                estudiante = Estudiante.objects.create(matricula = matricula, nombres = nombres, apellidos = apellidos, mac = mac, imei = imei)
+                if len(senales) <= 0:
+                    #raise Exception('Error no existe lectura de senales WIFI en estudiante')
+                    aprobado = 0
+                    print('Error no existe lectura de senales WIFI en estudiante')
 
-            if not estudiante:
-                raise Exception('Error al crear/obtener estudiante')
+                #estudiante, existe_estudiante = Estudiante.objects.get_or_create(matricula = matricula)
+                estudiante = None
+                try:
+                    estudiante = Estudiante.objects.get(matricula = matricula)
+                except ObjectDoesNotExist:
+                    estudiante = Estudiante.objects.create(matricula = matricula, nombres = nombres, apellidos = apellidos, mac = mac, imei = imei)
 
-            print ('Estudiante: ' + str(estudiante))
+                if not estudiante:
+                    raise Exception('Error al crear/obtener estudiante')
 
-              #M1      #M2       #M3a    #M3b
-            materia, profesor, paralelo, aula = get_info_codigo(codigo_decodificado)
-            print(materia)
-            print(profesor)
-            print(paralelo)
-            print(aula)
+                print ('Estudiante: ' + str(estudiante))
 
-            profesor = Profesor.objects.filter(identificador = profesor).first()
+                  #M1      #M2       #M3a    #M3b
+                materia, profesor, paralelo, aula = get_info_codigo(codigo_decodificado)
+                print(materia)
+                print(profesor)
+                print(paralelo)
+                print(aula)
 
-            if not profesor:
-                raise Exception('Error al obtener profesor')
+                profesor = Profesor.objects.filter(identificador = profesor).first()
 
-            materia  = Materia.objects.filter(identificador = materia).first()
+                if not profesor:
+                    aprobado = 0
+                    #raise Exception('Error al obtener profesor')
+                    print ('Error al obtener profesor')
 
-            if not materia:
-                raise Exception('Error al obtener materia')
+                materia  = Materia.objects.filter(identificador = materia).first()
 
-            paralelo = Paralelo.objects.filter(identificador = paralelo).first()
+                if not materia:
+                    #raise Exception('Error al obtener materia')
+                    aprobado = 0
+                    print ('Error al obtener materia')
 
-            if not paralelo:
-                raise Exception('Error al obtener paralelo')
+                paralelo = Paralelo.objects.filter(identificador = paralelo).first()
 
-            aula     = Aula.objects.filter(identificador = aula).first()
+                if not paralelo:
+                    #raise Exception('Error al obtener paralelo')
+                    aprobado = 0
+                    print ('Error al obtener paralelo')
 
-            if not aula:
-                raise Exception('Error al obtener aula')
-            print('1')
-            asistencia = AsistenciaEstudiante.objects.create(id_estudiante = estudiante,
-                                                   id_profesor = profesor,
-                                                   id_materia = materia,
-                                                   id_paralelo = paralelo,
-                                                   id_aula = aula,
-                                                   codigodecodificado = codigo_decodificado,
-                                                   distanciax = distancia_x,
-                                                   distanciay = distancia_y,
-                                                   fecha = fecha,
-                                                   aprobado = 0)
-            print('2')
-            if asistencia is None:
-                raise Exception('Error al crear asistencia')
+                aula = Aula.objects.filter(identificador = aula).first()
 
-            for _senal in senales:
-                bssid  = _senal.get('bssid')
-                ssid   = _senal.get('ssid')
-                level  = _senal.get('level')
-                level2 = _senal.get('level2')
+                if not aula:
+                    #raise Exception('Error al obtener aula')
+                    aprobado = 0
+                    print('Error al obtener aula')
 
-                senal = SenalEstudiante.objects.create(bssid = bssid,
-                                                         ssid = ssid,
-                                                         level = level,
-                                                         level2 = level2,
-                                                         asistencia = asistencia)
+                asistencia = AsistenciaEstudiante.objects.create(id_estudiante = estudiante,
+                                                       id_profesor = profesor,
+                                                       id_materia = materia,
+                                                       id_paralelo = paralelo,
+                                                       id_aula = aula,
+                                                       codigodecodificado = codigo_decodificado,
+                                                       distanciax = distancia_x,
+                                                       distanciay = distancia_y,
+                                                       fecha = fecha,
+                                                       aprobado = aprobado)
 
-                if not senal:
-                    raise Exception('Error al crear senal')
+                if asistencia is None:
+                    raise Exception('Error al crear asistencia')
 
-            aceptado = validar_posicion(estudiante, senales, asistencia)
+                for _senal in senales:
+                    bssid  = _senal.get('bssid')
+                    ssid   = _senal.get('ssid')
+                    level  = _senal.get('level')
+                    level2 = _senal.get('level2')
 
-            print ('OK')
-            return JsonResponse({'response':'0'})
+                    senal = SenalEstudiante.objects.create(bssid = bssid,
+                                                             ssid = ssid,
+                                                             level = level,
+                                                             level2 = level2,
+                                                             asistencia = asistencia)
+
+                    if not senal:
+                        raise Exception('Error al crear senal')
+
+                aceptado = validar_posicion(estudiante, senales, asistencia)
+
+                print ('OK')
+                return JsonResponse({'response':'0', 'msg' : 'ok'})
         except Exception as e:
             print (str(e))
-            return JsonResponse({'response':'1'})
+            return JsonResponse({'response':'1', 'msg' : str(e)})
     else:
-        return JsonResponse({'response':'1'})
+        return JsonResponse({'response':'1', 'msg' : 'metodo no soportado'})
 
 
 
