@@ -161,7 +161,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     asistenciaActual.setEstudiante(estudiante);
 
                     int index = getAsistenciaByCodigo(asistenciaActual);
-                    if(false){//index >= 0) {
+
+                    if(index >= 0) {
                         asistencias.get(index).setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
                         asistencias.get(index).setEstudiante(estudiante);
                         Toast.makeText(mContext, "Asistencia duplicada!", Toast.LENGTH_SHORT).show();
@@ -229,7 +230,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                                         Toast.LENGTH_SHORT).show();
                             }
                             case "1":{
-
+                                Toast.makeText(mContext, "Server NOK",
+                                        Toast.LENGTH_SHORT).show();
                             }
                         }
                     }
@@ -560,11 +562,11 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 Toast.makeText(context, "BroadcastReceiver: WIFI ON", Toast.LENGTH_SHORT).show();
             } else if (mobile.isConnected()) {
                 existeInternet = true;
-                wifiManager.setWifiEnabled(true);
+                //wifiManager.setWifiEnabled(true);
                 Toast.makeText(context, "BroadcastReceiver: MOBILE ON", Toast.LENGTH_SHORT).show();
             } else {
                 existeInternet = false;
-                wifiManager.setWifiEnabled(true);
+                //wifiManager.setWifiEnabled(true);
                 Toast.makeText(context, "BroadcastReceiver: MOBILE AND WIFI OFF", Toast.LENGTH_SHORT).show();
             }
         }
@@ -629,7 +631,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     }
 
     int getAsistenciaByCodigo(Asistencia asistenciaActual){
-        if(asistenciaActual == null || asistencias.size() <= 0) return -1;
+        if(asistenciaActual == null || asistencias == null || asistencias.size() <= 0) return -1;
         for (int i = 0; i <= asistencias.size(); i++) {
             Asistencia a = asistencias.get(i);
             if (a.getCodigo().equals(asistenciaActual.getCodigo()) &&
