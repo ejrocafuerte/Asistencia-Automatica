@@ -57,12 +57,13 @@ public class DeviceListActivity extends Activity {
 
         // Initialize the button to perform device discovery
         Button scanButton = (Button) findViewById(R.id.button_scan);
-        /*scanButton.setOnClickListener(new View.OnClickListener() {
+        scanButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                doDiscovery();
+                mBtAdapter.startDiscovery();
+                //doDiscovery();
                 v.setVisibility(View.GONE);
             }
-        });*/
+        });
 
         // Initialize array adapters. One for already paired devices and
         // one for newly discovered devices
@@ -124,6 +125,7 @@ public class DeviceListActivity extends Activity {
         this.registerReceiver(mReceiver, filter);
         // Get the local Bluetooth adapter
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBtAdapter.startDiscovery();
         System.out.println("sccdsc");
 
         // Get a set of currently paired devices
