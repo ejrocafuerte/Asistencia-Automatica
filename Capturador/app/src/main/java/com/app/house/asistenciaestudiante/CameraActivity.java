@@ -77,12 +77,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
     private double focalPx = 0.0f;
-    private float anchoObjetoReal = 1400;//1750;// mm
+    private float anchoObjetoReal = 215; //1400;//1750;// mm
     private double yaw = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
-    private double initialYaw = 135.0f;
-    private double finalYaw = 0.0f;
     private double flickerTime = 1000;//ms
     private double actualTime = 0;
     private int faseDeco = 0;
@@ -220,34 +218,34 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         //mprevFrameTime = Core.getTickCount();
 
         mParameters.put(0, 0, tilt);
-        mParameters.put(0, 1, finalYaw);
+        mParameters.put(0, 1, yaw);
         mParameters.put(0, 2, roll);
         mParameters.put(0, 3, horizonalAngle);
         mParameters.put(0, 4, verticalAngle);
-        mParameters.put(0, 5, faseDeco);
+        mParameters.put(0, 5, 4); //faseDeco);
         mParameters.put(0, 6, focalPx);
 ///////////////////////
-       /*mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+       mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
                 mResultado.getNativeObjAddr(),
                 mObjectSize.getNativeObjAddr(),
                 mParameters.getNativeObjAddr());
 
        tilt = mParameters.get(0,0)[0];
-       finalYaw = mParameters.get(0,1)[0];
+       yaw = mParameters.get(0,1)[0];
        roll = mParameters.get(0,2)[0];
 
         anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
 
         estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
-        estimatedDistX = -estimatedDist * Math.sin(finalYaw) * Math.cos(tilt);
-        estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) *Math.cos(finalYaw) * Math.cos(tilt));*/
+        estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
+        estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
 ////////////////////////
         //System.currentTimeMillis() - actualTime > flickerTime) {
 
 
 
-        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+        /*mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
                                         mResultado.getNativeObjAddr(),
                                         mObjectSize.getNativeObjAddr(),
                                         mParameters.getNativeObjAddr());
@@ -255,10 +253,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         faseDeco = (int) mParameters.get(0, 5)[0];
 
         Log.e(TAG, "Fase deco: " + faseDeco);
-        /*if(mensajeResultado.equals(CODIGO_INICIO)) {
-            faseDeco = 0;
-            //reset list
-        }*/
 
         if (faseDeco == 5) {
             mensajeListaFase1.clear();
@@ -389,9 +383,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         }
 
         if (faseDeco == 4){
-            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 /*&& mensajeListaFase3.size() > 0*/) {
+            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0){ //&& mensajeListaFase3.size() > 0) {
 
-                mensajeFinal = mostCommon(mensajeListaFase1)+mostCommon(mensajeListaFase2)/*+mostCommon(mensajeListaFase3)*/;
+                mensajeFinal = mostCommon(mensajeListaFase1)+mostCommon(mensajeListaFase2); //+mostCommon(mensajeListaFase3);
 
                 Log.e(TAG, "Mensaje Final: " + mensajeResultado);
 
@@ -401,7 +395,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     if(amountFrameEstDistance > 10) {
                         amountFrameEstDistance = 0;
                         tilt = mParameters.get(0, 0)[0];
-                        finalYaw = mParameters.get(0, 1)[0];
+                        yaw = mParameters.get(0, 1)[0];
                         roll = mParameters.get(0, 2)[0];
 
                         anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
@@ -410,8 +404,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                             estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
-                            estimatedDistX = -estimatedDist * Math.sin(finalYaw) * Math.cos(tilt);
-                            estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) * Math.cos(finalYaw) * Math.cos(tilt));
+                            estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
+                            estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) * Math.cos(yaw) * Math.cos(tilt));
 
                             Log.e(TAG, "Width image: " + anchoObjetoImagen + " , distance: " + estimatedDist);
 
@@ -450,9 +444,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             else{
                 Log.e(TAG, "Algunas de las lista de deco esta vacia.");
             }
-        }
+        }*/
+
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
-                        ", P: " + String.format("%.2f", Math.toDegrees(finalYaw)) +
+                        ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
                         ", R: " + String.format("%.2f", 360-Math.toDegrees(roll)),
                 new Point(10, 23),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
