@@ -3,11 +3,11 @@ package retrofit;
 import java.util.ArrayList;
 
 import models.Asistencia;
+import models.CodigosServer;
 import models.ResponseServer;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Headers;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 /**
@@ -15,7 +15,10 @@ import retrofit2.http.POST;
  */
 
 public interface RestClient {
-    //@Headers("Content-Type: application/json; charset=utf-8")
+
     @POST("gestionarestudiante/")
     Call<ResponseServer> sendMessage(@Body ArrayList<Asistencia> asistencias);
+
+    @GET("getasistencias/")
+    Call<CodigosServer> getCodigosServer();
 }

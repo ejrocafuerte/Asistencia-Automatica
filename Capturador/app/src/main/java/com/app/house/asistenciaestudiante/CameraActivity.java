@@ -49,12 +49,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import models.CodigosServer;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "CameraActivity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
     private Mat mRGBA, mResultado, mObjectSize, mParameters;// mEulerAngles;
     private FpsMeter fpsMeter = new FpsMeter();
+    private ArrayList<String> codigosServer = new ArrayList<>();
     private static final String CODIGO_INICIO = "000000009999";
     private static int amountFrameEstDistance = 0;
     private static int actualGeneralFrame = 0;
@@ -132,7 +138,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         _cameraBridgeViewBase.setMaxFrameSize(640, 640);
         _cameraBridgeViewBase.enableFpsMeter();
 
-
+        //getCodigosServer();
 
     }
 
@@ -141,8 +147,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         super.onPause();
         disableCamera();
     }
-
-
 
     @Override
     public void onBackPressed() {
@@ -265,7 +269,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             faseDeco = 0;
         }
 
-        if(!mensajeResultado.equals("") && fps > 3.0f){
+        if(!mensajeResultado.equals("") && fps > 2.0f){
             if(faseDeco == 0){
                 Log.e(TAG, "Empezando Fase 0, fps: " + fps);
                 if(mensajeResultado.equals(CODIGO_INICIO)){
@@ -390,59 +394,63 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 mensajeFinal = mostCommon(mensajeListaFase1)+mostCommon(mensajeListaFase2)/*+mostCommon(mensajeListaFase3)*/;
 
                 Log.e(TAG, "Mensaje Final: " + mensajeResultado);
+
+                if(verificaCodigo(mensajeFinal)) {
+                    amountFrameEstDistance++;
+
+                    if(amountFrameEstDistance > 10) {
+                        amountFrameEstDistance = 0;
+                        tilt = mParameters.get(0, 0)[0];
+                        finalYaw = mParameters.get(0, 1)[0];
+                        roll = mParameters.get(0, 2)[0];
+
+                        anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
+
+                        if (anchoObjetoImagen > 1) {
+
+                            estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
+
+                            estimatedDistX = -estimatedDist * Math.sin(finalYaw) * Math.cos(tilt);
+                            estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) * Math.cos(finalYaw) * Math.cos(tilt));
+
+                            Log.e(TAG, "Width image: " + anchoObjetoImagen + " , distance: " + estimatedDist);
+
+                            if (estimatedDist > 1) {
+
+                                faseDeco++;
+
+                                vibrate();
+                                //mensajeListaFase0.clear();
+                                mensajeListaFase1.clear();
+                                mensajeListaFase2.clear();
+                                mensajeListaFase3.clear();
+                                actualFaseFrame = 0;
+                                actualGeneralFrame = 0;
+                                //Toast.makeText(this, mensajeFinal, Toast.LENGTH_SHORT).show();
+                                Log.e(TAG, "onCam ancho imagen: " + anchoObjetoImagen);
+                                Log.e(TAG, "onCam distancia: " + estimatedDist);
+                                Intent intent = new Intent(this, LobbyActivity.class);
+                                intent.putExtra("codigo", mensajeFinal);
+                                intent.putExtra("distanciaX", estimatedDistX);
+                                intent.putExtra("distanciaY", estimatedDistY);
+                                setResult(LobbyActivity.RESULT_OK, intent);
+                                finish();
+                            }
+                        }
+                    }else{
+
+                        Log.e(TAG, "Frame <= 10, actual: "+ amountFrameEstDistance);
+                    }
+                }else{
+
+                    faseDeco = 5;
+                    Log.e(TAG, "Codigo Final no localizado en server: " + mensajeResultado);
+                }
             }
             else{
-                Log.e(TAG, "Algunas de las lista esta vacia.");
-            }
-
-            amountFrameEstDistance++;
-
-            if(amountFrameEstDistance > 10) {
-                amountFrameEstDistance = 0;
-                tilt = mParameters.get(0, 0)[0];
-                finalYaw = mParameters.get(0, 1)[0];
-                roll = mParameters.get(0, 2)[0];
-
-                anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
-
-                if (anchoObjetoImagen > 1) {
-
-                    estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
-
-                    estimatedDistX = -estimatedDist * Math.sin(finalYaw) * Math.cos(tilt);
-                    estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) * Math.cos(finalYaw) * Math.cos(tilt));
-
-                    Log.e(TAG, "Width image: " + anchoObjetoImagen + " , distance: " + estimatedDist);
-
-                    if (estimatedDist > 1) {
-
-                        faseDeco++;
-
-                        vibrate();
-                        //mensajeListaFase0.clear();
-                        mensajeListaFase1.clear();
-                        mensajeListaFase2.clear();
-                        mensajeListaFase3.clear();
-                        actualFaseFrame = 0;
-                        actualGeneralFrame = 0;
-                        //Toast.makeText(this, mensajeFinal, Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "onCam ancho imagen: " + anchoObjetoImagen);
-                        Log.e(TAG, "onCam distancia: " + estimatedDist);
-                        Intent intent = new Intent(this, LobbyActivity.class);
-                        intent.putExtra("codigo", mensajeFinal);
-                        intent.putExtra("distanciaX", estimatedDistX);
-                        intent.putExtra("distanciaY", estimatedDistY);
-                        setResult(LobbyActivity.RESULT_OK, intent);
-                        finish();
-                    }
-                }
-            }else{
-
-                Log.e(TAG, "Frame <= 10, actual: "+ amountFrameEstDistance);
+                Log.e(TAG, "Algunas de las lista de deco esta vacia.");
             }
         }
-
-
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
                         ", P: " + String.format("%.2f", Math.toDegrees(finalYaw)) +
                         ", R: " + String.format("%.2f", 360-Math.toDegrees(roll)),
@@ -475,6 +483,12 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 new Point(10, 200),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         return mResultado;
+    }
+
+    private boolean verificaCodigo(String codigoFinal) {
+        if(codigosServer == null || codigosServer.size() <= 0) return false;
+
+        return codigosServer.contains(codigoFinal);
     }
 
     public void getCameraParameters(int maxwidth, int maxheight) {
@@ -515,7 +529,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Log.e(TAG, "OpenCV library found inside package. Using it!");
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-
+        getCodigosServer();
     }
 
     private void vibrate() {
@@ -580,6 +594,47 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             return "";
         }*/
         return max.getKey();
+    }
+
+    private void getCodigosServer() {
+        if (LobbyActivity.retrofit != null) {
+            Call<CodigosServer> request = LobbyActivity.restClient.getCodigosServer();
+
+            request.enqueue(new Callback<CodigosServer>() {
+                @Override
+                public void onResponse(Call<CodigosServer> call, Response<CodigosServer> response) {
+
+                    if (response.isSuccessful()) {
+                        String rsp = response.body().getResponse();
+
+                        Log.e("onResponse codigos: ", rsp);
+
+                        switch(rsp){
+                            case "0":{
+                                codigosServer = null;
+                                codigosServer = response.body().getAsistencias();
+                                Toast.makeText(getBaseContext(), "Server OK Codigos",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            case "1":{
+                                codigosServer.clear();
+                                codigosServer = null;
+                                Toast.makeText(getBaseContext(), "Codigos NOK",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                    else{
+                        Toast.makeText(getBaseContext(), "Codigos NOK2",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CodigosServer> call, Throwable t) {
+                    Toast.makeText(getBaseContext(), "Retrofit fail!", Toast.LENGTH_SHORT).show();
+                }
+            });        }
     }
 }
 

@@ -48,6 +48,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import models.Asistencia;
+import models.CodigosServer;
 import models.Estudiante;
 import models.ResponseServer;
 import models.Senal;
@@ -65,8 +66,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
     private Context mContext;
     private NetworkConReceiver mNetworkConReceiver;
-    private static Retrofit retrofit = null;
-    private RestClient restClient = null;
+    protected static Retrofit retrofit = null;
+    protected static RestClient restClient = null;
     protected static Crypt crypto;
     private ArrayList<Asistencia> asistencias;
     private Asistencia asistenciaActual;
@@ -98,6 +99,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private boolean asistenciaEnlistada = false;
     private Button btn_enviar;
     private TextView txt_asistencias;
+    private ArrayList<String> codigosServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,10 +139,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
         scanWifiSignals();
 
-        // Get the reference of movies
-        ListView asistenciasLV = (ListView)findViewById(R.id.listAsistencias);
-
-        // Create The Adapter with passing ArrayList as 3rd parameter
+        ListView asistenciasLV = (ListView)findViewById(R.id.listAsistenciasPendientes);
         adapter = new ArrayAdapter<Asistencia>(this, R.layout.simple_list_item, asistencias);
         // Set The Adapter
 
@@ -150,6 +149,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             //
         asistenciasLV.setAdapter(adapter);
     }
+
+
 
     @Override
     public void onClick(View v) {
@@ -189,14 +190,13 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                         saveFile(mContext, asistencias, nombreArchivoAsistencia);
                     }
                 }
-                ;
             }
             default:
                 break;
         }
     }
 
-    private void sendMessage(/*String asistenciasMessage*/) {
+    private void sendMessage() {
 
         if (restClient != null) {
             Call<ResponseServer> request = restClient.sendMessage(asistencias);
@@ -238,6 +238,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 }
             });        }
     }
+
+
 
     private String getAsistenciasMessage(ArrayList<Asistencia> asistencias) {
         if(asistencias.size() <= 0) return "";

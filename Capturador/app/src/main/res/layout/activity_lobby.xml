@@ -21,6 +21,64 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <LinearLayout
+        android:id="@+id/rlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/benviar"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/appBarLayout2"
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <TextView
+            android:id="@+id/lasistencias"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.1"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
+            android:text="Asistencias pendientes:"
+            android:textColor="?attr/colorPrimaryDark"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ListView
+            android:id="@+id/listAsistenciasPendientes"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/lasistencias"
+            android:layout_weight="0.4"
+            android:divider="?attr/dividerHorizontal"
+            android:paddingLeft="10dp" />
+
+        <TextView
+            android:id="@+id/lasistencias2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@+id/listAsistenciasPendientes"
+            android:layout_weight="0.1"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
+            android:text="Asistencias realizadas:"
+            android:textColor="?attr/colorPrimaryDark"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ListView
+            android:id="@+id/listAsistenciasRealizadas"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@+id/lasistencias2"
+            android:layout_weight="0.4"
+            android:divider="?attr/dividerHorizontal"
+            android:entries="@string/title_activity_info"
+            android:paddingLeft="10dp">
+
+        </ListView>
+    </LinearLayout>
+
     <Button
         android:id="@+id/benviar"
         android:layout_width="match_parent"
@@ -33,34 +91,5 @@
         android:textColorLink="@color/colorPrimary"
         tools:layout_editor_absoluteX="101dp"
         tools:layout_editor_absoluteY="377dp" />
-
-    <TextView
-        android:id="@+id/lasistencias"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/appBarLayout2"
-        android:padding="10dp"
-        android:text="Asistencias pendientes:"
-        android:textColor="?attr/colorPrimaryDark"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <ListView
-        android:id="@+id/listAsistenciasPendientes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/lasistencias"
-        android:padding="10dp" />
-
-    <ListView
-        android:id="@+id/listAsistenciasRealizadas"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignTop="@id/listAsistenciasPendientes"
-        android:entries="@string/title_activity_info"
-        android:padding="10dp" />
 
 </RelativeLayout>
