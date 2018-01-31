@@ -159,6 +159,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
 
                     asistenciaActual.setEstudiante(estudiante);
+                    if(asistenciaActual.getSenales() == null || asistenciaActual.getSenales().size() <= 0)
+                        scanWifiSignals();
 
                     int index = getAsistenciaByCodigo(asistenciaActual);
 
@@ -174,22 +176,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                             adapter.notifyDataSetChanged();
                         Toast.makeText(mContext, "Added asistencia!", Toast.LENGTH_SHORT).show();
                     }
-
-
-
-                    /*if(!asistenciaEnlistada) {
-                        //infoAsistencias.add(infoAsistenciaActual);
-                        asistencias.add(asistenciaActual);
-                        Log.e("Existe internet, enviando server: ", getAsistenciasMessage(asistencias));
-                        asistenciaEnlistada = true;
-                    }
-                    else{
-                        //infoAsistencias.remove(infoAsistencias.size()-1);
-                        //infoAsistencias.add(infoAsistenciaActual);
-                        if(asistencias.size() > 0)
-                            asistencias.remove(asistencias.size()-1);
-                        asistencias.add(asistenciaActual);
-                    }*/
 
                     //enviar asistencia servidor web
                     if (existeInternet) {
@@ -218,19 +204,21 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             request.enqueue(new Callback<ResponseServer>() {
                 @Override
                 public void onResponse(Call<ResponseServer> call, Response<ResponseServer> response) {
+
                     if (response.isSuccessful()) {
                         String rsp = response.body().getResponse();
                         Log.e("onResponse", rsp);
-                        switch(rsp.toString()){
+
+                        switch(rsp){
                             case "0":{ //OK
                                 asistencias.clear();
-                                //infoAsistenciaActual = "";
+                                adapter.notifyDataSetChanged();
                                 _deleteFile(nombreArchivoAsistencia);
                                 Toast.makeText(mContext, "Server OK",
                                         Toast.LENGTH_SHORT).show();
                             }
                             case "1":{
-                                Toast.makeText(mContext, "Server NOK",
+                                Toast.makeText(mContext, response.body().getMessage(),
                                         Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -558,7 +546,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
             if (wifi.isConnected()) {
                 existeInternet = true;
-                sendMessage();
+                //sendMessage();
                 Toast.makeText(context, "BroadcastReceiver: WIFI ON", Toast.LENGTH_SHORT).show();
             } else if (mobile.isConnected()) {
                 existeInternet = true;
@@ -591,43 +579,30 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             senal.setLevel(scanResult.level);
             senal.setLevel2(WifiManager.calculateSignalLevel(scanResult.level, 100));
             senales.add(senal);
-            //Log.e(TAG, "scanWifiSignals: " + senal.toString());
-            /*sb.append(scanResult.BSSID)
-                    .append("==")
-                    .append(scanResult.level)
-                    .append("==")
-                    .append(WifiManager.calculateSignalLevel(scanResult.level, 100));
-            if (i < wifiList.size() - 1) {
-                sb.append("&&");
-            }*/
         }
-
         asistenciaActual.setSenales(senales);
-        //senales = sb.toString();
+        /*for (int i = 0; i < wifiList.size(); i++) {
+            ScanResult scanResult = null;
+            int level = 0;
 
-    }
+            for (int k = 0; k < 5; k++) {
+                scanResult = wifiList.get(i);
 
-    public static String encrypt(final String message) {
-        try {
-            String encryptMessage = crypto.encrypt_string(message);
-            //Log.e("encrypt", encryptMessage);
-            return encryptMessage;
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+                try { sleep(50); } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                level += WifiManager.calculateSignalLevel(scanResult.level, 100);
+                //Log.e("signals: " , String.valueOf(scanResult.level));
+            }
+            Senal senal = new Senal();
+            senal.setBssid(scanResult.BSSID);
+            senal.setSsid(scanResult.SSID);
+            senal.setLevel(0);
+            senal.setLevel2(level/5);
+            senales.add(senal);
+
         }
-        return "";
+        asistenciaActual.setSenales(senales);*/
     }
 
     int getAsistenciaByCodigo(Asistencia asistenciaActual){

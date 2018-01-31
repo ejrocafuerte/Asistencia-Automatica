@@ -36,7 +36,7 @@ from .serializers import ParaleloSerializer
 
 # Create your views here.
 def index(request):
-    return HttpResponse("SITIO EN CONSTRUCCION")
+    return HttpResponse("Asistencia Automatica")
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -138,11 +138,11 @@ def gestionar_estudiante(request):
 
             senal_pro = senales_profesor.filter(bssid = bssid_est).first()
 
-            if senal_pro and not senal_pro.level2 in range(level2_est - 7, level2_est + 7):
+            if senal_pro and not senal_pro.level2 in range(level2_est - 10, level2_est + 10):
                 raise Exception("Error potencia senal fuera de rango. Senal profesor(" + senal_pro.bssid + "): " + str(senal_pro.level2) +
                                 ". Senal estudiante(" + bssid_est + "): " + str(level2_est))
             if senal_pro:
-                print(senal_pro.ssid + ' ' + str(senal_pro.level2) + ' (' + str(level2_est - 5) + ' - ' + str(level2_est + 5) + ')')
+                print(senal_pro.ssid + ' ' + str(senal_pro.level2) + ' (' + str(level2_est - 10) + ' - ' + str(level2_est + 10) + ')')
         asistencia_estudiante.aprobado = 1
         asistencia_estudiante.save()
 
@@ -151,9 +151,12 @@ def gestionar_estudiante(request):
     if request.method == 'POST':
         aprobado = 1
         try:
-            msg_asistencias = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(request.body)
-            msg_asistencias = json.loads(msg_asistencias)
+            print(request.body)
+            #msg_asistencias = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(request.body)
 
+            #msg_asistencias = json.loads(msg_asistencias)
+            msg_asistencias = json.loads(request.body)
+            print(msg_asistencias)
             for msg_asistencia in msg_asistencias:
 
                 print(msg_asistencia)
@@ -162,6 +165,8 @@ def gestionar_estudiante(request):
 
                 #Busco en la tabla de asistencia profesor por el codigo
                 asistencia_prof = AsistenciaProfesor.objects.filter(codigo = codigo_decodificado).first()
+
+                print('-1-')
 
                 if not asistencia_prof:
                     aprobado = 0
@@ -186,7 +191,7 @@ def gestionar_estudiante(request):
                     #raise Exception('Error no existe lectura de senales WIFI en estudiante')
                     aprobado = 0
                     print('Error no existe lectura de senales WIFI en estudiante')
-
+                print('-2-')
                 #estudiante, existe_estudiante = Estudiante.objects.get_or_create(matricula = matricula)
                 estudiante = None
                 try:
@@ -207,7 +212,7 @@ def gestionar_estudiante(request):
                 print(aula)
 
                 profesor = Profesor.objects.filter(identificador = profesor).first()
-
+                print('-2,1-')
                 if not profesor:
                     aprobado = 0
                     #raise Exception('Error al obtener profesor')
