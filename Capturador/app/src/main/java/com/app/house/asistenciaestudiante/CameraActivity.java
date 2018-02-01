@@ -1,15 +1,6 @@
 package com.app.house.asistenciaestudiante;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Camera;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -154,24 +145,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+        /*MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
-        return true;
+        return true;*/
+        return false;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        /*switch (item.getItemId()) {
-            case R.id.new_game:
-                newGame();
-                return true;
-            case R.id.help:
-                showHelp();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }*/
         return false;
     }
 

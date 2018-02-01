@@ -30,7 +30,7 @@ static void unificarParticiones(const vector<vector<Point> >& cuadrados,
                                 const vector<vector<Point> > & puntosVertices,
                                 const vector<vector<vector<Point> > > & puntosFrontera,
                                 const vector<vector<vector<Point> > > & puntosInternos,
-                               vector<vector<vector<Point> > > & particiones);
+                                vector<vector<vector<Point> > > & particiones);
 static void decodificarParticiones( Mat& image,
                                     Mat& image_c,
                                     vector<vector<vector<Point> > >& particiones,
@@ -41,7 +41,8 @@ double distanciaEntreDosPuntos(Point p1, Point p2);
 int buscarPuntoMasCercano(vector<Point> puntos, Point punto);
 double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0);
 static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados);
-static void obtenerAngulosEuler(Mat& image, vector<vector<Point> >& cuadrados, double f, double ratio, double cx, double cy, double& tilt, double& yaw, double& roll);
+static void obtenerAngulosEuler(Mat& image, vector<vector<Point> >& cuadrados,
+                                double f, double ratio, double cx, double cy, double& tilt, double& yaw, double& roll);
 static void resetAngles();
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
 string IntToString (int a);
@@ -51,7 +52,7 @@ static double deg2Rad(double deg);
 void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double roll,
                  double dx, double dy, double dz, double f, double cx, double cy);
 
-int N = 15; //11
+int N = 5; //11
 int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
 int SEGMENTOS_FRONTERA = 4;
@@ -109,6 +110,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario);
                 traducirMensaje(mensajeBinario, mensajeDecimal, faseDeco);
                 mResultado = mProcesado;
+
             } else if(faseDeco == 4){
                 vector<Point2f> corners;
 
@@ -139,7 +141,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                     MAX_HEIGHT / 2,
                                     tilt, yaw, roll);
 
-                __android_log_print(ANDROID_LOG_ERROR, "euler angles", "%.2f %.2f %.2f", tilt, yaw, roll);
+                //__android_log_print(ANDROID_LOG_ERROR, "euler angles", "%.2f %.2f %.2f", tilt, yaw, roll);
 
                 warpFrame(mOriginalCopiaB,
                           mWarpImage,
@@ -150,10 +152,10 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                           MAX_HEIGHT / 2);
                 //mWarpImage = mWarpImage(Rect((mWarpImage.cols / 2) - (MAX_WIDTH / 2), (mWarpImage.rows / 2) - (MAX_HEIGHT / 2),MAX_WIDTH, MAX_HEIGHT));
 
-                Mat croppedImage;
-                croppedImage = mWarpImage(Rect(boundRect.tl().x - 50, boundRect.tl().y - 40, boundRect.width + 100, boundRect.height + 80)) ;
+                //Mat croppedImage;
+                //croppedImage = mWarpImage(Rect(boundRect.tl().x - 50, boundRect.tl().y - 40, boundRect.width + 100, boundRect.height + 80)) ;
 
-                buscarCuadrados(croppedImage, cuadradosImagenCorregida, LAPLACIAN, N);
+                buscarCuadrados(mWarpImage, cuadradosImagenCorregida, LAPLACIAN, N);
                 //dibujarCuadrados(croppedImage, cuadradosImagenCorregida);
 
                 //__android_log_print(ANDROID_LOG_ERROR, "cuadradosImagenCorregida", "%i", cuadradosImagenCorregida.size());
@@ -213,7 +215,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     mParameters.at<double>(0,5) = faseDeco;
     return env->NewStringUTF(mensajeDecimal.c_str());
 }
-static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdFactor){
+static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdFactor){
     cuadrados.clear();
 
     Mat gray0(image.size(), CV_8U);
@@ -271,7 +273,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
         // Encuentra los contornos (mas exteriores si existen otros dentro) y los enlista
         findContours(gray, contours1, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(1, 1)); //Point(-1 ,-1)
 
-        vector<Point> approx, _approx;
+        vector<Point> approx;
 
         // test each contour
         for( size_t i = 0; i < contours1.size(); i++ )
@@ -316,6 +318,7 @@ static void buscarCuadrados( const Mat& image, vector<vector<Point> >& cuadrados
     ordenarCuadradosPorPosicionEspacial(cuadrados, DIRECCION_ORDEN_C);
     obtenerCuadradosCercanos(cuadrados);
 }
+
 static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
 
     if(cuadrados.size() <= 3) return;
@@ -331,32 +334,28 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
             busquedaExitosaSegmento = false;
 
         for (int n = 0; n < cuadrados.size() - 2; n++) {
-
-            cuadradosSeleccionados.push_back(cuadrados[n]);
-
             for (int p = n + 1; p < cuadrados.size() - 1; p++) {
-
-                cuadradosSeleccionados.push_back(cuadrados[p]);
-                //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "pushback p: %i", p);
                 distanciaSeleccionada = distanciaEntreDosPuntos(cuadrados[n][0], cuadrados[p][0]);
-                angSeleccionado = fabs(atan2(cuadrados[p][0].y - cuadrados[n][0].y,
-                                             cuadrados[p][0].x - cuadrados[n][0].x));
+                angSeleccionado = atan2(cuadrados[p][0].y - cuadrados[n][0].y, cuadrados[p][0].x - cuadrados[n][0].x);
 
                 for (int q = p + 1; q < cuadrados.size(); q++) {
 
                     distanciaActual = distanciaEntreDosPuntos(cuadrados[p][0], cuadrados[q][0]);
-
-
                     double razon = (distanciaSeleccionada >= distanciaActual) ?
                                    (distanciaActual / distanciaSeleccionada) : (distanciaSeleccionada / distanciaActual);
-
+                    //__android_log_print(ANDROID_LOG_ERROR, "ord", "distSelec %.2f (%d), angAct %.2f (%d), razon %.2f, q(%d)",
+                                        //distanciaSeleccionada, n, distanciaActual, p, fabs(razon), q);
                     if (fabs(razon) > DISTANCE_RATIO) {
-                        angActual = fabs(atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x));
-                        razon = (angSeleccionado >= angActual) ? (angActual / angSeleccionado) : (angSeleccionado / angActual);
+                        angActual = atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x);
+                        razon = (angSeleccionado >= angActual) ? (angActual / ((angSeleccionado != 0.0)?angSeleccionado:0.01)) : (angSeleccionado / ((angActual != 0.0)?angActual:0.01));
 
-                        if (fabs(razon) <= 0.85) {
-                        __android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "OK angulo");
+                        //__android_log_print(ANDROID_LOG_ERROR, "ord", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), razon %.2f",
+                        //                   rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, razon);
 
+                        if (razon > 0.85) {
+
+                            cuadradosSeleccionados.push_back(cuadrados[n]);
+                            cuadradosSeleccionados.push_back(cuadrados[p]);
                             cuadradosSeleccionados.push_back(cuadrados[q]);
 
                             if(cuadradosSeleccionados.size() == NUM_MATRICES){
@@ -364,23 +363,9 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                                 cuadrados = cuadradosSeleccionados;
                                 return;
                             }
-
-                            busquedaExitosaSubSegmento = true;
-                            busquedaExitosaSegmento = true;
-                            break;
                        }
                     }
                 }
-
-                if (!busquedaExitosaSubSegmento) {
-                    cuadradosSeleccionados.pop_back();
-                    busquedaExitosaSubSegmento = false;
-                }
-            }
-
-            if (!busquedaExitosaSegmento) {
-                cuadradosSeleccionados.pop_back();
-                busquedaExitosaSegmento = false;
             }
         }
 }
@@ -522,7 +507,7 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
 
     }
     catch (Exception e){
-        __android_log_print(ANDROID_LOG_ERROR, "exp euler", "");
+        //__android_log_print(ANDROID_LOG_ERROR, "exp euler", "");
     }
 }
 
