@@ -148,6 +148,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         }
             //
         asistenciasLV.setAdapter(adapter);
+
+        getCodigosServer();
     }
 
 
@@ -467,6 +469,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.camara:
+                getCodigosServer();
                 startActivityForResult(new Intent(mContext, CameraActivity.class), REQUESTCODE_CAMERA);
                 return true;
             case R.id.info: {
@@ -617,6 +620,58 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                 return i;
         }
         return -1;
+    }
+
+    private void getCodigosServer() {
+        if (retrofit == null) {
+            Connection.init();
+            restClient = Connection.createService(RestClient.class); //, username, password);
+        }
+
+        if (retrofit != null) {
+            Call<CodigosServer> request = restClient.getCodigosServer();
+
+            request.enqueue(new Callback<CodigosServer>() {
+                @Override
+                public void onResponse(Call<CodigosServer> call, Response<CodigosServer> response) {
+
+                    if (response.isSuccessful()) {
+                        String rsp = response.body().getResponse();
+
+                        Log.e("onResponse codigos: ", rsp);
+
+                        switch(rsp){
+                            case "0":{
+
+                                codigosServer = null;
+                                codigosServer = response.body().getCodigos();
+                                Toast.makeText(getBaseContext(), "Server OK Codigos",
+                                        Toast.LENGTH_SHORT).show();
+                                //Log.e("onResponse codigos: ", codigosServer);
+                            }
+                            case "1":{
+                                //codigosServer.clear();
+                                //codigosServer = null;
+                                Toast.makeText(getBaseContext(), "Codigos NOK",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                    else{
+                        Toast.makeText(getBaseContext(), "Codigos NOK2",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CodigosServer> call, Throwable t) {
+                    Toast.makeText(getBaseContext(), "Retrofit fail!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }else{
+            Toast.makeText(getBaseContext(), "retrofit null",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

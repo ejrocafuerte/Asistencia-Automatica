@@ -211,10 +211,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mParameters.put(0, 2, roll);
         mParameters.put(0, 3, horizonalAngle);
         mParameters.put(0, 4, verticalAngle);
-        mParameters.put(0, 5, 4); //faseDeco);
+        mParameters.put(0, 5, 4);//faseDeco);
         mParameters.put(0, 6, focalPx);
 ///////////////////////
-       /*mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+       mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
                 mResultado.getNativeObjAddr(),
                 mObjectSize.getNativeObjAddr(),
                 mParameters.getNativeObjAddr());
@@ -228,249 +228,13 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
         estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
-        estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));*/
+        estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
 ////////////////////////
         //System.currentTimeMillis() - actualTime > flickerTime) {
 
+//here
 
 
-        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
-                                        mResultado.getNativeObjAddr(),
-                                        mObjectSize.getNativeObjAddr(),
-                                        mParameters.getNativeObjAddr());
-
-        faseDeco = (int) mParameters.get(0, 5)[0];
-
-        //Log.e(TAG, "Fase deco: " + faseDeco);
-
-        if (faseDeco == 5) {
-            mensajeListaFase1.clear();
-            mensajeListaFase2.clear();
-            mensajeListaFase3.clear();
-            actualFaseFrame = 0;
-            actualGeneralFrame = 0;
-            faseDeco = 0;
-        }
-
-        if(!mensajeResultado.equals("") && fps > 2.0f){
-            if(faseDeco == 0){
-                Log.e(TAG, "Empezando Fase 0, fps: " + fps);
-                if(mensajeResultado.equals(CODIGO_INICIO)){
-                    //if (avg >= 0.5) {
-                    faseDeco++;
-                    vibrate();
-                    mensajeAnteriorDecodificado = mensajeResultado;
-                    actualFaseFrame = 0;
-                    actualGeneralFrame = 0;
-                    Log.e(TAG, "FASE 0 OK");
-                }
-                else Log.e(TAG, "MSG FASE 0 NOK: "+mensajeResultado);
-
-                mensajeListaFase1.clear();
-                mensajeListaFase2.clear();
-                mensajeListaFase3.clear();
-            }
-            else if (faseDeco == 1) {
-
-                if(mensajeResultado.equals(CODIGO_INICIO)) {
-                    faseDeco = 5;
-                    Log.e(TAG, "En Fase 1 msg igual a msg Fase 0: " +mensajeResultado);
-                }
-                else if(!mensajeAnteriorDecodificado.equals(mensajeResultado)) {
-
-                    mensajeListaFase1.add(mensajeResultado);
-
-
-
-                    if(actualFaseFrame == 0){
-
-                        //Log.e(TAG, "Empezando Fase 1, fps: " + fpsMeter.getFps());
-                        actualGeneralFrame = (int)Math.floor(fpsMeter.getFps() * (flickerTime/1000));//  -1;
-                        Log.e(TAG, "Fase 1, Size list: " + mensajeListaFase1.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
-
-                        actualFaseFrame++;
-                    }
-
-                    Log.e(TAG, "Mensaje"+mensajeListaFase1.size()+" Fase 1: " +mensajeResultado);
-                    if (mensajeListaFase1.size() >= actualGeneralFrame) {
-                        //mensajes[faseDeco - 1] = mensajeResultado;
-                        faseDeco++;
-                        actualFaseFrame = 0;
-                        actualGeneralFrame = 0;
-                        mensajeAnteriorDecodificado = mensajeResultado;
-                        vibrate();
-                        Log.e(TAG, "Mensaje OK fase 1: , size list: " + mensajeListaFase1.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
-                    }
-
-
-
-                    }
-            } else if (faseDeco == 2) {
-
-                if(mensajeResultado.equals(CODIGO_INICIO)) {
-                    faseDeco = 5;
-                    Log.e(TAG, "En Fase 2 msg igual a msg Fase 1: " +mensajeResultado);
-                }
-                else if(!mensajeAnteriorDecodificado.equals(mensajeResultado)) {
-
-                    mensajeListaFase2.add(mensajeResultado);
-
-
-                    if(actualFaseFrame == 0){
-                        //Log.e(TAG, "Empezando Fase 2, fps: " + fpsMeter.getFps());
-                        actualGeneralFrame = (int)Math.floor(fpsMeter.getFps() * (flickerTime/1000));//  -1;
-                        Log.e(TAG, "Fase 2, Size list: " + mensajeListaFase2.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
-
-                        actualFaseFrame++;
-                    }
-
-                    Log.e(TAG, "Mensaje"+mensajeListaFase2.size()+" Fase 2: " +mensajeResultado);
-                    if (mensajeListaFase2.size() >= actualGeneralFrame) {
-                        //mensajes[faseDeco - 1] = mensajeResultado;
-                        faseDeco++;
-                        actualFaseFrame = 0;
-                        actualGeneralFrame = 0;
-                        mensajeAnteriorDecodificado = mensajeResultado;
-                        vibrate();
-                        Log.e(TAG, "Mensaje OK fase 2, size list: " + mensajeListaFase1.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
-                    }
-                }
-            } else if (faseDeco == 3) {
-                faseDeco++;
-
-                if(mensajeResultado.equals(CODIGO_INICIO)) {
-                    faseDeco = 5;
-                    Log.e(TAG, "En Fase 3 msg igual a msg Fase 2: " +mensajeResultado);
-                }
-                else if(!mensajeAnteriorDecodificado.equals(mensajeResultado)) {
-
-                    mensajeListaFase3.add(mensajeResultado);
-
-                    if(actualFaseFrame == 0){
-
-                        //Log.e(TAG, "Empezando Fase 3, fps: " + fpsMeter.getFps());
-                        actualGeneralFrame = (int)Math.floor(fpsMeter.getFps() * (flickerTime/1000));//  -1;
-                        Log.e(TAG, "Fase 3, Size list: " + mensajeListaFase3.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
-
-                        actualFaseFrame++;
-                    }
-                    Log.e(TAG, "Mensaje"+mensajeListaFase3.size()+" Fase 3: " +mensajeResultado);
-                    if (mensajeListaFase3.size() >= actualGeneralFrame) {
-                        //mensajes[faseDeco - 1] = mensajeResultado;
-                        faseDeco++;
-                        actualFaseFrame = 0;
-                        actualGeneralFrame = 0;
-                        mensajeAnteriorDecodificado = mensajeResultado;
-                        vibrate();
-                        Log.e(TAG, "Mensaje OK fase 3, size list: " + mensajeListaFase1.size()+", frame: "+actualGeneralFrame+", "+actualFaseFrame);
-                    }
-                }
-                else{
-                    Log.e(TAG, "Mensaje anterior fase 3 igual al anterior de fase 2: " +mensajeResultado);
-                }
-            }
-        }
-
-        if (faseDeco == 4){
-            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 && mensajeListaFase3.size() > 0) {
-
-                mensaje[0] = mostCommon(mensajeListaFase1);
-                mensaje[1] = mostCommon(mensajeListaFase2);
-                mensaje[2] = mostCommon(mensajeListaFase3);
-
-                if(mensaje[0].equals(mensaje[1]) && mensaje[0].equals(mensaje[2])){
-
-                    if(verificaCodigo(mensaje[0])) {
-                        mensajeFinal = mensaje[0];
-                        Log.e(TAG, "Mensaje Final Accuracy 100%: " + mensajeFinal);
-                        Toast.makeText(getBaseContext(), "100% OK", Toast.LENGTH_SHORT).show();
-                    }else{
-                        Log.e(TAG, "Mensaje Final 100% No coincide con cods server: " + mensajeFinal);
-                        Toast.makeText(getBaseContext(), "100% NOK", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                else if(mensaje[0].equals(mensaje[1]) && !mensaje[0].equals(mensaje[2])){
-                    if(verificaCodigo(mensaje[0])) {
-                        mensajeFinal = mensaje[0];
-                        Log.e(TAG, "Mensaje Final Acuracy 66%: " + mensajeFinal);
-                        Toast.makeText(getBaseContext(), "66% OK", Toast.LENGTH_SHORT).show();
-                    }else{
-                        Log.e(TAG, "Mensaje Final 66% No coincide con cods server: " + mensajeFinal);
-                        Toast.makeText(getBaseContext(), "66% NOK", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                else if(!mensaje[0].equals(mensaje[1]) && !mensaje[0].equals(mensaje[2])){
-                    if(verificaCodigo(mensaje[0])){
-                        mensajeFinal = mensaje[0];
-                        Toast.makeText(getBaseContext(), "33% OK, mensaje(0)", Toast.LENGTH_SHORT).show();
-                    } else if(verificaCodigo(mensaje[1])){
-                        mensajeFinal = mensaje[1];
-                        Toast.makeText(getBaseContext(), "33% OK, mensaje(1)", Toast.LENGTH_SHORT).show();
-                    } else if(verificaCodigo(mensaje[2])){
-                        mensajeFinal = mensaje[2];
-                        Toast.makeText(getBaseContext(), "33% OK, mensaje(2)", Toast.LENGTH_SHORT).show();
-                    }else{
-                        mensajeFinal = mensaje[0];
-                        Log.e(TAG, "Mensaje Final 33% No coincide con cods server: " + mensajeFinal);
-                        Toast.makeText(getBaseContext(), "100% NOK", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                    amountFrameEstDistance++;
-
-                    if(amountFrameEstDistance > 10) {
-                        amountFrameEstDistance = 0;
-                        tilt = mParameters.get(0, 0)[0];
-                        yaw = mParameters.get(0, 1)[0];
-                        roll = mParameters.get(0, 2)[0];
-
-                        anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
-
-                        if (anchoObjetoImagen > 1) {
-
-                            estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
-
-                            estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
-                            estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
-
-                            Log.e(TAG, "Width image: " + anchoObjetoImagen + " , distance: " + estimatedDist);
-
-                            if (estimatedDist > 1) {
-
-                                faseDeco++;
-                                Log.e(TAG, "X: " + estimatedDistX + " , Y: " + estimatedDistY);
-                                vibrate();
-                                //mensajeListaFase0.clear();
-                                mensajeListaFase1.clear();
-                                mensajeListaFase2.clear();
-                                mensajeListaFase3.clear();
-                                actualFaseFrame = 0;
-                                actualGeneralFrame = 0;
-                                //Toast.makeText(this, mensajeFinal, Toast.LENGTH_SHORT).show();
-                                Log.e(TAG, "onCam ancho imagen: " + anchoObjetoImagen);
-                                Log.e(TAG, "onCam distancia: " + estimatedDist);
-                                Intent intent = new Intent(this, LobbyActivity.class);
-                                intent.putExtra("codigo", mensajeFinal);
-                                intent.putExtra("distanciaX", estimatedDistX);
-                                intent.putExtra("distanciaY", estimatedDistY);
-                                setResult(LobbyActivity.RESULT_OK, intent);
-                                finish();
-                            }
-                        }
-                    }else{
-
-                        Log.e(TAG, "Frame <= 10, actual: "+ amountFrameEstDistance);
-                    }
-                /*}else{
-
-                    faseDeco = 5;
-                    Log.e(TAG, "Codigo Final no localizado en server: " + mensajeResultado);
-                }*/
-            }
-            else{
-                //Log.e(TAG, "Algunas de las lista de deco esta vacia.");
-            }
-        }
 
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
                         ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
@@ -506,11 +270,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         return mResultado;
     }
 
-    private boolean verificaCodigo(String codigoFinal) {
+    /*private boolean verificaCodigo(String codigoFinal) {
         if(codigosServer == null || codigosServer.size() <= 0) return false;
 
         return codigosServer.contains(codigoFinal);
-    }
+    }*/
 
     public void getCameraParameters(int maxwidth, int maxheight) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -550,7 +314,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Log.e(TAG, "OpenCV library found inside package. Using it!");
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        getCodigosServer();
+        //
     }
 
     private void vibrate() {
@@ -617,56 +381,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         return max.getKey();
     }
 
-    private void getCodigosServer() {
-        if (retrofit == null) {
-            Connection.init();
-            restClient = Connection.createService(RestClient.class); //, username, password);
-        }
 
-        if (retrofit != null) {
-            Call<CodigosServer> request = restClient.getCodigosServer();
-
-            request.enqueue(new Callback<CodigosServer>() {
-                @Override
-                public void onResponse(Call<CodigosServer> call, Response<CodigosServer> response) {
-
-                    if (response.isSuccessful()) {
-                        String rsp = response.body().getResponse();
-
-                        Log.e("onResponse codigos: ", rsp);
-
-                        switch(rsp){
-                            case "0":{
-
-                                codigosServer = null;
-                                codigosServer = response.body().getCodigos();
-                                Toast.makeText(getBaseContext(), "Server OK Codigos",
-                                        Toast.LENGTH_SHORT).show();
-                                //Log.e("onResponse codigos: ", codigosServer);
-                            }
-                            case "1":{
-                                //codigosServer.clear();
-                                //codigosServer = null;
-                                Toast.makeText(getBaseContext(), "Codigos NOK",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-                    else{
-                        Toast.makeText(getBaseContext(), "Codigos NOK2",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<CodigosServer> call, Throwable t) {
-                    Toast.makeText(getBaseContext(), "Retrofit fail!", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }else{
-            Toast.makeText(getBaseContext(), "retrofit null",
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
 }
 

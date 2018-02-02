@@ -52,7 +52,7 @@ static double deg2Rad(double deg);
 void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double roll,
                  double dx, double dy, double dz, double f, double cx, double cy);
 
-int N = 5; //11
+int N = 15; //11
 int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
 int SEGMENTOS_FRONTERA = 4;
@@ -235,7 +235,7 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
             if(metodo == LAPLACIAN) {
                 /// Apply Laplace function
                 Mat dst;
-                //bitwise_not(gray0, gray0);
+                bitwise_not(gray0, gray0);
                 Laplacian(gray0, dst, 3, 3, 1, 0, BORDER_DEFAULT); //3 depth CV_16S
                 convertScaleAbs(dst, gray);
                 /*if(1){
@@ -247,7 +247,7 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
                 }*/
             }
             else if (metodo == CANNY) {
-                //bitwise_not(gray0, gray0);
+                bitwise_not(gray0, gray0);
                 Canny(gray0, gray, 0, 10, 3, true);//10,20,3);// 0 10 5
 
             }
@@ -267,11 +267,11 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
         {
             // apply threshold if l!=0:
             //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
-            gray = gray0 >= ((l + 1) * 255 / thresholdFactor); //255 -
+            gray = gray0 >= ((l + 1) * 255 / thresholdFactor);
 
         }
         // Encuentra los contornos (mas exteriores si existen otros dentro) y los enlista
-        findContours(gray, contours1, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(1, 1)); //Point(-1 ,-1)
+        findContours(gray, contours1, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(-1, -1)); //Point(-1 ,-1)
 
         vector<Point> approx;
 
@@ -308,9 +308,7 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
                 // vertices to resultant sequence
                 if( maxCosine < 0.3 ) {
                     cuadrados.push_back(approx);
-                    //__android_log_print(ANDROID_LOG_ERROR, "APPROX SELECCIONADO ---> ", "(%i %i) (%i %i) (%i %i) (%i %i) ", approx[0].x, approx[0].y,approx[1].x,approx[1].y, approx[2].x, approx[2].y, approx[3].x, approx[3].y);
                 }
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 1.4);
             }
         }
     }
@@ -336,24 +334,40 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
         for (int n = 0; n < cuadrados.size() - 2; n++) {
             for (int p = n + 1; p < cuadrados.size() - 1; p++) {
                 distanciaSeleccionada = distanciaEntreDosPuntos(cuadrados[n][0], cuadrados[p][0]);
-                angSeleccionado = atan2(cuadrados[p][0].y - cuadrados[n][0].y, cuadrados[p][0].x - cuadrados[n][0].x);
+                angSeleccionado = -atan2(cuadrados[p][0].y - cuadrados[n][0].y, cuadrados[p][0].x - cuadrados[n][0].x);
 
                 for (int q = p + 1; q < cuadrados.size(); q++) {
 
                     distanciaActual = distanciaEntreDosPuntos(cuadrados[p][0], cuadrados[q][0]);
                     double razon = (distanciaSeleccionada >= distanciaActual) ?
                                    (distanciaActual / distanciaSeleccionada) : (distanciaSeleccionada / distanciaActual);
-                    //__android_log_print(ANDROID_LOG_ERROR, "ord", "distSelec %.2f (%d), angAct %.2f (%d), razon %.2f, q(%d)",
-                                        //distanciaSeleccionada, n, distanciaActual, p, fabs(razon), q);
+
+                    __android_log_print(ANDROID_LOG_ERROR, "ord", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
+                                        distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
+
                     if (fabs(razon) > DISTANCE_RATIO) {
-                        angActual = atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x);
-                        razon = (angSeleccionado >= angActual) ? (angActual / ((angSeleccionado != 0.0)?angSeleccionado:0.01)) : (angSeleccionado / ((angActual != 0.0)?angActual:0.01));
+                        __android_log_print(ANDROID_LOG_ERROR, "OK ", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
+                                            distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
 
-                        //__android_log_print(ANDROID_LOG_ERROR, "ord", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), razon %.2f",
-                        //                   rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, razon);
+                        angActual = -atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x);
 
-                        if (razon > 0.85) {
+                        if(angSeleccionado == 0.0) angSeleccionado = 0.01;
+                        if(angActual == 0.0) angActual = 0.01;
 
+                        if(angSeleccionado <= 0.0)
+                            angSeleccionado = CV_2PI + angSeleccionado;
+
+                        if(angActual <= 0.0)
+                            angActual = CV_2PI + angActual;
+
+                        double razonang = (angSeleccionado >= angActual) ? (angActual / angSeleccionado) : (angSeleccionado / angActual);
+
+                        __android_log_print(ANDROID_LOG_ERROR, "ord", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), razon %.2f",
+                                           rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, razonang);
+
+                        if (razonang >= 0.85 && razonang <= 1.0) {
+                            __android_log_print(ANDROID_LOG_ERROR, "OK ", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), razon %.2f",
+                                                rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, razonang);
                             cuadradosSeleccionados.push_back(cuadrados[n]);
                             cuadradosSeleccionados.push_back(cuadrados[p]);
                             cuadradosSeleccionados.push_back(cuadrados[q]);
@@ -980,35 +994,39 @@ static void decodificarParticiones( Mat& image,
                 Y = particiones[i][k][0].y + PARTICION_OFFSET,
                 W = particiones[i][k][1].x - X - PARTICION_OFFSET,
                 H = particiones[i][k][3].y - Y - PARTICION_OFFSET;
-            Mat mParticion = image_c(Rect(X, Y, W, H));
 
-            float tamanio = W * H;
+            Mat mParticion;
+            if(X>=0 && Y>=0 && W>0 && H>0) {
 
-            if(tamanio > 36.0){
-                dilate(mParticion, mParticion, getStructuringElement(MORPH_RECT, Size(3, 3)));
-            }
+                mParticion = image_c(Rect(X, Y, W, H));
 
-            /*if(i < NUM_MATRICES){
-                string path = "/storage/3034-3465/DCIM/";
-                string filename0 = IntToString(i+1);
-                string filename1 = IntToString(k+1);
-                string ext = ".jpg";
-                imwrite(path+filename0+"_"+filename1+ext, mParticion);
-            }*/
+                float tamanio = W * H;
 
-            ////Busca pixeles blancos en imagen binarizada
-            findNonZero(mParticion, puntosBlancos);
-            //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 4.0);
+                if (tamanio > 36.0) {
+                    dilate(mParticion, mParticion, getStructuringElement(MORPH_RECT, Size(3, 3)));
+                }
+
+                /*if(i < NUM_MATRICES){
+                    string path = "/storage/3034-3465/DCIM/";
+                    string filename0 = IntToString(i+1);
+                    string filename1 = IntToString(k+1);
+                    string ext = ".jpg";
+                    imwrite(path+filename0+"_"+filename1+ext, mParticion);
+                }*/
+
+                ////Busca pixeles blancos en imagen binarizada
+                findNonZero(mParticion, puntosBlancos);
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 4.0);
 
 
-            //Calcula el procentaje de pixeles blancos contra el total de pixeles en la region
-            porcentajeBlanco = float((puntosBlancos.size()) * 100.0) / tamanio;
+                //Calcula el procentaje de pixeles blancos contra el total de pixeles en la region
+                porcentajeBlanco = float((puntosBlancos.size()) * 100.0) / tamanio;
 
-            if (porcentajeBlanco >= TOLERANCIA_LED_ENCENDIDO) {
-                mensajeBinario[(i % NUM_MATRICES) * NUM_PARTICIONES + k] = '1';
-            }
-            else{
-                mensajeBinario[(i % NUM_MATRICES) * NUM_PARTICIONES + k] = '0';
+                if (porcentajeBlanco >= TOLERANCIA_LED_ENCENDIDO) {
+                    mensajeBinario[(i % NUM_MATRICES) * NUM_PARTICIONES + k] = '1';
+                } else {
+                    mensajeBinario[(i % NUM_MATRICES) * NUM_PARTICIONES + k] = '0';
+                }
             }
         }
     }
@@ -1045,20 +1063,20 @@ static void traducirMensaje(string& mensajeBinario, string& mensaje, int& fase){
 
 
 
-    if(mensajeBinario == "000000000000000000000000000000001111111111111111") {
-        msg_matriz_1 = "0000";
-        msg_matriz_2 = "0000";
+    if(mensajeBinario == "111111111111111111111111111111111111111111111111") {
+        msg_matriz_1 = "9999";
+        msg_matriz_2 = "9999";
         msg_matriz_3 = "9999";
         fase = 0;
     }
 
     //RECONOCER PATRON INICIO(TODOS LOS LEDS ENCENDIDOS)
     if(fase == 0){
-        if(mensajeBinario == "000000000000000000000000000000001111111111111111") {
+        if(mensajeBinario == "111111111111111111111111111111111111111111111111") {
             //msg_matriz_1 = msg_matriz_2 = msg_matriz_3 = "9999";
 
-            msg_matriz_1 = "0000";
-            msg_matriz_2 = "0000";
+            msg_matriz_1 = "9999";
+            msg_matriz_2 = "9999";
             msg_matriz_3 = "9999";
             //__android_log_print(ANDROID_LOG_ERROR, "mensaje", "Fase 1");
         }

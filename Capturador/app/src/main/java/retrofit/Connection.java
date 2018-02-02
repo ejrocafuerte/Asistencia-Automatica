@@ -28,7 +28,7 @@ public class Connection {
         if(builder == null) {
 
             builder = new Retrofit.Builder()
-                    .baseUrl(BASE_URL_DESA)
+                    .baseUrl(BASE_URL_PROD)
                     .addConverterFactory(GsonConverterFactory.create());
         }
     }
