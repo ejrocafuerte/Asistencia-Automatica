@@ -123,7 +123,9 @@ public class InfoActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return false;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main_2, menu);
+        return true;
     }
 
     @Override

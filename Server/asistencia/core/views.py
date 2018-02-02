@@ -279,7 +279,19 @@ def gestionar_estudiante(request):
         return JsonResponse({'response':'1', 'msg' : 'metodo no soportado'})
 
 
+def codigos_asistencias(request):
+    if request.method == 'GET':
+        codigos = None
+        try:
+            codigos = AsistenciaProfesor.objects.filter().values('codigo')
+            #print (list(codigos))
 
+            return JsonResponse({'response': '0', 'codigos': list(codigos), 'msg' : 'OK'})
+        except Exception as e:
+            print (str(e))
+            return JsonResponse({'response':'1', 'codigos': '', 'msg' : str(e)})
+    else:
+        return JsonResponse({'response':'1', 'codigos': '', 'msg' : 'metodo no soportado'})
 
 
 #INSTALAR DEPENDENCIA

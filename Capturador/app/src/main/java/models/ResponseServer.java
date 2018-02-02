@@ -11,6 +11,8 @@ public class ResponseServer {
     @SerializedName("response")
     @Expose
     private String response;
+    @SerializedName("msg")
+    @Expose
     private String message;
 
     public String getResponse() {

@@ -19,6 +19,6 @@ public interface RestClient {
     @POST("gestionarestudiante/")
     Call<ResponseServer> sendMessage(@Body ArrayList<Asistencia> asistencias);
 
-    @GET("getasistencias/")
+    @GET("codigosasistencias/")
     Call<CodigosServer> getCodigosServer();
 }

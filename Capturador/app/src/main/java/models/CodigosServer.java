@@ -14,16 +14,20 @@ public class CodigosServer {
     @Expose
     private String response;
 
-    @SerializedName("codigosasistencias")
+    @SerializedName("codigos")
     @Expose
-    private ArrayList<String> asistencias;
+    private ArrayList<String> codigos;
 
-    public ArrayList<String> getAsistencias() {
-        return asistencias;
+    @SerializedName("msg")
+    @Expose
+    private String message;
+
+    public ArrayList<String> getCodigos() {
+        return codigos;
     }
 
-    public void setAsistencias(ArrayList<String> asistencias) {
-        this.asistencias = asistencias;
+    public void setCodigos(ArrayList<String> asistencias) {
+        this.codigos = asistencias;
     }
 
     public String getResponse() {
@@ -32,5 +36,13 @@ public class CodigosServer {
 
     public void setResponse(String response) {
         this.response = response;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

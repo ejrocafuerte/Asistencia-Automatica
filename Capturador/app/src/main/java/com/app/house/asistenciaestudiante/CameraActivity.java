@@ -1,6 +1,7 @@
 package com.app.house.asistenciaestudiante;
 
 import android.Manifest;
+import android.content.Intent;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -41,18 +42,23 @@ import java.util.List;
 import java.util.Map;
 
 import models.CodigosServer;
+import retrofit.Connection;
+import retrofit.RestClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "CameraActivity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
+    protected static Retrofit retrofit = null;
+    protected static RestClient restClient = null;
     private Mat mRGBA, mResultado, mObjectSize, mParameters;// mEulerAngles;
     private FpsMeter fpsMeter = new FpsMeter();
     private ArrayList<String> codigosServer = new ArrayList<>();
-    private static final String CODIGO_INICIO = "000000009999";
+    private static final String CODIGO_INICIO = "999999999999";
     private static int amountFrameEstDistance = 0;
     private static int actualGeneralFrame = 0;
     private static int actualFaseFrame = 0;
@@ -68,7 +74,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
     private double focalPx = 0.0f;
-    private float anchoObjetoReal = 215; //1400;//1750;// mm
+    private float anchoObjetoReal = 1720; //1400;//1750;// mm
     private double yaw = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
@@ -76,7 +82,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double actualTime = 0;
     private int faseDeco = 0;
     private int sizeList = 3;
-    private String[] mensajes = {"", "", ""};
+    private String[] mensaje = {"", "", ""};
     private String mensajeFinal = "";
     private String mensajeAnteriorDecodificado = "";
     private ArrayList<String> mensajeListaFase0 = new ArrayList<>(),
@@ -127,7 +133,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         _cameraBridgeViewBase.setMaxFrameSize(640, 640);
         _cameraBridgeViewBase.enableFpsMeter();
 
-        //getCodigosServer();
+        if (retrofit == null) {
+            Connection.init();
+            restClient = Connection.createService(RestClient.class); //, username, password);
+        }
 
     }
 
@@ -145,10 +154,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        /*MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-        return true;*/
-        return false;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main_2, menu);
+        return true;
     }
 
     @Override
@@ -206,7 +214,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mParameters.put(0, 5, 4); //faseDeco);
         mParameters.put(0, 6, focalPx);
 ///////////////////////
-       mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+       /*mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
                 mResultado.getNativeObjAddr(),
                 mObjectSize.getNativeObjAddr(),
                 mParameters.getNativeObjAddr());
@@ -220,20 +228,20 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
         estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
-        estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
+        estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));*/
 ////////////////////////
         //System.currentTimeMillis() - actualTime > flickerTime) {
 
 
 
-        /*mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
                                         mResultado.getNativeObjAddr(),
                                         mObjectSize.getNativeObjAddr(),
                                         mParameters.getNativeObjAddr());
 
         faseDeco = (int) mParameters.get(0, 5)[0];
 
-        Log.e(TAG, "Fase deco: " + faseDeco);
+        //Log.e(TAG, "Fase deco: " + faseDeco);
 
         if (faseDeco == 5) {
             mensajeListaFase1.clear();
@@ -285,7 +293,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                     Log.e(TAG, "Mensaje"+mensajeListaFase1.size()+" Fase 1: " +mensajeResultado);
                     if (mensajeListaFase1.size() >= actualGeneralFrame) {
-                        mensajes[faseDeco - 1] = mensajeResultado;
+                        //mensajes[faseDeco - 1] = mensajeResultado;
                         faseDeco++;
                         actualFaseFrame = 0;
                         actualGeneralFrame = 0;
@@ -318,7 +326,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                     Log.e(TAG, "Mensaje"+mensajeListaFase2.size()+" Fase 2: " +mensajeResultado);
                     if (mensajeListaFase2.size() >= actualGeneralFrame) {
-                        mensajes[faseDeco - 1] = mensajeResultado;
+                        //mensajes[faseDeco - 1] = mensajeResultado;
                         faseDeco++;
                         actualFaseFrame = 0;
                         actualGeneralFrame = 0;
@@ -348,7 +356,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     }
                     Log.e(TAG, "Mensaje"+mensajeListaFase3.size()+" Fase 3: " +mensajeResultado);
                     if (mensajeListaFase3.size() >= actualGeneralFrame) {
-                        mensajes[faseDeco - 1] = mensajeResultado;
+                        //mensajes[faseDeco - 1] = mensajeResultado;
                         faseDeco++;
                         actualFaseFrame = 0;
                         actualGeneralFrame = 0;
@@ -364,13 +372,50 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         }
 
         if (faseDeco == 4){
-            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0){ //&& mensajeListaFase3.size() > 0) {
+            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 && mensajeListaFase3.size() > 0) {
 
-                mensajeFinal = mostCommon(mensajeListaFase1)+mostCommon(mensajeListaFase2); //+mostCommon(mensajeListaFase3);
+                mensaje[0] = mostCommon(mensajeListaFase1);
+                mensaje[1] = mostCommon(mensajeListaFase2);
+                mensaje[2] = mostCommon(mensajeListaFase3);
 
-                Log.e(TAG, "Mensaje Final: " + mensajeResultado);
+                if(mensaje[0].equals(mensaje[1]) && mensaje[0].equals(mensaje[2])){
 
-                if(verificaCodigo(mensajeFinal)) {
+                    if(verificaCodigo(mensaje[0])) {
+                        mensajeFinal = mensaje[0];
+                        Log.e(TAG, "Mensaje Final Accuracy 100%: " + mensajeFinal);
+                        Toast.makeText(getBaseContext(), "100% OK", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Log.e(TAG, "Mensaje Final 100% No coincide con cods server: " + mensajeFinal);
+                        Toast.makeText(getBaseContext(), "100% NOK", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else if(mensaje[0].equals(mensaje[1]) && !mensaje[0].equals(mensaje[2])){
+                    if(verificaCodigo(mensaje[0])) {
+                        mensajeFinal = mensaje[0];
+                        Log.e(TAG, "Mensaje Final Acuracy 66%: " + mensajeFinal);
+                        Toast.makeText(getBaseContext(), "66% OK", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Log.e(TAG, "Mensaje Final 66% No coincide con cods server: " + mensajeFinal);
+                        Toast.makeText(getBaseContext(), "66% NOK", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else if(!mensaje[0].equals(mensaje[1]) && !mensaje[0].equals(mensaje[2])){
+                    if(verificaCodigo(mensaje[0])){
+                        mensajeFinal = mensaje[0];
+                        Toast.makeText(getBaseContext(), "33% OK, mensaje(0)", Toast.LENGTH_SHORT).show();
+                    } else if(verificaCodigo(mensaje[1])){
+                        mensajeFinal = mensaje[1];
+                        Toast.makeText(getBaseContext(), "33% OK, mensaje(1)", Toast.LENGTH_SHORT).show();
+                    } else if(verificaCodigo(mensaje[2])){
+                        mensajeFinal = mensaje[2];
+                        Toast.makeText(getBaseContext(), "33% OK, mensaje(2)", Toast.LENGTH_SHORT).show();
+                    }else{
+                        mensajeFinal = mensaje[0];
+                        Log.e(TAG, "Mensaje Final 33% No coincide con cods server: " + mensajeFinal);
+                        Toast.makeText(getBaseContext(), "100% NOK", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
                     amountFrameEstDistance++;
 
                     if(amountFrameEstDistance > 10) {
@@ -386,14 +431,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                             estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
                             estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
-                            estimatedDistY = Math.abs(Math.hypot(estimatedDist, estimatedDistX) * Math.cos(yaw) * Math.cos(tilt));
+                            estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
 
                             Log.e(TAG, "Width image: " + anchoObjetoImagen + " , distance: " + estimatedDist);
 
                             if (estimatedDist > 1) {
 
                                 faseDeco++;
-
+                                Log.e(TAG, "X: " + estimatedDistX + " , Y: " + estimatedDistY);
                                 vibrate();
                                 //mensajeListaFase0.clear();
                                 mensajeListaFase1.clear();
@@ -416,16 +461,16 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                         Log.e(TAG, "Frame <= 10, actual: "+ amountFrameEstDistance);
                     }
-                }else{
+                /*}else{
 
                     faseDeco = 5;
                     Log.e(TAG, "Codigo Final no localizado en server: " + mensajeResultado);
-                }
+                }*/
             }
             else{
-                Log.e(TAG, "Algunas de las lista de deco esta vacia.");
+                //Log.e(TAG, "Algunas de las lista de deco esta vacia.");
             }
-        }*/
+        }
 
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
                         ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
@@ -485,7 +530,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 verticalAngle = (float) Math.toDegrees(2 * Math.atan(0.5f * sensorHeight / focalLength));
                 focalPx = (focalLength / sensorWidth) * maxwidth;
             } catch (CameraAccessException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         } else {
             // do something for phones running an SDK before lollipop
@@ -573,8 +618,13 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     private void getCodigosServer() {
-        if (LobbyActivity.retrofit != null) {
-            Call<CodigosServer> request = LobbyActivity.restClient.getCodigosServer();
+        if (retrofit == null) {
+            Connection.init();
+            restClient = Connection.createService(RestClient.class); //, username, password);
+        }
+
+        if (retrofit != null) {
+            Call<CodigosServer> request = restClient.getCodigosServer();
 
             request.enqueue(new Callback<CodigosServer>() {
                 @Override
@@ -587,14 +637,16 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                         switch(rsp){
                             case "0":{
+
                                 codigosServer = null;
-                                codigosServer = response.body().getAsistencias();
+                                codigosServer = response.body().getCodigos();
                                 Toast.makeText(getBaseContext(), "Server OK Codigos",
                                         Toast.LENGTH_SHORT).show();
+                                //Log.e("onResponse codigos: ", codigosServer);
                             }
                             case "1":{
-                                codigosServer.clear();
-                                codigosServer = null;
+                                //codigosServer.clear();
+                                //codigosServer = null;
                                 Toast.makeText(getBaseContext(), "Codigos NOK",
                                         Toast.LENGTH_SHORT).show();
                             }
@@ -610,7 +662,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 public void onFailure(Call<CodigosServer> call, Throwable t) {
                     Toast.makeText(getBaseContext(), "Retrofit fail!", Toast.LENGTH_SHORT).show();
                 }
-            });        }
+            });
+        }else{
+            Toast.makeText(getBaseContext(), "retrofit null",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

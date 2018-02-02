@@ -88,8 +88,6 @@
         android:background="@color/colorPrimaryDark"
         android:text="Enviar asistencias"
         android:textColor="@android:color/background_light"
-        android:textColorLink="@color/colorPrimary"
-        tools:layout_editor_absoluteX="101dp"
-        tools:layout_editor_absoluteY="377dp" />
+        android:textColorLink="@color/colorPrimary"/>
 
 </RelativeLayout>

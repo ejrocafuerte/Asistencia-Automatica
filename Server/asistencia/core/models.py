@@ -87,7 +87,7 @@ class AsistenciaEstudiante(models.Model):
 Tabla temporal donde se encola las asistencias que envia
 el profesor en espera de las asistencias de los estudiantes
 para verificacion, si se aprueba verificacion se inserta en
-tabla AsistenciaVerificada con campo aprobado igual 1
+tabla AsistenciaEstudiante con campo aprobado igual 1
 casocontrario 0, cuando sobrepasa el tiempo limite para
 verificacion se borra registro de tabla AsistenciaProfesor.
 '''
