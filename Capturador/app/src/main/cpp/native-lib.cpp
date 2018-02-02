@@ -52,7 +52,7 @@ static double deg2Rad(double deg);
 void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double roll,
                  double dx, double dy, double dz, double f, double cx, double cy);
 
-int N = 15; //11
+int N = 15;
 int GAUSSIAN_FACTOR = 7;
 int MAX_WIDTH, MAX_HEIGHT;
 int SEGMENTOS_FRONTERA = 4;
@@ -127,11 +127,11 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 //mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[0][3]);
                 mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(
                         Point(boundRect.tl().x, boundRect.tl().y + boundRect.height),
-                        boundRect.br()); //getWidthObjectImage(cuadrados); //
+                        boundRect.br());
                 mObjectSize.at<double>(0, 1) = distanciaEntreDosPuntos(boundRect.tl(),
                                                                        Point(boundRect.tl().x,
                                                                              boundRect.tl().y +
-                                                                             boundRect.height)); ////getHeightObjectImage(cuadrados);
+                                                                             boundRect.height));
 
                 obtenerAngulosEuler(mProcesado,
                                     cuadrados,
@@ -141,7 +141,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                     MAX_HEIGHT / 2,
                                     tilt, yaw, roll);
 
-                //__android_log_print(ANDROID_LOG_ERROR, "euler angles", "%.2f %.2f %.2f", tilt, yaw, roll);
+                __android_log_print(ANDROID_LOG_ERROR, "euler angles", "%.2f %.2f %.2f", tilt, yaw, roll);
 
                 warpFrame(mOriginalCopiaB,
                           mWarpImage,
@@ -197,7 +197,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                                  boundRect2.height)); ////getHeightObjectImage(cuadrados);
 
                 }
-                mResultado = mWarpImage;//mWarpImage;
+                mResultado = mWarpImage;
             }
         }
         else {
@@ -328,11 +328,12 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
             distanciaSeleccionada = 0,
             distanciaActual = 0;
 
-    bool busquedaExitosaSubSegmento = false,
-            busquedaExitosaSegmento = false;
-
         for (int n = 0; n < cuadrados.size() - 2; n++) {
+            cuadradosSeleccionados.push_back(cuadrados[n]);
+
             for (int p = n + 1; p < cuadrados.size() - 1; p++) {
+                cuadradosSeleccionados.push_back(cuadrados[p]);
+
                 distanciaSeleccionada = distanciaEntreDosPuntos(cuadrados[n][0], cuadrados[p][0]);
                 angSeleccionado = -atan2(cuadrados[p][0].y - cuadrados[n][0].y, cuadrados[p][0].x - cuadrados[n][0].x);
 
@@ -340,36 +341,32 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
 
                     distanciaActual = distanciaEntreDosPuntos(cuadrados[p][0], cuadrados[q][0]);
                     double razon = (distanciaSeleccionada >= distanciaActual) ?
-                                   (distanciaActual / distanciaSeleccionada) : (distanciaSeleccionada / distanciaActual);
+                                   (distanciaActual / distanciaSeleccionada) :
+                                   (distanciaSeleccionada / distanciaActual);
 
-                    __android_log_print(ANDROID_LOG_ERROR, "ord", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
-                                        distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
+                    //__android_log_print(ANDROID_LOG_ERROR, "ord", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
+                    //                    distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
 
                     if (fabs(razon) > DISTANCE_RATIO) {
-                        __android_log_print(ANDROID_LOG_ERROR, "OK ", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
-                                            distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
+                    //    __android_log_print(ANDROID_LOG_ERROR, "OK ", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
+                    //                        distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
 
                         angActual = -atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x);
 
                         if(angSeleccionado == 0.0) angSeleccionado = 0.01;
-                        if(angActual == 0.0) angActual = 0.01;
+                        if(angActual == 0.0)       angActual = 0.01;
+                        if(angSeleccionado <= 0.0) angSeleccionado = CV_2PI + angSeleccionado;
+                        if(angActual <= 0.0)       angActual = CV_2PI + angActual;
 
-                        if(angSeleccionado <= 0.0)
-                            angSeleccionado = CV_2PI + angSeleccionado;
+                        //double razonang = (angSeleccionado >= angActual) ? (angActual / angSeleccionado) : (angSeleccionado / angActual);
 
-                        if(angActual <= 0.0)
-                            angActual = CV_2PI + angActual;
+                        //__android_log_print(ANDROID_LOG_ERROR, "ord", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), razon %.2f",
+                        //                   rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, razonang);
 
-                        double razonang = (angSeleccionado >= angActual) ? (angActual / angSeleccionado) : (angSeleccionado / angActual);
+                        if (angActual >= (angSeleccionado - deg2Rad(10)) && angActual <= (angSeleccionado + deg2Rad(10))){//razonang >= 0.70 && razonang <= 1.0) {
+                            //__android_log_print(ANDROID_LOG_ERROR, "OK ", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), razon %.2f",
+                            //                    rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, razonang);
 
-                        __android_log_print(ANDROID_LOG_ERROR, "ord", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), razon %.2f",
-                                           rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, razonang);
-
-                        if (razonang >= 0.85 && razonang <= 1.0) {
-                            __android_log_print(ANDROID_LOG_ERROR, "OK ", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), razon %.2f",
-                                                rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, razonang);
-                            cuadradosSeleccionados.push_back(cuadrados[n]);
-                            cuadradosSeleccionados.push_back(cuadrados[p]);
                             cuadradosSeleccionados.push_back(cuadrados[q]);
 
                             if(cuadradosSeleccionados.size() == NUM_MATRICES){
@@ -379,9 +376,20 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                             }
                        }
                     }
+
+                    if(cuadradosSeleccionados.size() == 2 && q == cuadrados.size() - 1){
+                        cuadradosSeleccionados.pop_back();
+                    }
+                }
+
+                if(cuadradosSeleccionados.size() == 1 && p == cuadrados.size() - 2){
+                    cuadradosSeleccionados.pop_back();
                 }
             }
+
+
         }
+    //__android_log_print(ANDROID_LOG_ERROR, "cuadradosSelecc ", "%d %d",cuadrados.size(), cuadradosSeleccionados.size());
 }
 
 static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, double f, double ratio, double cx, double cy, double& tilt, double& yaw, double& roll){
@@ -403,6 +411,9 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
         double distance2 = distanciaEntreDosPuntos(b, c);
         double distance3 = distanciaEntreDosPuntos(a, b);
         double distance4 = distanciaEntreDosPuntos(d, c);
+        double angTilt = 0;
+        double angYaw = 0;
+        double angRoll = 0;
 
         p.x = a.x + (a.x - d.x) / distance1 * 50000;
         p.y = a.y + (a.y - d.y) / distance1 * 50000;
@@ -458,15 +469,14 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
 
             ratio = 1;
 
-            double angTilt = -asin(R3.at<double>(1,0));
-            double angYaw = -atan(R3.at<double>(0,0) / R3.at<double>(2,0));
-            double angRoll = CV_PI - atan2(cuadrados[0][3].y - cuadrados[2][2].y, cuadrados[0][3].x - cuadrados[2][2].x);
+            angTilt = -asin(R3.at<double>(1,0));
+            angYaw = -atan(R3.at<double>(0,0) / R3.at<double>(2,0));
+            angRoll = CV_PI - atan2(cuadrados[0][3].y - cuadrados[2][2].y, cuadrados[0][3].x - cuadrados[2][2].x);
 
-            roll = angRoll;
-            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "antes actilt: %0.2f, acyaw: %.2f, acroll: %.2f", accumTilt, accumYaw, accumRoll);
-            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", angTilt, angYaw, angRoll);
+            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "antes actilt: %0.2f, acyaw: %.2f, acroll: %.2f", accumTilt, accumYaw, accumRoll);
+            __android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", angTilt, angYaw, angRoll);
 
-                if(angTilt > 0 && accumTilt > 0){
+                /*if(angTilt > 0 && accumTilt > 0){
                     if(angTilt >= accumTilt)
                         ratio = accumTilt / angTilt;
                     else
@@ -483,14 +493,14 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
                 }
                 else if(angTilt < 0 && accumTilt > 0){
                     ratio = fabs(angTilt / accumTilt);
-                }
+                }*/
 
             //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio tilt: %0.2f", ratio);
-            if (ratio >= 0.2)
+            //if (ratio >= 0.2)
                 vTilt.push_back(angTilt);
 
 
-            if(angYaw > 0 && accumYaw > 0){
+            /*if(angYaw > 0 && accumYaw > 0){
                 if(angYaw >= accumYaw)
                     ratio = accumYaw / angYaw;
                 else
@@ -507,21 +517,25 @@ static void obtenerAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados, 
             }
             else if(angYaw < 0 && accumYaw > 0){
                 ratio = fabs(angYaw / accumYaw);
-            }
+            }*/
 
-            if (ratio >= 0.2)
+            //if (ratio >= 0.2)
                 vYaw.push_back(angYaw);
         }
 
         accumTilt = accumulate(vTilt.begin(), vTilt.end(), 0.0f);
-        tilt = (vTilt.size() == 0) ? tilt : (accumTilt / vTilt.size());
+        tilt = (vTilt.size() == 0) ? 1 : (accumTilt / vTilt.size());
 
         accumYaw = accumulate(vYaw.begin(), vYaw.end(), 0.0f);
-        yaw = (vYaw.size() == 0) ? yaw : (accumYaw / vYaw.size());
+        yaw = (vYaw.size() == 0) ? 1 : (accumYaw / vYaw.size());
+
+        roll = angRoll;
+
+        //__android_log_print(ANDROID_LOG_ERROR, "size: ", "%d - %d", vTilt.size(), vYaw.size());
 
     }
     catch (Exception e){
-        //__android_log_print(ANDROID_LOG_ERROR, "exp euler", "");
+        __android_log_print(ANDROID_LOG_ERROR, "exp euler", "");
     }
 }
 

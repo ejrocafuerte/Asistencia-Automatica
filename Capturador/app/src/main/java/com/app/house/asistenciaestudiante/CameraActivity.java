@@ -74,7 +74,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
     private double focalPx = 0.0f;
-    private float anchoObjetoReal = 1720; //1400;//1750;// mm
+    private float anchoObjetoReal = 215;//1720
     private double yaw = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
@@ -199,12 +199,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mRGBA = inputFrame.rgba();
         fpsMeter.measure();
         fps = fpsMeter.getFps();
-        //actualGeneralFrame++;
-        //actualFaseFrame++;
-        //Log.e(TAG, "FPS: " + fpsMeter.getFps());
-
-        //mFrequency = Core.getTickFrequency();//  FRAMERATE
-        //mprevFrameTime = Core.getTickCount();
 
         mParameters.put(0, 0, tilt);
         mParameters.put(0, 1, yaw);
@@ -223,19 +217,15 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
        yaw = mParameters.get(0,1)[0];
        roll = mParameters.get(0,2)[0];
 
-        anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
+        anchoObjetoImagen = mObjectSize.get(0, 2)[0];
 
         estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
 
         estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
         estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
 ////////////////////////
-        //System.currentTimeMillis() - actualTime > flickerTime) {
 
 //here
-
-
-
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
                         ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
                         ", R: " + String.format("%.2f", 360-Math.toDegrees(roll)),
