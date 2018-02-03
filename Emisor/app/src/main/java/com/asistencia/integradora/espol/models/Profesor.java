@@ -1,14 +1,13 @@
 package com.asistencia.integradora.espol.models;
-/*
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-*/
+
 import java.io.Serializable;
 
 /**
  * Created by erick on 19/01/2018.
  */
-/*
 public class Profesor implements Serializable{
     @SerializedName("nombres")
     @Expose
@@ -61,4 +60,3 @@ public class Profesor implements Serializable{
                 matricula;
     }
 }
-*/

@@ -44,26 +44,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         EmisorSQLHelper db1 = new EmisorSQLHelper(getApplicationContext(), "emisor.db", null, 1);
         SQLiteDatabase dbEmisor = db1.getWritableDatabase();
-        Thread welcomeThread = new Thread() {
 
-            @Override
-            public void run() {
-                try {
-                    super.run();
-                    sleep(10000);  //Delay of 10 seconds
-                } catch (Exception e) {
-
-                } finally {
-
-                    Intent i = new Intent(SplashActivity.this,
-                            MainActivity.class);
-                    startActivity(i);
-                    finish();
-                }
-            }
-        };
-        welcomeThread.start();
-    }
 
         if (dbEmisor != null) {
             //dbEmisor.execSQL("insert into core_profesor values(1,\"201021839\",\"erick joel\",\"rocafuerte villon\",\"example@example.com\")");
