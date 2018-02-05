@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -25,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -41,9 +43,9 @@ public class MainActivity extends Activity {
     protected static RestClient restClient = null;
     protected static Crypt crypto;
     BluetoothConn conexion;
-    byte[] mensaje = new byte[13];
     public BluetoothAdapter mBluetoothAdapter;
 
+    String mensaje="";
     private Profesor profesor;
     private Asistencia asistenciaActual;
     private ArrayList<Senal> senales;
@@ -72,13 +74,14 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        String id_materia = null, numero_paralelo = null, id_prof = null;
         super.onCreate(savedInstanceState);
         crypto = Crypt.getInstance();
         asistenciaActual = new Asistencia();
         profesor = new Profesor();
         senales = new ArrayList<Senal>();
 
-        asistenciaActual.setMac(getMacAddr());
+        //asistenciaActual.setMac(getMacAddr());
         //asistenciaActual.setImei(getImei());
 
         if (retrofit == null) {
@@ -87,8 +90,93 @@ public class MainActivity extends Activity {
         }
         EmisorSQLHelper db1 = new EmisorSQLHelper(getApplicationContext(), "emisor.db", null, 1);
         SQLiteDatabase dbEmisor = db1.getWritableDatabase();
-        //si es diferente de null pregunto si tiene datos
-
+        //  CONSULTANDO DATOS DE PROFESOR
+        Cursor c = dbEmisor.rawQuery("select identificador from core_profesor where nombres='erick joel'", null);
+        c.moveToFirst();
+        if (!c.getString(0).isEmpty()) {
+            id_prof = c.getString(0);
+            //corregimos el string de idprofesor conforme se debe mostrar en matriz
+            if(id_prof.length()<4){
+                if(id_prof.length()<2){
+                    String resultado = "000";
+                    resultado="000".concat(id_prof);
+                    id_prof=resultado;
+                }
+                if(id_prof.length()<3){
+                    String resultado = "00";
+                    resultado= "00".concat(id_prof);
+                    id_prof=resultado;
+                }
+                if(id_prof.length()<4){
+                    String resultado = "0";
+                    resultado="0".concat(id_prof);
+                    id_prof=resultado;
+                }
+            }
+        }
+        //CONSULTO DATOS DE PARALELO que toca hoy ahi consigo idprofesor id materia id aula
+        int dia = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        int rangoHora = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        String aComparar="";
+        switch (dia) {
+            case 2:
+                aComparar = "LUN";
+                break;
+            case 3:
+                aComparar = "MAR";
+                break;
+            case 4:
+                aComparar = "MIE";
+                break;
+            case 5:
+                aComparar = "JUE";
+                break;
+            case 6:
+                aComparar = "VIE";
+                break;
+            case 7:
+                aComparar = "SAB";
+                break;
+        }
+        c = dbEmisor.rawQuery("select id_materia_id, numero_paralelo from core_paralelo ",null);
+        c = dbEmisor.rawQuery("select id_materia_id, numero_paralelo from core_paralelo where (dia1='"+aComparar+"'"+" or dia2='"+aComparar+"'"+" or dia3='"+aComparar+"')",null);
+        c.moveToFirst();
+        if (!c.getString(0).isEmpty()) {
+            id_materia = c.getString(0);
+            numero_paralelo = c.getString(1);
+            if(numero_paralelo.length()<2){
+                String resultado = "";
+                resultado= "0".concat(numero_paralelo);
+                numero_paralelo=resultado;
+            }
+        } else {
+            Toast.makeText(this, "Error fatal",Toast.LENGTH_LONG).show();
+        }
+        //el id de la materia a mostrar es el registro que muestro en matriz
+        //aula siempre 1
+        if(id_materia.length()<4){
+            if(id_materia.length()<2){
+                String resultado = "000";
+                resultado="000".concat(id_materia);
+                id_materia=resultado;
+            }
+            if(id_materia.length()<3){
+                String resultado = "00";
+                resultado = "00".concat(id_materia);
+                id_materia=resultado;
+            }
+            if(id_materia.length()<4){
+                String resultado = "0";
+                resultado = "0".concat(id_materia);
+                id_materia=resultado;
+            }
+        }
+        String datoAMostrar = "";
+        numero_paralelo = numero_paralelo.concat("01");
+        id_prof = id_prof.concat(numero_paralelo);
+        id_materia = id_materia.concat(id_prof);
+        datoAMostrar = id_materia;
+        mensaje = datoAMostrar.concat("\n");
         setContentView(R.layout.activity_main);
 
         //TextView txt_bt = (TextView) findViewById(R.id.txt_bt);
@@ -189,9 +277,9 @@ public class MainActivity extends Activity {
                     if (bts.isConnected()) {
                         System.out.println("conectado");
                         System.out.println("enviando mensaje");
-                        mensaje = "12131415\n".getBytes();
                         try{
-                            bts.getOutputStream().write(mensaje);
+                            bts.getOutputStream().write(mensaje.getBytes());
+                            //AQUI DEBO DE ENVIAR EL MENSAJE AL SERVIDOR
                             System.out.println("mensaje enviado");
                             //System.out.println(bts.getInputStream().read());
                         }catch (IOException e){

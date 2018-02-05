@@ -27,11 +27,11 @@ public class EmisorSQLHelper extends SQLiteOpenHelper{
     private static final String profesor="CREATE TABLE core_profesor (id integer NOT NULL PRIMARY KEY AUTOINCREMENT, " +
             "identificador varchar(20) NOT NULL, nombres varchar(60) NOT NULL, apellidos varchar(60) NOT NULL, " +
             "correo varchar(60) NOT NULL)";
-    private static final String arduino="CREATE TABLE core_arduino (id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
-            "mac_arduino varchar(17) NOT NULL)";
-    private static final String aula= "CREATE TABLE core_aula (id integer NOT NULL PRIMARY KEY AUTOINCREMENT, "+
-            "identificador varchar(10) NOT NULL UNIQUE, nombre varchar(10) NOT NULL, descripcion varchar(25) NOT NULL,)";
+    private static final String arduino= "CREATE TABLE core_arduino (id integer NOT NULL PRIMARY KEY AUTOINCREMENT,"+
+            "mac_arduino varchar(17) NOT NULL, id_aula_id integer NOT NULL)";
 
+    private static final String aula= "CREATE TABLE core_aula (id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
+            "identificador varchar(10) NOT NULL UNIQUE, nombre varchar(10) NOT NULL, descripcion varchar(25) NOT NULL)";
     public EmisorSQLHelper(Context ctx, String nombre_db, CursorFactory cursor, int version) {
         super(ctx,nombre_db,cursor,version);
     }
@@ -44,12 +44,12 @@ public class EmisorSQLHelper extends SQLiteOpenHelper{
         db.execSQL(aula);
         db.execSQL(paralelo);
         db.execSQL(arduino);
-        db.execSQL("insert into core_profesor values(1,\"0039\",\"erick joel\",\"rocafuerte villon\",\"example@example.com\")");
-        db.execSQL("insert into core_facultad values(1,\"1\",\"ingenieria en electricidad y computacion \",\"FIEC\")");
-        db.execSQL("insert into core_materia values(1,\"0045\",\"Inteligencia Artificial\",\"fundamentos\",1)");
+        db.execSQL("insert into core_profesor values(1,\"39\",\"erick joel\",\"rocafuerte villon\",\"example@example.com\")");
+        db.execSQL("insert into core_facultad values(1,\"ingenieria en electricidad y computacion\",\"FIEC\")");
+        db.execSQL("insert into core_materia values(1,\"45\",\"Inteligencia Artificial\",\"fundamentos\",1)");
         db.execSQL("insert into core_paralelo values (1,\"1\",\"2017\",\"2\",\"10\",\"LUN\",\"MIE\",\"1\",\"1\",\"09:30:00\",\"09:30:00\",\"10:30:00\", \"VIE\")");
 
-        db.execSQL("insert into core_aula values(1,\"11\",\"1\",\"aula 1 edificio 16\",1)");
+        db.execSQL("insert into core_aula values(1,\"11\",\"1\",\"aula 1 edificio 16\")");
         db.execSQL("insert into core_arduino values (1,\"98:D3:32:21:0C:A4\",1)");
 
     }
