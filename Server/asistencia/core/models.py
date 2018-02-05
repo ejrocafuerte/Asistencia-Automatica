@@ -1,12 +1,16 @@
 from django.db import models
 from datetime import datetime
 from django.utils import timezone
+from django.conf import settings
 # Create your models here.
 class Profesor(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
     identificador = models.CharField(max_length=20, unique=True, default=0)
     nombres = models.CharField(max_length=60)
     apellidos = models.CharField(max_length=60)
     correo = models.CharField(max_length=60)
+    def __str__(self):
+        return self.apellidos+' '+self.nombres
 
 class Estudiante(models.Model):
     matricula = models.CharField(max_length=10,primary_key=True)
@@ -24,12 +28,16 @@ class Facultad(models.Model):
     identificador = models.CharField(max_length=10, unique=True, default=0)
     nombre= models.CharField(max_length=50)
     abreviatura=models.CharField(max_length=6)
+    def __str__(self):
+        return self.abreviatura
 
 class Edificio(models.Model):
     id_facultad=models.ForeignKey('Facultad',on_delete=None)
     identificador = models.CharField(max_length=10, unique=True, default=0)
     nombre=models.CharField(max_length=60)
     ayuda=models.TextField(null=True)
+    def __str__(self):
+        return self.nombre
 
 class Aula(models.Model):
     id_edificio = models.ForeignKey('Edificio',on_delete=models.CASCADE,)
@@ -37,16 +45,22 @@ class Aula(models.Model):
     nombre=models.CharField(max_length=10)
     descripcion=models.CharField(max_length=25)
     capacidad=models.PositiveSmallIntegerField(default=0)
+    def __str__(self):
+        return self.nombre
 
 class Arduino(models.Model):
     id_aula=models.ForeignKey('Aula', on_delete=models.CASCADE,)
     mac_arduino=models.CharField(max_length=17)
+    def __str__(self):
+        return self.mac_arduino
 
 class Materia(models.Model):
     id_facultad=models.ForeignKey('Facultad',on_delete=None)
     identificador=models.CharField(max_length=10,unique=True, default=0)
     nombre=models.CharField(max_length=30)
     descripcion = models.CharField(max_length=100,null=True)
+    def __str__(self):
+        return self.nombre
 
 class Paralelo(models.Model):
     id_materia=models.ForeignKey('Materia',on_delete=None)
@@ -55,22 +69,29 @@ class Paralelo(models.Model):
     anio=models.CharField(max_length=4)
     termino=models.CharField(max_length=1)
     numero_paralelo=models.CharField(max_length=2)
+    def __str__(self):
+        return self.numero_paralelo
 
-    LUNES='LUN',
-    MARTES='MAR',
-    MIERCOLES='MIE',
-    JUEVES='JUE',
-    VIERNES='VIE',
-    SABADO='SAB',
-    dias_opt=((LUNES,'LUNES'),
-              (MARTES,'MARTES'),
-              (MIERCOLES,'MIERCOLES'),
-              (JUEVES,'JUEVES'),
-              (VIERNES,'VIERNES'),
-              (SABADO,'SABADO'))
+    LUNES='LUN'
+    MARTES='MAR'
+    MIERCOLES='MIE'
+    JUEVES='JUE'
+    VIERNES='VIE'
+    SABADO='SAB'
+
+    dias_opt=(
+        (LUNES,'LUNES'),
+        (MARTES,'MARTES'),
+        (MIERCOLES,'MIERCOLES'),
+        (JUEVES,'JUEVES'),
+        (VIERNES,'VIERNES'),
+        (SABADO,'SABADO'))
     dia1=models.CharField(max_length=3,choices=dias_opt,default=LUNES)
     dia2=models.CharField(max_length=3,choices=dias_opt,default=LUNES,null=True)
     dia3 = models.CharField(max_length=3, choices=dias_opt, default=LUNES, null=True)
+    hora1 = models.TimeField()
+    hora2 = models.TimeField()
+    hora3 = models.TimeField()
 
 class AsistenciaEstudiante(models.Model):
     id_estudiante = models.ForeignKey('Estudiante', on_delete = None, null=False, blank=False, default=0)

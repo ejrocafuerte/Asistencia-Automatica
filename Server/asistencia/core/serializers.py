@@ -111,6 +111,19 @@ class ParaleloSerializer(serializers.ModelSerializer):
             'numero_paralelo',
 
         )
+
+class AsistenciaProfesorSerializer(serializers.ModelSerializer):
+    class meta:
+        model = Paralelo
+        fields = (
+            'id_profesor',
+            'id_materia',
+            'id_paralelo',
+            'id_aula',
+            'fecha',
+            'codigo',
+        )
+            
         """
 class resumenAsistencias(models.Model):
     id_estudiante=models.ForeignKey('Estudiante',on_delete=None)
@@ -119,7 +132,8 @@ class resumenAsistencias(models.Model):
     diasContados=models.PositiveSmallIntegerField(default=0)
     porcentajeFaltas=models.PositiveSmallIntegerField()
 """
-#def stringaFecha(self, hora, minutos):
+
+#def stringFecha(self, hora, minutos):
 #    cel = models.DateTimeField()
 #    hoy = datetime.today()
 #    hoy.hour=hora

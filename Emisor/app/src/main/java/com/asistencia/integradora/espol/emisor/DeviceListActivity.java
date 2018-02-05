@@ -7,6 +7,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -81,8 +83,18 @@ public class DeviceListActivity extends Activity {
         newDevicesListView.setAdapter(mNewDevicesArrayAdapter);
         newDevicesListView.setOnItemClickListener(mDeviceClickListener);
 
+        //AQUI CARGO LA TABLA DE AULAS Y ARDUINOS PARA MOSTRAR LA DESCRIPCION DEL AULA Y NO LA MAC DEL DISPOSITIVO
+        //SI NO EXISTE LA MAC EN LA TABLA ASUMIMOS QUE ES OTRO DISPOSITIVO QUE NO ES UN BLUETOOTH DE MATRIZ
 
+        EmisorSQLHelper db1 = new EmisorSQLHelper(getApplicationContext(), "emisor.db", null, 1);
+        final SQLiteDatabase dbArduinos = db1.getWritableDatabase();
+        //  CONSULTANDO DATOS DE ARDUINOS
+        final Cursor cArduinos = dbArduinos.rawQuery("select * from core_arduino", null);
+        cArduinos.moveToFirst();
+        if (!cArduinos.getString(0).isEmpty()) {
 
+            //si no esta vacio no hay problema
+        }
 
         final BroadcastReceiver mReceiver = new BroadcastReceiver() {
             @Override
@@ -95,9 +107,16 @@ public class DeviceListActivity extends Activity {
                     System.out.println(action);
                     // Get the BluetoothDevice object from the Intent
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // If it's already paired, skip it, because it's been listed already
-                    //if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                    mNewDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                    String aula ="";
+                    while (!cArduinos.isLast()){
+                        if(cArduinos.getString(1).equals(device.getAddress())){
+                            final Cursor cAulas = dbArduinos.rawQuery("select descripcion from core_aula where id='"+cArduinos.getString(cArduinos.getColumnIndex("id_aula_id"))+"'", null);
+                            cAulas.moveToFirst();
+                            // If it's already paired, skip it, because it's been listed already
+                            //if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                            mNewDevicesArrayAdapter.add(device.getName() + "\n" + cAulas.getString(0));
+                        }
+                    }
                     //}
                     // When discovery is finished, change the Activity title
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {

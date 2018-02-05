@@ -8,7 +8,8 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 import json
 from django.http import JsonResponse
-
+from django.contrib.auth import authenticate
+from django.core import serializers
 
 from .models import AsistenciaEstudiante
 from .models import AsistenciaProfesor
@@ -105,6 +106,26 @@ def gestionar_profesor(request):
     #Insertar el inicio de las asistencias en AsistenciaProfesor
     pass
 
+@csrf_exempt
+@transaction.atomic
+def login_profesor(request):
+    #Insertar el inicio de las asistencias en AsistenciaProfesor
+    print('entro a login profesor')
+    if request.method =='POST':
+        msg = json.loads(request.body)
+        print(msg)
+        usuario = msg.get('user')
+        password = msg.get('pass')
+        print(usuario)
+        print(password)
+        user = authenticate(username=usuario,password=password)
+        if user is not None:
+            profesor = Profesor.objects.filter(user__username = usuario).first()
+            print(profesor)
+            serial = ProfesorSerializer(profesor)
+            return JsonResponse({'response': '1', 'msg': 'OK', 'profesor': serial.data})
+        return JsonResponse({'response': '0', 'msg': 'NO se encontro al profesor'})
+    return JsonResponse({'response': '-1', 'msg': 'NO ADMITIDO'})
 
 
 @csrf_exempt
