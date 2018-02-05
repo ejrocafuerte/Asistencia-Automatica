@@ -16,5 +16,7 @@ urlpatterns = [
     url(r'^gestionarestudiante/$', views.gestionar_estudiante,name='gestionar_estudiante'),
     url(r'^gestionarprofesor/$', views.gestionar_profesor,name='gestionar_profesor'),
     url(r'^codigosasistencias/$', views.codigos_asistencias, name='codigos_asistencias'),
+    url(r'^login_profesor/$', views.login_profesor, name='login'),
+
     #url(r'^paralelo/<int=anio>/<int=paralelo>/$',views.ParaleloAnioList.as_view(),name='views.ParaleloList.name'),
 ]

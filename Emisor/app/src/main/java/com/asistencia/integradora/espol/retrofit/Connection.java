@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Connection {
     private static final String TAG = "Connection";
-    private static final String BASE_URL_DESA = "http://192.168.0.5:8000/";
+    private static final String BASE_URL_DESA = "http://192.168.0.9:8000/";
     private static final String BASE_URL_PROD = "http://ejrocafuerte.pythonanywhere.com/";
     private static Retrofit.Builder builder = null;
     private static Retrofit retrofit = null;
@@ -28,13 +28,13 @@ public class Connection {
         if(builder == null) {
 
             builder = new Retrofit.Builder()
-                    .baseUrl(BASE_URL_PROD)
+                    .baseUrl(BASE_URL_DESA)
                     .addConverterFactory(GsonConverterFactory.create());
         }
     }
 
     public static <S> S createService(Class<S> serviceClass) {
-        return createService(serviceClass, ".", ".");
+        return createService(serviceClass,".",".");
     }
 
     public static <S> S createService( Class<S> serviceClass, String username, String password) {

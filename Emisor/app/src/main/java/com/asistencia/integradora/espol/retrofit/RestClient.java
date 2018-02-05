@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import com.asistencia.integradora.espol.models.Asistencia;
 import com.asistencia.integradora.espol.models.CodigosServer;
 import com.asistencia.integradora.espol.models.ResponseServer;
+import com.asistencia.integradora.espol.models.Usuario;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -18,7 +20,13 @@ public interface RestClient {
 
     @POST("gestionarestudiante/")
     Call<ResponseServer> sendMessage(@Body ArrayList<Asistencia> asistencias);
-
+/*
     @GET("codigosasistencias/")
-    Call<CodigosServer> getCodigosServer();
+    Call<String> getCodigosServer();
+*/
+    @POST("login_profesor/")
+    Call<ResponseServer> sendMessage(@Body Usuario user);
+
+    //@GET("profesor/")
+
 }

@@ -14,6 +14,10 @@ public class ResponseServer {
     @SerializedName("msg")
     @Expose
     private String message;
+    @SerializedName("Profesor")
+    @Expose
+    private Profesor profesor;
+
 
     public String getResponse() {
         return response;
@@ -29,5 +33,13 @@ public class ResponseServer {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Profesor getProfesor() {
+        return profesor;
+    }
+
+    public void setProfesor(Profesor profesor) {
+        this.profesor = profesor;
     }
 }

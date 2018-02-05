@@ -35,11 +35,11 @@
                 style="@style/Widget.SampleMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingBottom="10px"
                 android:paddingLeft="10px"
                 android:paddingRight="10px"
                 android:paddingTop="10px"
-                android:paddingBottom="10px"
-                android:text="intro_message" />
+                android:text="Mis materias a esta Hora" />
         </ScrollView>
     </ViewAnimator>
     <View

@@ -14,21 +14,13 @@ public class CodigosServer {
     @Expose
     private String response;
 
-    @SerializedName("codigos")
+    @SerializedName("profesor")
     @Expose
-    private ArrayList<String> codigos;
+    private Profesor profesor;
 
     @SerializedName("msg")
     @Expose
     private String message;
-
-    public ArrayList<String> getCodigos() {
-        return codigos;
-    }
-
-    public void setCodigos(ArrayList<String> asistencias) {
-        this.codigos = asistencias;
-    }
 
     public String getResponse() {
         return response;
@@ -44,5 +36,13 @@ public class CodigosServer {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Profesor getProfesor() {
+        return profesor;
+    }
+
+    public void setProfesor(Profesor profesor) {
+        this.profesor = profesor;
     }
 }
