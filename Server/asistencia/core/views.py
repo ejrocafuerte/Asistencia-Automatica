@@ -139,8 +139,8 @@ def gestionar_estudiante(request):
             senal_pro = senales_profesor.filter(bssid = bssid_est).first()
 
             if senal_pro and not senal_pro.level2 in range(level2_est - 10, level2_est + 10):
-                raise Exception("Error potencia senal fuera de rango. Senal profesor(" + senal_pro.bssid + "): " + str(senal_pro.level2) +
-                                ". Senal estudiante(" + bssid_est + "): " + str(level2_est))
+                raise Exception("Error potencia senal fuera de rango. Senal profesor(" + senal_pro.ssid + "): " + str(senal_pro.level2) +
+                                ". Senal estudiante(" + senal_est.ssid + "): " + str(level2_est))
             if senal_pro:
                 print(senal_pro.ssid + ' ' + str(senal_pro.level2) + ' (' + str(level2_est - 10) + ' - ' + str(level2_est + 10) + ')')
         asistencia_estudiante.aprobado = 1
@@ -173,7 +173,7 @@ def gestionar_estudiante(request):
                     #raise Exception('Error, Codigo decodificado no existe en tabla asistencia profesor')
                     print ('Error, Codigo decodificado no existe en tabla asistencia profesor')
 
-                print('Codigo: ' + asistencia_prof.codigo)
+                print('Codigo profesor: ' + asistencia_prof.codigo)
 
                 info_estudiante = msg_asistencia.get('estudiante')
 
@@ -284,7 +284,8 @@ def codigos_asistencias(request):
         codigos = None
         try:
             codigos = AsistenciaProfesor.objects.filter().values('codigo')
-            #print (list(codigos))
+
+            #print (codigos)
 
             return JsonResponse({'response': '0', 'codigos': list(codigos), 'msg' : 'OK'})
         except Exception as e:

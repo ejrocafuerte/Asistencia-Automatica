@@ -77,7 +77,7 @@
 
     <TextView
         android:id="@+id/lnombres"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/appBarLayout"
@@ -87,7 +87,7 @@
 
     <TextView
         android:id="@+id/lapelllidos"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/tnombres"
@@ -97,12 +97,40 @@
 
     <TextView
         android:id="@+id/lmatricula"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/tapellidos"
         android:paddingLeft="10dp"
         android:paddingTop="15dp"
         android:text="Mi matrícula" />
+
+    <TextView
+        android:id="@+id/ltamanio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ttamanio"
+        android:layout_alignParentStart="true"
+        android:paddingLeft="10dp"
+        android:paddingTop="15dp"
+        android:text="Tamaño real objeto (mm):" />
+
+    <EditText
+        android:id="@+id/ttamanio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnborrarid"
+        android:layout_alignParentStart="true"
+        android:ems="10"
+        android:inputType="textPersonName|number"
+        android:textColor="@color/colorPrimaryDark" />
+
+    <Button
+        android:id="@+id/btnborrarid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bguardar"
+        android:layout_alignParentStart="true"
+        android:text="Borrar archivo" />
 
 </RelativeLayout>

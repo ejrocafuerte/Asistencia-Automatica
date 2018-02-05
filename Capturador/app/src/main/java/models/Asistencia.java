@@ -28,19 +28,19 @@ public class Asistencia {
 
     @SerializedName("materia")
     @Expose
-    private String materia = "CCG01INTEGRADORA";
+    private String materia = "";
 
     @SerializedName("codigo")
     @Expose
-    private String codigo = "123456789012";
+    private String codigo = "";
 
     @SerializedName("distanciaX")
     @Expose
-    private String distanciaX = "0.0";
+    private String distanciaX = "";
 
     @SerializedName("distanciaY")
     @Expose
-    private String distanciaY = "150.0";
+    private String distanciaY = "";
 
     @SerializedName("senales")
     @Expose
@@ -118,8 +118,13 @@ public class Asistencia {
         this.estudiante = estudiante;
     }
 
+
     @Override
     public String toString() {
+        return  "Código: " + codigo + " (" + fecha + ")";
+    }
+
+    public String toStringtoFile() {
         StringBuilder sbs = new StringBuilder();
         for(int i = 0; i < senales.size(); i++){
             sbs.append(senales.get(i).toString());

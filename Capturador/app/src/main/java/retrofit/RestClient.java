@@ -1,5 +1,7 @@
 package retrofit;
 
+import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 
 import models.Asistencia;
@@ -17,7 +19,7 @@ import retrofit2.http.POST;
 public interface RestClient {
 
     @POST("gestionarestudiante/")
-    Call<ResponseServer> sendMessage(@Body ArrayList<Asistencia> asistencias);
+    Call<ResponseServer> sendServer(@Body ArrayList<Asistencia> asistencias);
 
     @GET("codigosasistencias/")
     Call<CodigosServer> getCodigosServer();

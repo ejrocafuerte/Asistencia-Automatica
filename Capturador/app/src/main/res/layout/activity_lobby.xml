@@ -38,7 +38,7 @@
             android:layout_weight="0.1"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
-            android:text="Asistencias pendientes:"
+            android:text="Asistencias pendientes de envío:"
             android:textColor="?attr/colorPrimaryDark"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -53,7 +53,7 @@
             android:divider="?attr/dividerHorizontal"
             android:paddingLeft="10dp" />
 
-        <TextView
+        <!--TextView
             android:id="@+id/lasistencias2"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -76,7 +76,7 @@
             android:entries="@string/title_activity_info"
             android:paddingLeft="10dp">
 
-        </ListView>
+        </ListView-->
     </LinearLayout>
 
     <Button

@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+from django.utils import timezone
 # Create your models here.
 class Profesor(models.Model):
     identificador = models.CharField(max_length=20, unique=True, default=0)
@@ -77,7 +78,7 @@ class AsistenciaEstudiante(models.Model):
     id_materia = models.ForeignKey('Materia', on_delete = None, null=False, blank=False, default=0)
     id_paralelo = models.ForeignKey('Paralelo', on_delete = None, null=False, blank=False, default=0)
     id_aula = models.ForeignKey('Aula', on_delete = None, null=False, blank=False, default=0)
-    fecha = models.DateTimeField()
+    fecha = models.DateTimeField(default=timezone.now)
     codigodecodificado = models.CharField(max_length=200, null=True, blank=True)
     distanciax = models.FloatField(default=0.0, null=True, blank=True)
     distanciay = models.FloatField(default=0.0, null=True, blank=True)
@@ -96,7 +97,7 @@ class AsistenciaProfesor(models.Model):
     id_materia = models.ForeignKey('Materia', on_delete=None, null=False, blank=False, default=0)
     id_paralelo = models.ForeignKey('Paralelo', on_delete=None, null=False, blank=False, default=0)
     id_aula = models.ForeignKey('Aula', on_delete=None, null=False, blank=False, default=0)
-    fecha = models.DateTimeField()
+    fecha = models.DateTimeField(default=timezone.now)
     codigo = models.CharField(max_length=200, null=True, blank=True)
 
 

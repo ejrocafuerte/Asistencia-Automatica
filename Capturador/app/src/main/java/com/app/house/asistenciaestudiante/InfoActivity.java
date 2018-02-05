@@ -26,16 +26,21 @@ import models.Estudiante;
 public class InfoActivity extends AppCompatActivity {
     private Context mContext;
     private Button btn_guardar;
+    private Button btn_borrar;
     private TextView txt_nombres;
     private TextView txt_apellidos;
     private TextView txt_matricula;
+    private TextView txt_tamanio;
     private File miArchivo;
+    private File miArchivoParam;
     private String delimitador = ";;";
 
     private String nombres;
     private String apellidos;
     private String matricula;
+    private String tamanio;
     private String nombreArchivoEstudiante = "InfoEstudiante";
+    private String nombreArchivoParametros = "Parametros";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +55,11 @@ public class InfoActivity extends AppCompatActivity {
 
         mContext = this;
         btn_guardar = (Button) findViewById(R.id.bguardar);
+        btn_borrar =  (Button) findViewById(R.id.btnborrarid);
         txt_nombres = (TextView) findViewById(R.id.tnombres);
         txt_apellidos = (TextView) findViewById(R.id.tapellidos);
         txt_matricula = (TextView) findViewById(R.id.tmatricula);
+        txt_tamanio = (TextView) findViewById(R.id.ttamanio);
 
         btn_guardar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,8 +68,9 @@ public class InfoActivity extends AppCompatActivity {
                 nombres = txt_nombres.getText().toString().trim();
                 apellidos = txt_apellidos.getText().toString().trim();
                 matricula = txt_matricula.getText().toString().trim();
-
+                tamanio = txt_tamanio.getText().toString().trim();
                 miArchivo = new File(getFilesDir().getPath(), nombreArchivoEstudiante);
+                miArchivoParam = new File(getFilesDir().getPath(), nombreArchivoParametros);
 
 
                 if(nombres.length() <= 0){
@@ -78,42 +86,52 @@ public class InfoActivity extends AppCompatActivity {
                     return;
                 }
 
-                //String info = nombres + delimitador + apellidos + delimitador + matricula;
                 Estudiante estudiante = new Estudiante(nombres, apellidos, matricula);
 
                 try {
                     FileOutputStream fos = new FileOutputStream(miArchivo);
-                    //fos.write((LobbyActivity.encrypt(info)).getBytes());
                     fos.write((/*LobbyActivity.encrypt(*/estudiante.toString()).getBytes());
                     fos.close();
-                    //Toast.makeText(v.getContext(), "Datos guardados", Toast.LENGTH_SHORT).show();
-                    Log.e("infoActivity writefile",estudiante.toString());
-                    Intent intent = new Intent(mContext, LobbyActivity.class);
-                    //intent.putExtra("intent_nombres", nombres);
-                    //intent.putExtra("intent_apellidos", apellidos);
-                    //intent.putExtra("intent_matricula", matricula);
-                    intent.putExtra("Estudiante", estudiante);
-                    setResult(InfoActivity.RESULT_OK, intent);
-                    finish();
-
-
                 } catch (IOException e) {
-                    setResult(InfoActivity.RESULT_CANCELED, null);
+                    //setResult(InfoActivity.RESULT_CANCELED, null);
                     Toast.makeText(v.getContext(), "IOException", Toast.LENGTH_SHORT).show();
                 }
+
+                try {
+                    FileOutputStream fos = new FileOutputStream(miArchivoParam);
+                    fos.write((String.valueOf(tamanio)).getBytes());
+                    fos.close();
+
+                } catch (IOException e) {
+                    Toast.makeText(v.getContext(), "IOException", Toast.LENGTH_SHORT).show();
+                }
+
+                Intent intent = new Intent(mContext, LobbyActivity.class);
+                intent.putExtra("Estudiante", estudiante);
+                //Log.e("InfoActivity: tamanio: ", tamanio);
+                intent.putExtra("Tamanio", Integer.valueOf(tamanio));
+                setResult(LobbyActivity.RESULT_OK, intent);
+                finish();
+
             }
         });
+
+        btn_borrar.setOnClickListener(new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+              _deleteFile("/Asistencia");
+          }
+      });
 
         Intent intent = getIntent();
 
         if(intent != null) {
             Estudiante estudiante = (Estudiante)intent.getSerializableExtra("Estudiante");
-            txt_nombres.setText(estudiante.getNombres()/*intent.getStringExtra("intent_nombres")*/);
-            txt_apellidos.setText(estudiante.getApellidos()/*intent.getStringExtra("intent_apellidos")*/);
-            txt_matricula.setText(estudiante.getMatricula()/*intent.getStringExtra("intent_matricula")*/);
+            txt_nombres.setText(estudiante.getNombres());
+            txt_apellidos.setText(estudiante.getApellidos());
+            txt_matricula.setText(estudiante.getMatricula());
+            txt_tamanio.setText(String.valueOf(intent.getIntExtra("Tamanio", 0)));
         }
-
-
     }
     @Override
     public boolean onSupportNavigateUp(){
@@ -134,5 +152,10 @@ public class InfoActivity extends AppCompatActivity {
     }
 
 
-
+    private void _deleteFile(String filename) {
+        File fileAsistencia = new File(getFilesDir().getPath() + filename);
+        if (fileAsistencia.exists()) {
+            fileAsistencia.delete();
+        }
+    }
 }

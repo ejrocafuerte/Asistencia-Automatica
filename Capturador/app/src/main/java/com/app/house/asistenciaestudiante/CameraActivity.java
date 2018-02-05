@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import models.Codigo;
 import models.CodigosServer;
 import retrofit.Connection;
 import retrofit.RestClient;
@@ -57,11 +58,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     protected static RestClient restClient = null;
     private Mat mRGBA, mResultado, mObjectSize, mParameters;// mEulerAngles;
     private FpsMeter fpsMeter = new FpsMeter();
-    private ArrayList<String> codigosServer = new ArrayList<>();
+    private ArrayList<Codigo> codigosServer = new ArrayList<>();
+    private boolean consultandoServer = false;
     private static final String CODIGO_INICIO = "999999999999";
+    private static final String CODIGO_OFF = "000000000000";
     private static int amountFrameEstDistance = 0;
-    private static int actualGeneralFrame = 0;
-    private static int actualFaseFrame = 0;
     private static double fps = 0.0f;
     private double anchoObjetoImagen = 0.0f;
     private double estimatedDist = 0.0f;
@@ -74,19 +75,19 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double sensorWidth = 0.0f;
     private double sensorHeight = 0.0f;
     private double focalPx = 0.0f;
-    private float anchoObjetoReal = 215;//1720
+    private double anchoObjetoReal = 1660;//1184;//1720
     private double yaw = 0.0f;
     private double tilt = 0.0f;
     private double roll = 0.0f;
     private double flickerTime = 1000;//ms
     private double actualTime = 0;
     private int faseDeco = 0;
-    private int sizeList = 3;
-    private String[] mensaje = {"", "", ""};
+    private String[] mensajeComun = {"", "", ""};
     private String mensajeFinal = "";
-    private String mensajeAnteriorDecodificado = "";
-    private ArrayList<String> mensajeListaFase0 = new ArrayList<>(),
-                              mensajeListaFase1 = new ArrayList<>(),
+    private int DECODIFICACION = 1;
+    private int POSICION = 2;
+
+    private ArrayList<String> mensajeListaFase1 = new ArrayList<>(),
                               mensajeListaFase2 = new ArrayList<>(),
                               mensajeListaFase3 = new ArrayList<>();
 
@@ -133,9 +134,18 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         _cameraBridgeViewBase.setMaxFrameSize(640, 640);
         _cameraBridgeViewBase.enableFpsMeter();
 
-        if (retrofit == null) {
+        if (LobbyActivity.retrofit == null) {
             Connection.init();
-            restClient = Connection.createService(RestClient.class); //, username, password);
+            LobbyActivity.restClient = Connection.createService(RestClient.class); //, username, password);
+        }
+
+        if(codigosServer.size()<= 0)
+            getCodigosServer();
+
+        Intent intent = getIntent();
+        if(intent != null) {
+            anchoObjetoReal = intent.getIntExtra("Tamanio", 0);
+            Log.e(TAG, "Ancho Objecto Real: "+anchoObjetoReal);
         }
 
     }
@@ -181,7 +191,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     public void onCameraViewStarted(int width, int height) {
-        //Log.e(TAG, "Resolution: " + (width + "x" + height));
         mRGBA = new Mat(width, height, CvType.CV_8UC4);
         mResultado = new Mat(width, height, CvType.CV_8UC4);
 
@@ -205,28 +214,189 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mParameters.put(0, 2, roll);
         mParameters.put(0, 3, horizonalAngle);
         mParameters.put(0, 4, verticalAngle);
-        mParameters.put(0, 5, 4);//faseDeco);
+        mParameters.put(0, 5, faseDeco);
         mParameters.put(0, 6, focalPx);
-///////////////////////
-       mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
+
+        mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
                 mResultado.getNativeObjAddr(),
                 mObjectSize.getNativeObjAddr(),
                 mParameters.getNativeObjAddr());
 
-       tilt = mParameters.get(0,0)[0];
-       yaw = mParameters.get(0,1)[0];
-       roll = mParameters.get(0,2)[0];
+        faseDeco = (int) mParameters.get(0, 5)[0];
 
-        anchoObjetoImagen = mObjectSize.get(0, 2)[0];
+        if (faseDeco == -1) {
+            mensajeListaFase1.clear();
+            mensajeListaFase2.clear();
+            mensajeListaFase3.clear();
+            faseDeco = 0;
+            amountFrameEstDistance = 0;
+        }
 
-        estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
+        if(faseDeco == -2){
+            amountFrameEstDistance = 1;
+            faseDeco = 4;
+        }
 
-        estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
-        estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
-////////////////////////
+        mensajeResultado = checkOff(mensajeResultado);
 
-//here
-        Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
+        if(!mensajeResultado.equals(CODIGO_OFF)) {
+
+            if(fps > 2.0f){
+
+                if (faseDeco == 0) {
+
+                    //Log.e(TAG, "Empezando Fase 0, fps: " + fps);
+                    if (mensajeResultado.equals(CODIGO_INICIO)) {
+                        faseDeco++;
+                        //vibrate();
+                        Log.e(TAG, "FASE 0 OK");
+                    }
+
+                    mensajeListaFase1.clear();
+                    mensajeListaFase2.clear();
+                    mensajeListaFase3.clear();
+
+                } else if (faseDeco == 1) {
+
+                    if (mensajeResultado.equals(CODIGO_INICIO)) {
+                        faseDeco = -1;
+                    } else{
+
+                        mensajeListaFase1.add(mensajeResultado);
+                        Log.e(TAG, "Mensaje " + mensajeListaFase1.size() + " Fase 1: " + mensajeResultado);
+                    }
+                } else if (faseDeco == 2) {
+
+                    if (mensajeResultado.equals(CODIGO_INICIO)) {
+                        faseDeco = -1;
+                    } else{
+
+                        mensajeListaFase2.add(mensajeResultado);
+                        Log.e(TAG, "Mensaje " + mensajeListaFase2.size() + " Fase 2: " + mensajeResultado);
+                    }
+                } else if (faseDeco == 3) {
+
+                    if (mensajeResultado.equals(CODIGO_INICIO)) {
+                        faseDeco = -1;
+                    } else{
+                        mensajeListaFase3.add(mensajeResultado);
+                        Log.e(TAG, "Mensaje " + mensajeListaFase3.size() + " Fase 3: " + mensajeResultado);
+                    }
+                }
+
+            }
+        }
+        else{
+            if(faseDeco == 1 && mensajeListaFase1.size() > 0) {
+                faseDeco = 2;
+                Log.e(TAG, "Mensajes FASE 1 terminó ");
+            }
+            else if(faseDeco == 2 && mensajeListaFase2.size() > 0) {
+                faseDeco = 3;
+                Log.e(TAG, "Mensajes FASE 2 terminó ");
+            }
+            if(faseDeco == 3 && mensajeListaFase3.size() > 0) {
+                faseDeco = 4;
+                Log.e(TAG, "Mensajes FASE 3 terminó ");
+            }
+            //showText(DECODIFICACION);
+        }
+
+        if (faseDeco == 4){
+
+            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 && mensajeListaFase3.size() > 0) {
+
+                if(amountFrameEstDistance == 0) {
+                    mensajeComun[0] = mostCommon(mensajeListaFase1);
+                    mensajeComun[1] = mostCommon(mensajeListaFase2);
+                    mensajeComun[2] = mostCommon(mensajeListaFase3);
+
+                    Log.e(TAG, "Mensaje FASE 1 mas comun: " + mensajeComun[0]);
+                    Log.e(TAG, "Mensaje FASE 2 mas comun: " + mensajeComun[1]);
+                    Log.e(TAG, "Mensaje FASE 3 mas comun: " + mensajeComun[2]);
+
+                    if (mensajeComun[0].equals(mensajeComun[1]) && mensajeComun[0].equals(mensajeComun[2])) {
+                        Log.e(TAG, "Mensaje Final Precisión 100%: " + mensajeFinal);
+                        mensajeFinal = mensajeComun[0];
+
+                    } else if ((mensajeComun[0].equals(mensajeComun[1]) && !mensajeComun[0].equals(mensajeComun[2])) ||
+                            (mensajeComun[0].equals(mensajeComun[2]) && !mensajeComun[0].equals(mensajeComun[1])) ||
+                            (mensajeComun[1].equals(mensajeComun[2]) && !mensajeComun[0].equals(mensajeComun[1]))) {
+                        Log.e(TAG, "Mensaje Final Precisión 66%: " + mensajeFinal);
+                        mensajeFinal = mensajeComun[0];
+
+
+                    } else if (!mensajeComun[0].equals(mensajeComun[1]) && !mensajeComun[0].equals(mensajeComun[2])) {
+                        Log.e(TAG, "Precisión 0%, no es posible determinar codigo, reiniciando...");
+                        faseDeco = -1;
+                    }
+
+                    if(!mensajeFinal.isEmpty() && serverContains(mensajeFinal)){
+                        Log.e(TAG, "Codigo coincide con Server!");
+                    }
+
+                }
+                amountFrameEstDistance++;
+
+                if(amountFrameEstDistance > 20) {
+                    amountFrameEstDistance = 0;
+                    tilt = mParameters.get(0, 0)[0];
+                    yaw = mParameters.get(0, 1)[0];
+                    roll = mParameters.get(0, 2)[0];
+
+                    anchoObjetoImagen = mObjectSize.get(0, 2)[0];// * Math.abs(((mObjectSize.get(0, 0)[0] / mObjectSize.get(0, 2)[0] )));
+
+                    if (anchoObjetoImagen > 1) {
+
+                        estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
+
+                        estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
+                        estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
+
+                        if (estimatedDist > 1) {
+
+                            faseDeco = -1;
+                            vibrate();
+                            mensajeListaFase1.clear();
+                            mensajeListaFase2.clear();
+                            mensajeListaFase3.clear();
+                            Intent intent = new Intent(this, LobbyActivity.class);
+                            intent.putExtra("codigo", mensajeFinal);
+                            intent.putExtra("distanciaX", estimatedDistX/10);
+                            intent.putExtra("distanciaY", estimatedDistY/10);
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), "X: " +
+                                            String.format("%.2f", estimatedDistX / 10) +  ", Y: " +
+                                            String.format("%.2f", estimatedDistY / 10), Toast.LENGTH_LONG).show();
+                                }
+                            });
+
+                            Log.e(TAG, "Codigo: " + mensajeFinal+ " , distanceX: " + estimatedDistX/10 + ", distanceY: "+estimatedDistY/10);
+                            setResult(LobbyActivity.RESULT_OK, intent);
+                            finish();
+                        }
+
+
+                    }
+                }else{
+                    if(faseDeco == 4)
+                        Log.e(TAG, "Frame <= 20, actual: "+ amountFrameEstDistance);
+                }
+            }
+            else{
+                Log.e(TAG, "Algunas de las lista de deco esta vacia.");
+            }
+
+            showText(POSICION);
+
+        }
+
+        if(faseDeco != -1 && faseDeco != 4){
+            showText(DECODIFICACION);
+        }
+
+/*        Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
                         ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
                         ", R: " + String.format("%.2f", 360-Math.toDegrees(roll)),
                 new Point(10, 23),
@@ -235,36 +405,34 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         String.format("%.2f", mObjectSize.get(0, 0)[0]) + "px, " +
                         String.format("%.2f", mObjectSize.get(0, 1)[0]) + "px)",
                 new Point(10, 50), //140
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Size Corrected: (" +
-                        String.format("%.2f", mObjectSize.get(0, 2)[0]) + "px, " +
-                        String.format("%.2f", mObjectSize.get(0, 3)[0]) + "px)",
-                new Point(10, 80), //140
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Estimated Dist: " +
-                        String.format("%.2f", estimatedDist / 10) + " cm (X: " +
-                        String.format("%.2f", estimatedDistX / 10) +  ", Y: "+
-                        String.format("%.2f", estimatedDistY / 10)+")",
-                new Point(10, 110),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Fase: " + faseDeco,
-                new Point(10, 140),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Mensaje: " + mensajeResultado,
-                new Point(10, 170),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);*/
 
-        Imgproc.putText(mResultado, "Calc. distancia: " + amountFrameEstDistance,
-                new Point(10, 200),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         return mResultado;
     }
 
-    /*private boolean verificaCodigo(String codigoFinal) {
+    private String checkOff(String mensajeResultado) {
+        if(mensajeResultado == null || mensajeResultado.equals("")) return CODIGO_OFF;
+        String msg1 = new String(mensajeResultado).substring(0,4);
+        String msg2 = new String(mensajeResultado).substring(4,8);
+        String msg3 = new String(mensajeResultado).substring(8,12);
+        if(msg1.equals("0000") ||
+           msg2.equals("0000") ||
+           msg3.equals("0000")) {
+           //Log.e(TAG, "Discarding: " + mensajeResultado);
+
+            return CODIGO_OFF;
+        }
+        else {
+            //Log.e(TAG, "Secciones: (" + msg1+", "+msg2+", "+msg3+")");
+            return mensajeResultado;
+        }
+    }
+
+    private boolean verificaCodigo(String codigoFinal) {
         if(codigosServer == null || codigosServer.size() <= 0) return false;
 
         return codigosServer.contains(codigoFinal);
-    }*/
+    }
 
     public void getCameraParameters(int maxwidth, int maxheight) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -304,14 +472,15 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Log.e(TAG, "OpenCV library found inside package. Using it!");
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        //
+
+        getCodigosServer();
     }
 
     private void vibrate() {
         if (Build.VERSION.SDK_INT >= 26) {
-            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(50,50));
+            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(150,50));
         } else {
-            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(50);
+            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(150);
         }
     }
 
@@ -371,6 +540,87 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         return max.getKey();
     }
 
+    private void getCodigosServer() {
+        if (LobbyActivity.restClient != null && !consultandoServer) {
+            consultandoServer = true;
+            Call<CodigosServer> request = LobbyActivity.restClient.getCodigosServer();
 
+            if(!request.isExecuted()) {
+                request.enqueue(new Callback<CodigosServer>() {
+                    @Override
+                    public void onResponse(Call<CodigosServer> call, Response<CodigosServer> response) {
+
+                        if (response.isSuccessful()) {
+                            String rsp = response.body().getResponse();
+
+                            switch (rsp) {
+                                case "0": {
+
+                                    //codigosServer = null;
+                                    codigosServer = response.body().getCodigos();
+                                    Toast.makeText(getBaseContext(), "Server OK Codigos", Toast.LENGTH_SHORT).show();
+                                    Log.e(TAG, "Server OK Codigos");
+                                    break;
+                                }
+                                case "1": {
+                                    //codigosServer.clear();
+                                    //codigosServer = null;
+                                    //Toast.makeText(getBaseContext(), "Codigos NOK", Toast.LENGTH_SHORT).show();
+                                    Log.e(TAG, "Server NOK Codigos");
+                                    break;
+                                }
+                                default: {
+                                    //Toast.makeText(getBaseContext(), "Default Codigos NOK", Toast.LENGTH_SHORT).show();
+                                    break;
+                                }
+                            }
+                        } else {
+                            //Toast.makeText(getBaseContext(), "Codigos NOK2, no succs req", Toast.LENGTH_SHORT).show();
+                        }
+                        consultandoServer=false;
+                    }
+
+                    @Override
+                    public void onFailure(Call<CodigosServer> call, Throwable t) {
+                        Toast.makeText(getBaseContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                        consultandoServer=false;
+                    }
+                });
+            }
+        }
+    }
+
+    public void showText(int proceso){
+        if(proceso == DECODIFICACION){
+            Imgproc.putText(mResultado, "Decodificando...",
+                    new Point(10, 24),
+                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(mResultado, "Fase: " + ((faseDeco == -1 || faseDeco == -2) ? 0 : faseDeco) + " de 4",
+                    new Point(10, 50),
+                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+            /*Imgproc.putText(mResultado, "Mensaje: " + mensajeResultado,
+                    new Point(10, 50),
+                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);*/
+        }
+        else if(proceso == POSICION){
+            Imgproc.putText(mResultado, "Estimando Posicion...",
+                    new Point(10, 24),
+                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(mResultado, "Fase: 4 de 4",
+                    new Point(10, 50),
+                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(mResultado, "Espere: "+ ((amountFrameEstDistance == 0) ? 0 : (20 - amountFrameEstDistance)),
+                    new Point(10, 80), Core.FONT_HERSHEY_SIMPLEX, .85, new Scalar(255, 0, 0), 2);
+        }
+    }
+
+    private boolean serverContains(String mensaje){
+        if(codigosServer == null || codigosServer.size() <= 0) return false;
+
+        for(int i = 0; i < codigosServer.size(); i++){
+            if(codigosServer.get(i).getCodigo().equals(mensaje))
+                return true;
+        }
+        return  false;
+    }
 }
-

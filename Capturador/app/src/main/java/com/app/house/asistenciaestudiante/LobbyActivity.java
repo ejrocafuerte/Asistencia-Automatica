@@ -2,6 +2,7 @@ package com.app.house.asistenciaestudiante;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -10,10 +11,12 @@ import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -90,16 +93,18 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
     private String delimitadorNl = "**";
     private String nombreArchivoEstudiante = "/InfoEstudiante";
     private String nombreArchivoAsistencia = "/Asistencia";
+    private String nombreArchivoParametros = "/Parametros";
     private int REQUESTCODE_INFO = 1;
     private int REQUESTCODE_CAMERA = 2;
     private ArrayList<String> infoEstudiante;
     private ArrayList<String> infoAsistencias;
     private String infoAsistenciaActual = "";
     private boolean existeInternet = false;
-    private boolean asistenciaEnlistada = false;
+    private boolean enviandoServidor = false;
     private Button btn_enviar;
     private TextView txt_asistencias;
     private ArrayList<String> codigosServer;
+    private int tamanioObj = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,12 +117,9 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         crypto = Crypt.getInstance();
 
         asistencias = new ArrayList<Asistencia>();
-        //asistencias = new ListaAsistencias();
         asistenciaActual = new Asistencia();
         estudiante = new Estudiante();
         senales = new ArrayList<Senal>();
-        //_deleteFile(nombreArchivoEstudiante);
-        //_deleteFile(nombreArchivoAsistencia);
 
         fileManager(mContext);
 
@@ -137,59 +139,34 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             restClient = Connection.createService(RestClient.class); //, username, password);
         }
 
-        scanWifiSignals();
+        senales = scanWifiSignals();
 
         ListView asistenciasLV = (ListView)findViewById(R.id.listAsistenciasPendientes);
         adapter = new ArrayAdapter<Asistencia>(this, R.layout.simple_list_item, asistencias);
-        // Set The Adapter
 
         if(asistencias.size() <= 0){
             asistenciasLV.setEmptyView((View)findViewById(R.id.emptyview));
         }
-            //
+
         asistenciasLV.setAdapter(adapter);
 
-        getCodigosServer();
+        showDialog(this);
     }
-
-
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.benviar: {
-                if (validateInfo()) {
-
-
-                    asistenciaActual.setEstudiante(estudiante);
-                    if(asistenciaActual.getSenales() == null || asistenciaActual.getSenales().size() <= 0)
-                        scanWifiSignals();
-
-                    int index = getAsistenciaByCodigo(asistenciaActual);
-
-                    if(index >= 0) {
-                        asistencias.get(index).setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-                        asistencias.get(index).setEstudiante(estudiante);
-                        Toast.makeText(mContext, "Asistencia duplicada!", Toast.LENGTH_SHORT).show();
-
-                    }else{
-                        asistenciaActual.setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-                        asistencias.add(asistenciaActual);
-                        if(adapter != null)
-                            adapter.notifyDataSetChanged();
-                        Toast.makeText(mContext, "Added asistencia!", Toast.LENGTH_SHORT).show();
-                    }
-
+                if(validateInfo()) {
                     //enviar asistencia servidor web
                     if (existeInternet) {
-                        Log.e("Existe internet, enviando server: ", "3");
-                        sendMessage();
-
-                        Log.e("Existe internet, enviando server", infoAsistenciaActual);
+                        Log.e(TAG, "Existe internet, enviando server");
+                        sendServer();
                     }
                     //guardar info a archivo
                     else {
-                        saveFile(mContext, asistencias, nombreArchivoAsistencia);
+                        Toast.makeText(mContext, "Sin conexion a internet, guardando a archivo", Toast.LENGTH_SHORT).show();
+                        //Log.e(TAG, "No se detecta conexion a internet, guardando a archivo");
+                        //saveFile(mContext, asistencias, nombreArchivoAsistencia);
                     }
                 }
             }
@@ -198,45 +175,48 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void sendMessage() {
+    private void sendServer() {
 
-        if (restClient != null) {
-            Call<ResponseServer> request = restClient.sendMessage(asistencias);
+        if (restClient != null && !enviandoServidor) {
 
+            Call<ResponseServer> request = restClient.sendServer(asistencias);
+            enviandoServidor = true;
             request.enqueue(new Callback<ResponseServer>() {
                 @Override
                 public void onResponse(Call<ResponseServer> call, Response<ResponseServer> response) {
-
                     if (response.isSuccessful()) {
                         String rsp = response.body().getResponse();
                         Log.e("onResponse", rsp);
 
                         switch(rsp){
-                            case "0":{ //OK
-                                asistencias.clear();
-                                adapter.notifyDataSetChanged();
+                            case "0": { //OK
+                                if(asistencias!=null) asistencias.clear();
+                                if(adapter!=null) adapter.notifyDataSetChanged();
                                 _deleteFile(nombreArchivoAsistencia);
-                                Toast.makeText(mContext, "Server OK",
-                                        Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mContext, "Server OK",  Toast.LENGTH_SHORT).show();
+                                Log.e(TAG, "Asistencias enviadas satisfactoriamente");
                             }
-                            case "1":{
-                                Toast.makeText(mContext, response.body().getMessage(),
-                                        Toast.LENGTH_SHORT).show();
+                            case "1": { //NOK
+                                Toast.makeText(mContext, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e(TAG, "Existen problemas al verificar asistencias: "+response.body().getMessage());
                             }
                         }
                     }
                     else{
                         saveFile(mContext, asistencias, nombreArchivoAsistencia);
-                        Toast.makeText(mContext, "Server NOK saving file...", Toast.LENGTH_SHORT).show();
-                        Log.e("Server NOK saving file...", getAsistenciasMessage(asistencias));
+                        Toast.makeText(mContext, "Server NOK saving file", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Server NOK saving file, "+response.body().getMessage());
                     }
+
+                    enviandoServidor = false;
                 }
 
                 @Override
                 public void onFailure(Call<ResponseServer> call, Throwable t) {
+                    enviandoServidor = false;
                     Toast.makeText(mContext, "Retrofit fail!", Toast.LENGTH_SHORT).show();
-                    Log.e("Retrofit fail!", t.getMessage() + " " + t.getLocalizedMessage() + " "+getAsistenciasMessage(asistencias));
-                    saveFile(mContext, asistencias, nombreArchivoAsistencia);
+                    Log.e("Retrofit fail!", t.getMessage() + " " + t.getLocalizedMessage());
+                    //saveFile(mContext, asistencias, nombreArchivoAsistencia);
                 }
             });        }
     }
@@ -250,7 +230,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             Asistencia a = asistencias.get(k);
 
             if(a != null) {
-                message.append(a.toString());
+                message.append(a.toStringtoFile());
                 if (k < asistencias.size() - 1) {
                     message.append(delimitadorNl);
                 }
@@ -275,11 +255,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         } else if (estudiante.getMatricula().isEmpty()) {
             Toast.makeText(mContext, "Error: Matricula", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (asistenciaActual.getCodigo().isEmpty()) {
+        } /*else if (asistenciaActual.getCodigo().isEmpty()) {
             Toast.makeText(mContext, "Error: Codigo", Toast.LENGTH_SHORT).show();
-            return false;
-        } else if (asistenciaActual.getMateria().isEmpty()) {
-            Toast.makeText(mContext, "Error: Materia", Toast.LENGTH_SHORT).show();
             return false;
         } else if (asistenciaActual.getDistanciaX().isEmpty()) {
             Toast.makeText(mContext, "Error: Distancia X", Toast.LENGTH_SHORT).show();
@@ -290,7 +267,7 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         } else if (asistenciaActual.getSenales().isEmpty()) {
             Toast.makeText(mContext, "Error: Senales", Toast.LENGTH_SHORT).show();
             return false;
-        } else
+        }*/ else
             return true;
     }
 
@@ -324,139 +301,6 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         return ((TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
     }
 
-    private void fileManager(Context context) {
-        File fileAsistencia = new File(getFilesDir().getPath() + nombreArchivoAsistencia);
-        File fileEstudiante = new File(getFilesDir().getPath() + nombreArchivoEstudiante);
-
-        if (!fileEstudiante.exists()) {
-            try {
-                fileEstudiante.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            infoEstudiante = readFile(mContext, nombreArchivoEstudiante);
-
-            if (infoEstudiante.size() > 0) {
-                String[] info = infoEstudiante.get(0).split(delimitador);
-                estudiante.setNombres(info[0]);
-                estudiante.setApellidos(info[1]);
-                estudiante.setMatricula(info[2]);
-                //nombres = info[0];
-                //apellidos = info[1];
-                //matricula = info[2];
-            }
-        }
-
-        if (!fileAsistencia.exists()) {
-            try {
-                fileAsistencia.createNewFile();
-            } catch (IOException e) {
-            }
-        } else {
-            infoAsistencias = readFile(context, nombreArchivoAsistencia);
-
-            if (infoAsistencias.size() > 0) {
-                for (String info : infoAsistencias) {
-                    String[] parametros = info.split(delimitador);
-                    Asistencia asistencia = new Asistencia();
-                    asistencia.setMac(parametros[0]);
-                    asistencia.setImei(parametros[1]);
-                    Estudiante estudiante = new Estudiante();
-                    estudiante.setNombres(parametros[2]);
-                    estudiante.setApellidos(parametros[3]);
-                    estudiante.setMatricula(parametros[4]);
-                    asistencia.setEstudiante(estudiante);
-                    asistencia.setFecha(parametros[5]);
-                    asistencia.setMateria(parametros[6]);
-                    asistencia.setCodigo(parametros[7]);
-                    asistencia.setDistanciaX(parametros[8]);
-                    asistencia.setDistanciaY(parametros[9]);
-                    String[] senales = new String(parametros[10]).split("&&");
-                    //Log.e("senales " , senales[0]);
-
-                    ArrayList<Senal> ls = new ArrayList<>();
-                    for (String infosenal : senales) {
-                        String[] paramsenal = new String(infosenal).split("==");
-
-                        //Log.e("senalesc " , paramsenal[0]);
-                        Senal s = new Senal();
-                        s.setBssid(paramsenal[0]);
-                        s.setSsid(paramsenal[1]);
-                        s.setLevel(Integer.parseInt(paramsenal[2]));
-                        s.setLevel2(Integer.parseInt(paramsenal[3]));
-                        ls.add(s);
-                    }
-                    asistencia.setSenales(ls);
-                    asistencias.add(asistencia);
-                }
-            }
-        }
-    }
-
-    private void saveFile(Context context, ArrayList<Asistencia> asistencias, String filename) {
-        if (asistencias.size() <= 0) {
-            Toast.makeText(context, "No infoAsistencia", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        try {
-            FileOutputStream fos = new FileOutputStream(getFilesDir().getPath() + filename);//, true);
-
-            /*for (int i = 0; i < infoAsistencia.size(); i++) {
-                fos.write((encrypt(infoAsistencia.get(i).toString()) + "\n").getBytes());
-                Log.e("saveFile " + filename, (infoAsistencia.get(i).toString() + "\n"));
-            }*/
-            for (int i = 0; i < asistencias.size(); i++) {
-                fos.write((/*encrypt(*/asistencias.get(i).toString() + "\n").getBytes());
-                //Log.e("saveFile " + filename, (infoAsistencia.get(i).toString() + "\n"));
-                Log.e("saveFile " + filename, (asistencias.get(i).toString()) + "\n");
-            }
-            fos.close();
-            Toast.makeText(context, "Datos guardados", Toast.LENGTH_SHORT).show();
-
-        } catch (IOException e) {
-            Toast.makeText(context, "saveFile IOException", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private ArrayList readFile(Context context, String filename) {
-
-        ArrayList<String> dataList = new ArrayList<String>();
-        try {
-            //InputStream inputStream = context.openFileInput("asistencia-config.txt");
-            FileInputStream fileInputStream = new FileInputStream(getFilesDir().getPath() + filename);
-
-            if (fileInputStream != null) {
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);//(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                while ((receiveString = bufferedReader.readLine()) != null) {
-                    //stringBuilder.append(receiveString);
-                    dataList.add(/*crypto.decrypt_string(*/receiveString);
-                    Log.e("readFile2 " + filename, receiveString);
-                }
-                fileInputStream.close();
-                //dataList = (ArrayList<String>)Arrays.asList(stringBuilder.toString().split("\\n"));
-            }
-        } catch (FileNotFoundException e) {
-            Log.e("FileNotFoundException", "File not found: " + e.toString());
-            return dataList;
-        } catch (IOException e) {
-            Log.e("IOException", "Can not read file: " + e.toString());
-            return dataList;
-        }
-        //Log.e("Read File", dataList.get(0).toString());
-        return dataList;
-    }
-
-    private void _deleteFile(String filename) {
-        File fileAsistencia = new File(getFilesDir().getPath() + filename);
-        if (fileAsistencia.exists()) {
-            fileAsistencia.delete();
-                //fileAsistencia.createNewFile();
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -467,14 +311,17 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.camara:
-                getCodigosServer();
-                startActivityForResult(new Intent(mContext, CameraActivity.class), REQUESTCODE_CAMERA);
+                intent = new Intent(mContext, CameraActivity.class);
+                intent.putExtra("Tamanio", tamanioObj);
+                startActivityForResult(intent, REQUESTCODE_CAMERA);
                 return true;
             case R.id.info: {
-                Intent intent = new Intent(mContext, InfoActivity.class);
+                intent = new Intent(mContext, InfoActivity.class);
                 intent.putExtra("Estudiante", estudiante);
+                intent.putExtra("Tamanio", tamanioObj);
                 startActivityForResult(intent, REQUESTCODE_INFO);
                 return true;
             }
@@ -511,6 +358,8 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             if (resultCode == RESULT_OK) {
                 if (data != null) {
                     estudiante = (Estudiante)data.getSerializableExtra("Estudiante");
+                    asistenciaActual.setEstudiante(estudiante);
+                    tamanioObj = data.getIntExtra("Tamanio", 0);
                 }
             }
         } else if (requestCode == REQUESTCODE_CAMERA) {
@@ -519,6 +368,45 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     codigo = data.getStringExtra("codigo");
                     distanciaX = Double.toString(data.getDoubleExtra("distanciaX", 0.0));
                     distanciaY = Double.toString(data.getDoubleExtra("distanciaY", 0.0));
+                        Log.e(TAG, "OnActivityResult, Codigo: " + codigo + " , distanceX: " + distanciaX + ", distanceY: " + distanciaY);
+
+
+                        if (asistenciaActual.getSenales() == null || asistenciaActual.getSenales().size() <= 0)
+                            senales = scanWifiSignals();
+
+                        asistenciaActual.setCodigo(codigo);
+                        int index = getAsistenciaByCodigo(asistenciaActual);
+
+                        if (index >= 0) {
+                            asistencias.get(index).setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                            asistencias.get(index).setEstudiante(estudiante);
+                            asistencias.get(index).setCodigo(codigo);
+                            asistencias.get(index).setDistanciaX(distanciaX);
+                            asistencias.get(index).setDistanciaY(distanciaY);
+                            asistencias.get(index).setSenales(senales);
+                            Log.e("onActivityResult", "Asistencia encontrada en pos " + index + ", actualizando...: [" + codigo + ", " + distanciaX + ", " + distanciaY);
+                            Toast.makeText(mContext, "Asistencia ya registrada, actualizando info!", Toast.LENGTH_SHORT).show();
+
+                        } else {
+
+
+                            asistenciaActual.setFecha(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                            asistenciaActual.setEstudiante(estudiante);
+                            asistenciaActual.setCodigo(codigo);
+                            asistenciaActual.setDistanciaX(distanciaX);
+                            asistenciaActual.setDistanciaY(distanciaY);
+                            asistenciaActual.setSenales(senales);
+                            asistencias.add(asistenciaActual);
+                            Log.e("onActivityResult", "Asitencia nueva agregada: [" + codigo + ", " + distanciaX + ", " + distanciaY);
+                            Toast.makeText(mContext, "Asitencia nueva agregada!", Toast.LENGTH_SHORT).show();
+                        }
+
+                        saveFile(mContext, asistencias, nombreArchivoAsistencia);
+
+                        if (adapter != null) {
+                            adapter.notifyDataSetChanged();
+                        }
+                    //}
                 }
             }
         }
@@ -551,30 +439,31 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
 
             if (wifi.isConnected()) {
                 existeInternet = true;
-                //sendMessage();
-                Toast.makeText(context, "BroadcastReceiver: WIFI ON", Toast.LENGTH_SHORT).show();
+                //sendServer();
+                //Toast.makeText(context, "BroadcastReceiver: WIFI ON", Toast.LENGTH_SHORT).show();
             } else if (mobile.isConnected()) {
                 existeInternet = true;
+                wifiManager.setWifiEnabled(true);
                 //wifiManager.setWifiEnabled(true);
-                Toast.makeText(context, "BroadcastReceiver: MOBILE ON", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "BroadcastReceiver: MOBILE ON", Toast.LENGTH_SHORT).show();
             } else {
                 existeInternet = false;
-                //wifiManager.setWifiEnabled(true);
-                Toast.makeText(context, "BroadcastReceiver: MOBILE AND WIFI OFF", Toast.LENGTH_SHORT).show();
+                wifiManager.setWifiEnabled(true);
+                //Toast.makeText(context, "BroadcastReceiver: MOBILE AND WIFI OFF", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    public void scanWifiSignals() {
+    public ArrayList<Senal> scanWifiSignals() {
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         if(!wifiManager.isWifiEnabled()){
-            //wifiManager.setWifiEnabled(true);
+            wifiManager.setWifiEnabled(true);
         }
 
         List<ScanResult> wifiList = wifiManager.getScanResults();
         StringBuilder sb = new StringBuilder("");
-        senales.clear();
+        ArrayList<Senal> senales = new ArrayList<>();
 
         for (int i = 0; i < wifiList.size(); i++) {
             ScanResult scanResult = wifiList.get(i);
@@ -585,34 +474,12 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
             senal.setLevel2(WifiManager.calculateSignalLevel(scanResult.level, 100));
             senales.add(senal);
         }
-        asistenciaActual.setSenales(senales);
-        /*for (int i = 0; i < wifiList.size(); i++) {
-            ScanResult scanResult = null;
-            int level = 0;
-
-            for (int k = 0; k < 5; k++) {
-                scanResult = wifiList.get(i);
-
-                try { sleep(50); } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                level += WifiManager.calculateSignalLevel(scanResult.level, 100);
-                //Log.e("signals: " , String.valueOf(scanResult.level));
-            }
-            Senal senal = new Senal();
-            senal.setBssid(scanResult.BSSID);
-            senal.setSsid(scanResult.SSID);
-            senal.setLevel(0);
-            senal.setLevel2(level/5);
-            senales.add(senal);
-
-        }
-        asistenciaActual.setSenales(senales);*/
+        return senales;
     }
 
     int getAsistenciaByCodigo(Asistencia asistenciaActual){
         if(asistenciaActual == null || asistencias == null || asistencias.size() <= 0) return -1;
-        for (int i = 0; i <= asistencias.size(); i++) {
+        for (int i = 0; i < asistencias.size(); i++) {
             Asistencia a = asistencias.get(i);
             if (a.getCodigo().equals(asistenciaActual.getCodigo()) &&
                 a.getMac().equals(asistenciaActual.getMac()) &&
@@ -622,56 +489,167 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
         return -1;
     }
 
-    private void getCodigosServer() {
-        if (retrofit == null) {
-            Connection.init();
-            restClient = Connection.createService(RestClient.class); //, username, password);
+    void showDialog(Context context){
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        dialogBuilder.setMessage("1. Ingrese sus datos personales dando clic en el icono del lápiz y oprima guardar.\n\n" +
+                "2. Luego abra el decodificador dando clic en el icono de la cámara, apunte a las " +
+                "matrices hasta que la cruz roja este centrada con la matriz del medio.\n\n" +
+                "3. Espere hasta que se decodifique la información y estime la ubicación.\n\n" +
+                "4. De clic en 'Enviar Asistencia' para que su asistencia sea validada.");
+        dialogBuilder.setTitle("Instrucciones:");
+        dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+
+    private void fileManager(Context context) {
+        File fileAsistencia = new File(getFilesDir().getPath() + nombreArchivoAsistencia);
+        File fileEstudiante = new File(getFilesDir().getPath() + nombreArchivoEstudiante);
+        File fileParametros = new File(getFilesDir().getPath() + nombreArchivoParametros);
+
+        if (!fileParametros.exists()) {
+            try {
+                fileParametros.createNewFile();
+            } catch (IOException e) {
+            }
+        } else {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(getFilesDir().getPath() + nombreArchivoParametros);
+
+                if (fileInputStream != null) {
+                    InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);//(inputStream);
+                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                    String receiveString = "", tam = "";
+                    while ((receiveString = bufferedReader.readLine()) != null) {
+                        tam += receiveString;
+                    }
+                    fileInputStream.close();
+                    tamanioObj = Integer.valueOf(tam);
+                }
+            } catch (FileNotFoundException e) {
+                tamanioObj = 0;
+            } catch (IOException e) {
+                tamanioObj = 0;
+            }
+        }
+        if (!fileEstudiante.exists()) {
+            try {
+                fileEstudiante.createNewFile();
+            } catch (IOException e) {
+                //e.printStackTrace();
+            }
+        } else {
+            infoEstudiante = readFile(mContext, nombreArchivoEstudiante);
+
+            if (infoEstudiante.size() > 0) {
+                String[] info = infoEstudiante.get(0).split(delimitador);
+                estudiante.setNombres(info[0]);
+                estudiante.setApellidos(info[1]);
+                estudiante.setMatricula(info[2]);
+                asistenciaActual.setEstudiante(estudiante);
+            }
         }
 
-        if (retrofit != null) {
-            Call<CodigosServer> request = restClient.getCodigosServer();
+        if (!fileAsistencia.exists()) {
+            try {
+                fileAsistencia.createNewFile();
+            } catch (IOException e) {
+            }
+        } else {
+            infoAsistencias = readFile(context, nombreArchivoAsistencia);
 
-            request.enqueue(new Callback<CodigosServer>() {
-                @Override
-                public void onResponse(Call<CodigosServer> call, Response<CodigosServer> response) {
+            if (infoAsistencias.size() > 0) {
+                for (String info : infoAsistencias) {
+                    String[] parametros = info.split(delimitador);
+                    Asistencia asistencia = new Asistencia();
+                    asistencia.setMac(parametros[0]);
+                    asistencia.setImei(parametros[1]);
+                    Estudiante estudiante = new Estudiante();
+                    estudiante.setNombres(parametros[2]);
+                    estudiante.setApellidos(parametros[3]);
+                    estudiante.setMatricula(parametros[4]);
+                    asistencia.setEstudiante(estudiante);
+                    asistencia.setFecha(parametros[5]);
+                    asistencia.setMateria(parametros[6]);
+                    asistencia.setCodigo(parametros[7]);
+                    asistencia.setDistanciaX(parametros[8]);
+                    asistencia.setDistanciaY(parametros[9]);
+                    String[] senales = new String(parametros[10]).split("&&");
 
-                    if (response.isSuccessful()) {
-                        String rsp = response.body().getResponse();
-
-                        Log.e("onResponse codigos: ", rsp);
-
-                        switch(rsp){
-                            case "0":{
-
-                                codigosServer = null;
-                                codigosServer = response.body().getCodigos();
-                                Toast.makeText(getBaseContext(), "Server OK Codigos",
-                                        Toast.LENGTH_SHORT).show();
-                                //Log.e("onResponse codigos: ", codigosServer);
-                            }
-                            case "1":{
-                                //codigosServer.clear();
-                                //codigosServer = null;
-                                Toast.makeText(getBaseContext(), "Codigos NOK",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
+                    ArrayList<Senal> ls = new ArrayList<>();
+                    for (String infosenal : senales) {
+                        String[] paramsenal = new String(infosenal).split("==");
+                        Senal s = new Senal();
+                        s.setBssid(paramsenal[0]);
+                        s.setSsid(paramsenal[1]);
+                        s.setLevel(Integer.parseInt(paramsenal[2]));
+                        s.setLevel2(Integer.parseInt(paramsenal[3]));
+                        ls.add(s);
                     }
-                    else{
-                        Toast.makeText(getBaseContext(), "Codigos NOK2",
-                                Toast.LENGTH_SHORT).show();
-                    }
+                    asistencia.setSenales(ls);
+                    asistencias.add(asistencia);
                 }
-
-                @Override
-                public void onFailure(Call<CodigosServer> call, Throwable t) {
-                    Toast.makeText(getBaseContext(), "Retrofit fail!", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }else{
-            Toast.makeText(getBaseContext(), "retrofit null",
-                    Toast.LENGTH_SHORT).show();
+            }
         }
     }
-}
 
+    private void saveFile(Context context, ArrayList<Asistencia> asistencias, String filename) {
+        if (asistencias == null || asistencias.size() <= 0) {
+            Toast.makeText(context, "No existen asistencias", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            FileOutputStream fos = new FileOutputStream(getFilesDir().getPath() + filename);//, true);
+            for (int i = 0; i < asistencias.size(); i++) {
+                fos.write((/*encrypt(*/asistencias.get(i).toStringtoFile() + "\n").getBytes());
+            }
+
+            Log.e(TAG, "Grabando a asistencias a archivo.");
+            fos.close();
+
+        } catch (IOException e) {
+        }
+    }
+
+    private ArrayList readFile(Context context, String filename) {
+
+        ArrayList<String> dataList = new ArrayList<String>();
+        try {
+            FileInputStream fileInputStream = new FileInputStream(getFilesDir().getPath() + filename);
+
+            if (fileInputStream != null) {
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);//(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                while ((receiveString = bufferedReader.readLine()) != null) {
+                    dataList.add(/*crypto.decrypt_string(*/receiveString);
+                }
+
+                //Log.e("readFile2 " + filename, receiveString);
+                fileInputStream.close();
+            }
+        } catch (FileNotFoundException e) {
+            Log.e("FileNotFoundException", "File not found: " + e.toString());
+            return dataList;
+        } catch (IOException e) {
+            Log.e("IOException", "Can not read file: " + e.toString());
+            return dataList;
+        }
+        return dataList;
+    }
+
+    private void _deleteFile(String filename) {
+        File fileAsistencia = new File(getFilesDir().getPath() + filename);
+        if (fileAsistencia.exists()) {
+            fileAsistencia.delete();
+        }
+    }
+
+}
