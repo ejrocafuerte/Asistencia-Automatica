@@ -54,9 +54,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     private static final String TAG = "CameraActivity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
-    protected static Retrofit retrofit = null;
-    protected static RestClient restClient = null;
-    private Mat mRGBA, mResultado, mObjectSize, mParameters;// mEulerAngles;
+    private Mat mRGBA, mResultado, mObjectSize, mParameters;
     private FpsMeter fpsMeter = new FpsMeter();
     private ArrayList<Codigo> codigosServer = new ArrayList<>();
     private boolean consultandoServer = false;
@@ -82,10 +80,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private double flickerTime = 1000;//ms
     private double actualTime = 0;
     private int faseDeco = 0;
+    private int threshold = 0;
     private String[] mensajeComun = {"", "", ""};
     private String mensajeFinal = "";
+    private int BUSCAR = 0;
     private int DECODIFICACION = 1;
     private int POSICION = 2;
+    private int MAX_WIDTH = 0;
+    private int MAX_HEIGHT = 0;
 
     private ArrayList<String> mensajeListaFase1 = new ArrayList<>(),
                               mensajeListaFase2 = new ArrayList<>(),
@@ -194,9 +196,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mRGBA = new Mat(width, height, CvType.CV_8UC4);
         mResultado = new Mat(width, height, CvType.CV_8UC4);
 
+        MAX_WIDTH = width;
+        MAX_HEIGHT = height;
 
         mObjectSize = new Mat(1, 4, CvType.CV_64FC1);
-        mParameters = new Mat(1, 7, CvType.CV_64FC1);
+        mParameters = new Mat(1, 8, CvType.CV_64FC1);
         getCameraParameters(width, height);
 
     }
@@ -214,17 +218,29 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mParameters.put(0, 2, roll);
         mParameters.put(0, 3, horizonalAngle);
         mParameters.put(0, 4, verticalAngle);
-        mParameters.put(0, 5, faseDeco);
+        mParameters.put(0, 5, 4);//faseDeco);
         mParameters.put(0, 6, focalPx);
+        mParameters.put(0, 7, threshold);
 
         mensajeResultado = decodificar(mRGBA.getNativeObjAddr(),
-                mResultado.getNativeObjAddr(),
-                mObjectSize.getNativeObjAddr(),
-                mParameters.getNativeObjAddr());
+                                        mResultado.getNativeObjAddr(),
+                                        mObjectSize.getNativeObjAddr(),
+                                        mParameters.getNativeObjAddr());
+
+        tilt = mParameters.get(0, 0)[0];
+        yaw = mParameters.get(0, 1)[0];
+        roll = mParameters.get(0, 2)[0];
+
+        anchoObjetoImagen = mObjectSize.get(0, 2)[0];
+
+            estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
+
+            estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
+            estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
 
         faseDeco = (int) mParameters.get(0, 5)[0];
 
-        if (faseDeco == -1) {
+        /*if (faseDeco == -1) {
             mensajeListaFase1.clear();
             mensajeListaFase2.clear();
             mensajeListaFase3.clear();
@@ -241,7 +257,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
         if(!mensajeResultado.equals(CODIGO_OFF)) {
 
-            if(fps > 2.0f){
+            if(fps > 1.0f){
 
                 if (faseDeco == 0) {
 
@@ -249,7 +265,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     if (mensajeResultado.equals(CODIGO_INICIO)) {
                         faseDeco++;
                         //vibrate();
-                        Log.e(TAG, "FASE 0 OK");
+                        //Log.e(TAG, "FASE 0 OK");
                     }
 
                     mensajeListaFase1.clear();
@@ -283,7 +299,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         Log.e(TAG, "Mensaje " + mensajeListaFase3.size() + " Fase 3: " + mensajeResultado);
                     }
                 }
-
             }
         }
         else{
@@ -304,7 +319,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
         if (faseDeco == 4){
 
-            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 && mensajeListaFase3.size() > 0) {
+            if (true){//mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 && mensajeListaFase3.size() > 0) {
 
                 if(amountFrameEstDistance == 0) {
                     mensajeComun[0] = mostCommon(mensajeListaFase1);
@@ -390,31 +405,25 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
             showText(POSICION);
 
-        }
+        }*/
 
-        if(faseDeco != -1 && faseDeco != 4){
+        if(faseDeco >= 1 && faseDeco <= 3){
             showText(DECODIFICACION);
+        }else if(faseDeco <= 0){
+            showText(BUSCAR);
+        }else if(faseDeco == 4){
+            showText(POSICION);
         }
 
-/*        Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
-                        ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
-                        ", R: " + String.format("%.2f", 360-Math.toDegrees(roll)),
-                new Point(10, 23),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Size Original  : (" +
-                        String.format("%.2f", mObjectSize.get(0, 0)[0]) + "px, " +
-                        String.format("%.2f", mObjectSize.get(0, 1)[0]) + "px)",
-                new Point(10, 50), //140
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);*/
 
         return mResultado;
     }
 
     private String checkOff(String mensajeResultado) {
         if(mensajeResultado == null || mensajeResultado.equals("")) return CODIGO_OFF;
-        String msg1 = new String(mensajeResultado).substring(0,4);
-        String msg2 = new String(mensajeResultado).substring(4,8);
-        String msg3 = new String(mensajeResultado).substring(8,12);
+        String msg1 = mensajeResultado.substring(0,4);
+        String msg2 = mensajeResultado.substring(4,8);
+        String msg3 = mensajeResultado.substring(8,12);
         if(msg1.equals("0000") ||
            msg2.equals("0000") ||
            msg3.equals("0000")) {
@@ -510,7 +519,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     long time = Core.getTickCount();
                     fps = STEP * mFrequency / (time - mprevFrameTime);
                     mprevFrameTime = time;
-
                 }
             }
         }
@@ -537,7 +545,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         /*if(map.size() == list.size()){
             return "";
         }*/
-        return max.getKey();
+        return (max != null) ? max.getKey() : "";
     }
 
     private void getCodigosServer() {
@@ -591,16 +599,21 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     public void showText(int proceso){
-        if(proceso == DECODIFICACION){
+        if(proceso == BUSCAR) {
+            Imgproc.putText(mResultado, "Buscando...",
+                    new Point(10, 24),
+                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(mResultado, "Fase: " + ((faseDeco == -1 || faseDeco == -2) ? 0 : faseDeco) + " de 4",
+                    new Point(10, 50),
+                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+        }
+        else if(proceso == DECODIFICACION){
             Imgproc.putText(mResultado, "Decodificando...",
                     new Point(10, 24),
                     Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
             Imgproc.putText(mResultado, "Fase: " + ((faseDeco == -1 || faseDeco == -2) ? 0 : faseDeco) + " de 4",
                     new Point(10, 50),
                     Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-            /*Imgproc.putText(mResultado, "Mensaje: " + mensajeResultado,
-                    new Point(10, 50),
-                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);*/
         }
         else if(proceso == POSICION){
             Imgproc.putText(mResultado, "Estimando Posicion...",
@@ -609,9 +622,22 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Imgproc.putText(mResultado, "Fase: 4 de 4",
                     new Point(10, 50),
                     Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+            Imgproc.putText(mResultado, "Distancias: ("+String.format("%.2f", estimatedDistX/10)+", "+String.format("%.2f", estimatedDistY/10)+")",
+                    new Point(10, 80),
+                    Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
             Imgproc.putText(mResultado, "Espere: "+ ((amountFrameEstDistance == 0) ? 0 : (20 - amountFrameEstDistance)),
-                    new Point(10, 80), Core.FONT_HERSHEY_SIMPLEX, .85, new Scalar(255, 0, 0), 2);
+                    new Point(10, 110), Core.FONT_HERSHEY_SIMPLEX, .85, new Scalar(255, 0, 0), 2);
+
         }
+
+        Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
+                        ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
+                        ", R: " + String.format("%.2f", 360-Math.toDegrees(roll)),
+                new Point(10, MAX_HEIGHT-30),
+                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(mResultado, "Threshold: " + (int)mParameters.get(0, 7)[0],
+                new Point(10, MAX_HEIGHT-60),
+                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
     }
 
     private boolean serverContains(String mensaje){
