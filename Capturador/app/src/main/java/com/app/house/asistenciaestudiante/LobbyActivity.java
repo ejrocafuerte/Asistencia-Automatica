@@ -533,9 +533,11 @@ public class LobbyActivity extends AppCompatActivity implements View.OnClickList
                     tamanioObj = Integer.valueOf(tam);
                 }
             } catch (FileNotFoundException e) {
-                tamanioObj = 0;
+                tamanioObj = 1;
+            } catch(NumberFormatException e) {
+                tamanioObj = 1;
             } catch (IOException e) {
-                tamanioObj = 0;
+                tamanioObj = 1;
             }
         }
         if (!fileEstudiante.exists()) {

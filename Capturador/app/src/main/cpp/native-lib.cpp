@@ -100,13 +100,15 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
 
     buscarCuadrados(mProcesado, cuadrados, CANNY, N);
     if(cuadrados.size() == NUM_MATRICES){
-        dibujarCuadrados(mProcesado, cuadrados, Scalar(0, 0, 255));
+        dibujarCuadrados(mProcesado, cuadrados, Scalar(255, 0, 0));
         drawMarker(mProcesado, Scalar(255, 0, 0));
         if(alineadoEjeFocal(mProcesado, cuadrados)) {
             dibujarCuadrados(mProcesado, cuadrados, Scalar(0, 255, 0));
             drawMarker(mProcesado, Scalar(0, 255, 0));
             double dist = distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[2][1]);
-            double ratiowidth = MAX_WIDTH / ((dist <= 0) ? 1 : dist);
+            double ratiowidth = dist / MAX_WIDTH;
+            double threshFactor = ratiowidth;
+                    //MAX_WIDTH / ((dist <= 0) ? 1 : dist);
             //__android_log_print(ANDROID_LOG_ERROR, "rat", "%.2f", ratiowidth);
             Mat mWarpImage;
 
@@ -116,7 +118,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 }
 
                 particionarCuadrados(mProcesado, cuadrados, particiones);
-                decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario, ratiowidth);
+                decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario, threshFactor);
                 traducirMensaje(mensajeBinario, mensajeDecimal, faseDeco);
                 mResultado = mProcesado;
 
@@ -170,7 +172,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                         brPoints2.push_back(cuadradosImagenCorregida[2][2]); //2
                         brPoints2.push_back(cuadradosImagenCorregida[0][3]);
                         boundRect2 = boundingRect(brPoints2);
-                        rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0),
+                        /*rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0),
                                   1,
                                   8, 0);
                         rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(0, 255, 200),
@@ -186,7 +188,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                         circle(mWarpImage,
                                Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height), 2,
                                Scalar(0, 0, 255), 2, 8);
-                        circle(mWarpImage, boundRect2.br(), 2, Scalar(0, 0, 255), 2, 8);
+                        circle(mWarpImage, boundRect2.br(), 2, Scalar(0, 0, 255), 2, 8);*/
 
                         mObjectSize.at<double>(0, 2) = distanciaEntreDosPuntos(
                                 Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height),
@@ -201,7 +203,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
             }
         }
         else {
-            dibujarCuadrados(mProcesado, cuadrados, Scalar(0, 0, 255));
+            dibujarCuadrados(mProcesado, cuadrados, Scalar(255, 0, 0));
             drawMarker(mProcesado, Scalar(255, 0, 0));
 
             if(faseDeco == 4)
@@ -214,7 +216,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
 
     }
     else {
-        dibujarCuadrados(mProcesado, cuadrados, Scalar(0, 0, 255));
+        dibujarCuadrados(mProcesado, cuadrados, Scalar(255, 0, 0));//Scalar(0, 0, 255));
         drawMarker(mProcesado, Scalar(255, 0, 0));
         mResultado = mProcesado;
     }
@@ -240,31 +242,16 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
             if(metodo == LAPLACIAN) {
                 /// Apply Laplace function
                 Mat dst;
-                bitwise_not(gray0, gray0);
+                //bitwise_not(gray0, gray0);
                 Laplacian(gray0, dst, 3, 3, 1, 0, BORDER_DEFAULT); //3 depth CV_16S
                 convertScaleAbs(dst, gray);
-                /*if(1){
-
-                    string path = "/storage/3034-3465/DCIM/";
-                    string filename = IntToString(1);
-                    string ext = "lap.jpg";
-                    imwrite(path+filename+ext, gray);
-                }*/
             }
             else if (metodo == CANNY) {
-                bitwise_not(gray0, gray0);
-                Canny(gray0, gray, 10, 20, 3);//10,20,3);// 0 10 5
+                //bitwise_not(gray0, gray0);
+                Canny(gray0, gray, 0, 30, 5);//10,20,3);// 0 10 5
 
             }
             dilate(gray, gray, getStructuringElement(MORPH_RECT, Size(3, 3)));
-            /*if(1){
-
-                string path = "/storage/3034-3465/DCIM/";
-                string filename = IntToString(2);
-                string ext = ".jpg";
-                imwrite(path+filename+ext, gray);
-            }*/
-
         }
         else
         {
@@ -278,27 +265,16 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
 
         vector<Point> approx;
 
-        // test each contour
-        for( size_t i = 0; i < contours1.size(); i++ )
+        for(size_t i = 0; i < contours1.size(); i++)
         {
             //convexHull(Mat(contours1[i]), _approx, true, true); //PROVOCA DESORDEN EN LOS VERTICES
-            try {
-                approxPolyDP(Mat(contours1[i]), approx, arcLength(Mat(contours1[i]), true)*0.02, true);
-            }catch(Exception e){
-            }
-            // square contours should have 4 vertices after approximation
-            // relatively large area (to filter out noisy contours)
-            // and be convex.
-            // Note: absolute value of an area is used because
-            // area may be positive or negative - in accordance with the
-            // contour orientation
-            if( approx.size() == 4 &&
-                fabs(contourArea(Mat(approx))) > SQUARE_AREA &&
-                !filtrarCuadrado(cuadrados, approx) &&
-                isContourConvex(Mat(approx)))
+            approxPolyDP(Mat(contours1[i]), approx, arcLength(Mat(contours1[i]), true)*0.02, true);
+
+            if( approx.size() == 4 && fabs(contourArea(Mat(approx))) > SQUARE_AREA &&
+                !filtrarCuadrado(cuadrados, approx) && isContourConvex(Mat(approx)))
             {
                 double maxCosine = 0;
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificar", "%.3f", 1.3);
+
                 for( int j = 2; j < 5; j++ )
                 {
                     // find the maximum cosine of the angle between joint edges
@@ -309,7 +285,7 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
                 // if cosines of all angles are small
                 // (all angles are ~90 degree) then write quandrange
                 // vertices to resultant sequence
-                if( maxCosine < 0.3 ) {
+                if( maxCosine < 0.5 ) {
                     cuadrados.push_back(approx);
                 }
             }
@@ -595,7 +571,7 @@ static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrado
 
 //        putText(image, IntToString(i + 1).c_str(), Point(cuadrados[i][0].x, cuadrados[i][0].y-10),
 //                FONT_HERSHEY_SIMPLEX, 0.75, Scalar(255, 0, 0), 2, LINE_AA, false);
-        polylines(image, &p, &n, 1, true, scalar, 1, 16);
+        polylines(image, &p, &n, 1, true, scalar, 2, 16);
     }
 }
 static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados , vector<vector<vector<Point> > >& particiones) {
@@ -961,7 +937,7 @@ static void unificarParticiones(const vector<vector<Point> >& cuadrados,
 
 
 }
-static void preprocesar( Mat& image, Mat& image_prep, double ratiowidth){
+static void preprocesar( Mat& image, Mat& image_prep, double threshFactor){
     Mat tmp;
     cvtColor(image, image_prep, CV_BGR2GRAY);
     GaussianBlur( image_prep, image_prep, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
@@ -970,8 +946,8 @@ static void preprocesar( Mat& image, Mat& image_prep, double ratiowidth){
     //imwrite("/storage/3034-3465/DCIM/prep2.jpg", tmp);
     //convertScaleAbs( tmp, image_prep );
     //if(ratiowidth <= 0.0) ratiowidth = 0.1;
-    //if(ratiowidth > 1.0) ratiowidth = 1.0;
-    threshold(image_prep, image_prep, 80 , 255, CV_THRESH_BINARY); //160-()(40 * ratiowidth)
+    //if(ratiowidth > 1.0) ratiowidth = 1.0;   80 * 0.05
+    threshold(image_prep, image_prep, 200 * threshFactor , 255, CV_THRESH_BINARY);
     //__android_log_print(ANDROID_LOG_ERROR, "thresh", "%.2f", 160-(40 * ratiowidth));
 
     //imwrite("/storage/3034-3465/DCIM/prep4.jpg", image_prep);
@@ -981,14 +957,14 @@ static void decodificarParticiones( Mat& image,
                                     Mat& image_c,
                                     vector<vector<vector<Point> > >& particiones,
                                     string& mensajeBinario,
-                                    double ratiowidth){
+                                    double threshFactor){
 
     if(particiones.size() <= 0 ) return;
     if(particiones[0].size() <= 0 ) return;
     float porcentajeBlanco = 0;
     vector<Point> puntosBlancos;
 
-    preprocesar(image_c, image_c, ratiowidth);
+    preprocesar(image_c, image_c, threshFactor);
 
     for(int i = 0; i < NUM_MATRICES; i++) {
         for (int k = 0; k < NUM_PARTICIONES; k++) {
@@ -1348,21 +1324,6 @@ bool alineadoEjeFocal(Mat& image, vector<vector<Point> >& cuadrados) {
         }
     }
     return false;
-}
-
-float getWidthObjectImage(vector<vector<Point> >& cuadrados){
-    if(cuadrados.size() != 1 && cuadrados.size() != 3) return 0.0f;
-    if(NUM_MATRICES == 1)
-        return distanciaEntreDosPuntos(cuadrados[0][3], cuadrados[0][2]);
-    else if(NUM_MATRICES == 3)
-        return distanciaEntreDosPuntos(cuadrados[0][3], cuadrados[2][2]);
-
-}
-
-float getHeightObjectImage(vector<vector<Point> >& cuadrados){
-    if(cuadrados.size() != 1 && cuadrados.size() != 3) return 0.0f;
-        return distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[0][3]);
-
 }
 
 static double rad2Deg(double rad){return rad*(180/M_PI);}//Convert radians to degrees
