@@ -169,8 +169,22 @@ def gestionar_estudiante(request):
 
         return True
 
+    def validar_mac(estudiante, mac):
+        if(estudiante.mac == mac):
+            pass
+        else:
+            if estudiante.imei_cambios >= 1:
+                raise Exception("Su teléfono no concuerda con el registrado anteriormente, " \
+                       "no podrá registrar su asistencia")
+            elif estudiante.imei_cambios == 0:
+                estudiante.imei_cambios = 1
+                estudiante.mac = mac
+                estudiante.save()
+                raise Exception("Su teléfono no concuerda con el registrado anteriormente, " \
+                       "no posee mas oportunidades de cambio")
+
     if request.method == 'POST':
-        aprobado = 1
+        aprobado = 0
         try:
             print(request.body)
             #msg_asistencias = AESCipher('51e1f539-b614-4df1-8005-96eb4b4e4b07').decrypt(request.body)
@@ -210,18 +224,21 @@ def gestionar_estudiante(request):
 
                 if len(senales) <= 0:
                     #raise Exception('Error no existe lectura de senales WIFI en estudiante')
-                    aprobado = 0
                     print('Error no existe lectura de senales WIFI en estudiante')
-                print('-2-')
+
                 #estudiante, existe_estudiante = Estudiante.objects.get_or_create(matricula = matricula)
                 estudiante = None
                 try:
                     estudiante = Estudiante.objects.get(matricula = matricula)
+
+
                 except ObjectDoesNotExist:
                     estudiante = Estudiante.objects.create(matricula = matricula, nombres = nombres, apellidos = apellidos, mac = mac, imei = imei)
 
                 if not estudiante:
                     raise Exception('Error al crear/obtener estudiante')
+
+                validar_mac(estudiante, mac)
 
                 print ('Estudiante: ' + str(estudiante))
 
@@ -235,7 +252,6 @@ def gestionar_estudiante(request):
                 profesor = Profesor.objects.filter(identificador = profesor).first()
                 print('-2,1-')
                 if not profesor:
-                    aprobado = 0
                     #raise Exception('Error al obtener profesor')
                     print ('Error al obtener profesor')
 
@@ -243,21 +259,18 @@ def gestionar_estudiante(request):
 
                 if not materia:
                     #raise Exception('Error al obtener materia')
-                    aprobado = 0
                     print ('Error al obtener materia')
 
                 paralelo = Paralelo.objects.filter(identificador = paralelo).first()
 
                 if not paralelo:
                     #raise Exception('Error al obtener paralelo')
-                    aprobado = 0
                     print ('Error al obtener paralelo')
 
                 aula = Aula.objects.filter(identificador = aula).first()
 
                 if not aula:
                     #raise Exception('Error al obtener aula')
-                    aprobado = 0
                     print('Error al obtener aula')
 
                 asistencia = AsistenciaEstudiante.objects.create(id_estudiante = estudiante,
