@@ -88,6 +88,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private int POSICION = 2;
     private int MAX_WIDTH = 0;
     private int MAX_HEIGHT = 0;
+    private boolean first_frame = true;
 
     private ArrayList<String> mensajeListaFase1 = new ArrayList<>(),
                               mensajeListaFase2 = new ArrayList<>(),
@@ -233,10 +234,12 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
         anchoObjetoImagen = mObjectSize.get(0, 2)[0];
 
-            estimatedDist = (anchoObjetoImagen > 0) ? (anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen) : 0;//??
+            estimatedDist = (anchoObjetoImagen > 0) ? ((anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen)) : 0;//??
 
             estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
             estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
+        Log.e(TAG, "d "+anchoObjetoReal+ " "+anchoObjetoImagen+" "+estimatedDist);
+
 
         faseDeco = (int) mParameters.get(0, 5)[0];
 
@@ -245,6 +248,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             mensajeListaFase2.clear();
             mensajeListaFase3.clear();
             faseDeco = 0;
+            first_frame = true;
             amountFrameEstDistance = 0;
         }
 
@@ -264,7 +268,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     //Log.e(TAG, "Empezando Fase 0, fps: " + fps);
                     if (mensajeResultado.equals(CODIGO_INICIO)) {
                         faseDeco++;
-                        //vibrate();
+                        if(first_frame){
+                            vibrate(50);
+                            first_frame = false;
+                        }
                         //Log.e(TAG, "FASE 0 OK");
                     }
 
@@ -319,7 +326,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
         if (faseDeco == 4){
 
-            if (true){//mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 && mensajeListaFase3.size() > 0) {
+            if (mensajeListaFase1.size() > 0  && mensajeListaFase2.size() > 0 && mensajeListaFase3.size() > 0) {
 
                 if(amountFrameEstDistance == 0) {
                     mensajeComun[0] = mostCommon(mensajeListaFase1);
@@ -353,7 +360,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 }
                 amountFrameEstDistance++;
 
-                if(amountFrameEstDistance > 20) {
+                if(amountFrameEstDistance > 10) {
                     amountFrameEstDistance = 0;
                     tilt = mParameters.get(0, 0)[0];
                     yaw = mParameters.get(0, 1)[0];
@@ -371,7 +378,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         if (estimatedDist > 1) {
 
                             faseDeco = -1;
-                            vibrate();
+                            vibrate(150);
                             mensajeListaFase1.clear();
                             mensajeListaFase2.clear();
                             mensajeListaFase3.clear();
@@ -400,7 +407,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 }
             }
             else{
-                Log.e(TAG, "Algunas de las lista de deco esta vacia.");
+                Log.e(TAG, "Algunas de las listas de cods esta vacia.");
             }
 
             showText(POSICION);
@@ -485,11 +492,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         getCodigosServer();
     }
 
-    private void vibrate() {
+    private void vibrate(int mili) {
         if (Build.VERSION.SDK_INT >= 26) {
-            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(150,50));
+            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(mili,mili));
         } else {
-            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(150);
+            ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(mili);
         }
     }
 
@@ -625,14 +632,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Imgproc.putText(mResultado, "Distancias: ("+String.format("%.2f", estimatedDistX/10)+", "+String.format("%.2f", estimatedDistY/10)+")",
                     new Point(10, 80),
                     Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-            Imgproc.putText(mResultado, "Espere: "+ ((amountFrameEstDistance == 0) ? 0 : (20 - amountFrameEstDistance)),
+            Imgproc.putText(mResultado, "Espere: "+ ((amountFrameEstDistance == 0) ? 0 : (10 - amountFrameEstDistance)),
                     new Point(10, 110), Core.FONT_HERSHEY_SIMPLEX, .85, new Scalar(255, 0, 0), 2);
 
         }
 
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
                         ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
-                        ", R: " + String.format("%.2f", 360-Math.toDegrees(roll)),
+                        ", R: " + String.format("%.2f", Math.toDegrees(roll)),
                 new Point(10, MAX_HEIGHT-30),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
         Imgproc.putText(mResultado, "Threshold: " + (int)mParameters.get(0, 7)[0],

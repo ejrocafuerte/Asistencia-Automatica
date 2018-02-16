@@ -44,8 +44,10 @@ int buscarPuntoMasCercano(vector<Point> puntos, Point punto);
 double calcularAnguloEntreDosPuntos( Point pt1, Point pt2, Point pt0);
 static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados);
 static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
-                                 double f, double cx, double cy, double r1, double r2,
+                                 double f, double cx, double cy,
                                  double& tilt, double& yaw, double& roll);
+void corregirPerspectiva(const Mat &input, Mat &output, double tilt, double yaw, double roll,
+                         double dx, double dy, double dz, double f, double cx, double cy);
 static void drawMarker(Mat& image, Scalar scalar);
 static void resetAngles();
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
@@ -54,10 +56,8 @@ int binarioADecimal(int n);
 static double rad2Deg(double rad);
 static double deg2Rad(double deg);
 double normalizeAngle(double ang);
-void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double roll,
-                 double dx, double dy, double dz, double f, double cx, double cy);
 
-int N = 15;
+int BUSQUEDA_TRESH = 15;
 int GAUSSIAN_FACTOR = 5;
 int MAX_WIDTH, MAX_HEIGHT;
 int SEGMENTOS_FRONTERA = 4;
@@ -69,10 +69,10 @@ int NIVEL_THRESHOLD = 50;
 int NUM_MATRICES = 3;
 int NUM_PARTICIONES = 16;
 int PARTICION_OFFSET = 2;
-int SQUARE_AREA = 100;
-int INIT_THRESH = 200;
+int SQUARE_AREA = 150;
+int INIT_THRESH_DECO = 120;
 double TOLERANCIA_LED_ENCENDIDO = 6.0; //(%)
-double DISTANCE_RATIO = 0.4;
+double DISTANCE_RATIO = 0.9;
 
 
 JNIEXPORT jstring JNICALL
@@ -102,33 +102,38 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     vector<vector<Point> > cuadrados, cuadradosImagenCorregida;
     vector<vector<vector<Point> > > particiones;
 
-    buscarCuadrados(mProcesado, cuadrados, CANNY, N);
+    buscarCuadrados(mProcesado, cuadrados, CANNY, BUSQUEDA_TRESH);
+    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 1.0);
     if(cuadrados.size() == NUM_MATRICES){
-
+        //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 2.0);
         dibujarCuadrados(mProcesado, cuadrados, Scalar(255, 0, 0));
         drawMarker(mProcesado, Scalar(255, 0, 0));
-
+        //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 3.0);
         if(alineadoEjeFocal(mProcesado, cuadrados)) {
 
             dibujarCuadrados(mProcesado, cuadrados, Scalar(0, 255, 0));
             drawMarker(mProcesado, Scalar(0, 255, 0));
+            //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 4.0);
             double dist = distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[2][1]);
             double ratiowidth = dist / MAX_WIDTH;
             //__android_log_print(ANDROID_LOG_ERROR, "_", "dist: %.2f, ratio: %0.2f, thresh: %0.2f", 0,0,0);
-            threshold = INIT_THRESH * sqrt(ratiowidth);
-            threshold = (threshold <= 0) ? 10 : ((threshold >= INIT_THRESH) ? INIT_THRESH : threshold);
+            threshold = INIT_THRESH_DECO * sqrt(ratiowidth);
+            threshold = (threshold <= 0) ? 10 : ((threshold >= INIT_THRESH_DECO) ? INIT_THRESH_DECO : threshold);
                     //MAX_WIDTH / ((dist <= 0) ? 1 : dist);
             //__android_log_print(ANDROID_LOG_ERROR, "_", "dist: %.2f, ratio: %0.2f, thresh: %0.2f", dist, ratiowidth, threshold);
             Mat mWarpImage;
-
+            //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 5.0);
             if (faseDeco < 4) {
                 if(faseDeco == 0) {
                     resetAngles();
                 }
-
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 5.1);
                 particionarCuadrados(mProcesado, cuadrados, particiones);
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 6.0);
                 decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario, threshold);
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 7.0);
                 traducirMensaje(mensajeBinario, mensajeDecimal, faseDeco);
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 8.0);
                 mResultado = mProcesado;
 
             } else if(faseDeco == 4){
@@ -141,6 +146,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 brPoints.push_back(cuadrados[2][2]);
                 brPoints.push_back(cuadrados[0][3]);
                 boundRect = boundingRect(brPoints);
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 9.0);
                 mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(
                         Point(boundRect.tl().x, boundRect.tl().y + boundRect.height),
                         boundRect.br());
@@ -148,16 +154,16 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                        Point(boundRect.tl().x,
                                                                              boundRect.tl().y +
                                                                              boundRect.height));
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 10.0);
                 estimarAngulosEuler(mProcesado,
                                     cuadrados,
                                     mParameters.at<double>(0, 6),
-                                    mObjectSize.at<double>(0, 2) / mObjectSize.at<double>(0, 0),
-                                    mObjectSize.at<double>(0, 3) / mObjectSize.at<double>(0, 1),
                                     MAX_WIDTH / 2,
                                     MAX_HEIGHT / 2,
                                     tilt, yaw, roll);
-                __android_log_print(ANDROID_LOG_ERROR, "Plane Z", "%.2f ", 1.0 - (fabs(yaw) / CV_PI));
-                warpFrame(mOriginalCopiaB,
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f %.3f %.3f ", tilt, yay, roll);
+                //__android_log_print(ANDROID_LOG_ERROR, "Plane Z", "%.2f ", 1.0 - (fabs(yaw) / CV_PI));
+                corregirPerspectiva(mOriginalCopiaB,
                           mWarpImage,
                           tilt, yaw, roll,
                           0, 0, 1.0 - (fabs(yaw) / CV_PI),
@@ -170,11 +176,21 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 Mat croppedImage;
                 int X = boundRect.tl().x - 50; X = (X > 0) ? X : 0;
                 int Y = boundRect.tl().y - 40; Y = (Y > 0) ? Y : 0;
-                int W = boundRect.width + 100;
-                int H = boundRect.height + 80;
+                int W = boundRect.width + 100; W = (W > 0) ? W : 0;
+                int H = boundRect.height + 80; H = (H > 0) ? H : 0;
 
-                croppedImage = mWarpImage(Rect(X, Y, W, H));
-                buscarCuadrados(mWarpImage, cuadradosImagenCorregida, CANNY, N);
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 12.0);
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%i %i %i %i", X, Y, W, H);
+
+                try{
+                    croppedImage = mWarpImage(Rect(X, Y, W, H));
+                } catch(Exception e){
+                    croppedImage = mWarpImage;
+                    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones ex", "%s", e.what());
+                }
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 12.1);
+                buscarCuadrados(croppedImage, cuadradosImagenCorregida, CANNY, BUSQUEDA_TRESH);
+                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 13.0);
                 if (cuadradosImagenCorregida.size() == NUM_MATRICES) {
 
                     Rect boundRect2;
@@ -184,7 +200,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                     brPoints2.push_back(cuadradosImagenCorregida[2][2]);
                     brPoints2.push_back(cuadradosImagenCorregida[0][3]);
                     boundRect2 = boundingRect(brPoints2);
-                    rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0),
+                    /*rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0),
                               1,
                               8, 0);
                     rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(0, 255, 200),
@@ -200,27 +216,30 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                     circle(mWarpImage,
                            Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height), 2,
                            Scalar(0, 0, 255), 2, 8);
-                    circle(mWarpImage, boundRect2.br(), 2, Scalar(0, 0, 255), 2, 8);
+                    circle(mWarpImage, boundRect2.br(), 2, Scalar(0, 0, 255), 2, 8);*/
 
                     mObjectSize.at<double>(0, 2) = distanciaEntreDosPuntos(
                             Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height),
                             boundRect2.br());
+
                     mObjectSize.at<double>(0, 3) = distanciaEntreDosPuntos(boundRect2.tl(),
                                                                            Point(boundRect2.tl().x,
                                                                                  boundRect2.tl().y +
                                                                                  boundRect2.height));
+                    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 14.0);
                     }
-                mResultado = mWarpImage;//mProcesado;//mWarpImage;
+                mResultado = mProcesado;//mProcesado;//mWarpImage;
             }
         }
         else {
             dibujarCuadrados(mProcesado, cuadrados, Scalar(255, 0, 0));
             drawMarker(mProcesado, Scalar(255, 0, 0));
 
-            if(faseDeco == 4)
+            if(faseDeco == 4) {
                 faseDeco = -2;
-            else
+            } else {
                 faseDeco = -1;
+            }
             resetAngles();
             mResultado = mProcesado;
         }
@@ -232,13 +251,13 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
         mResultado = mProcesado;
     }
 
+    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 15.0);
     mParameters.at<double>(0,0) = tilt;
     mParameters.at<double>(0,1) = yaw;
     mParameters.at<double>(0,2) = roll;
     mParameters.at<double>(0,5) = faseDeco;
     mParameters.at<double>(0,7) = threshold;
 
-    //preprocesar(mResultado, mResultado, threshold);
     return env->NewStringUTF(mensajeDecimal.c_str());
 }
 static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados, MetodoBusqueda metodo, int thresholdFactor){
@@ -251,27 +270,30 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
     vector<vector<Point> > contours1;
 
     for( int l = 0; l < thresholdFactor; l++ ){
-        if( l == 0 ){
+        if(l == 0 ){
             if(metodo == LAPLACIAN) {
                 /// Apply Laplace function
                 Mat dst;
-                //bitwise_not(gray0, gray0);
+                bitwise_not(gray0, gray0);
                 Laplacian(gray0, dst, 3, 3, 1, 0, BORDER_DEFAULT); //3 depth CV_16S
                 convertScaleAbs(dst, gray);
             }
             else if (metodo == CANNY) {
-                //bitwise_not(gray0, gray0);
-                Canny(gray0, gray, 0, 30, 3);//10,20,3);// 0 10 5
+                bitwise_not(gray0, gray0);
+                Canny(gray0, gray, 0, 50, 3);//10,20,3);// 0 10 5
 
             }
             dilate(gray, gray, getStructuringElement(MORPH_RECT, Size(3, 3)));
         }
         else
         {
-            // apply threshold if l!=0:
-            //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
-            gray = gray0 >= ((l + 1) * 255 / thresholdFactor);
-
+            threshold(gray0, gray, (l+1)*255/BUSQUEDA_TRESH, 255, CV_THRESH_BINARY);
+//            if(true){
+//                    string path = "/storage/3034-3465/DCIM/";
+//                    string filename0 = IntToString(l);
+//                    string ext = ".jpg";
+//                    imwrite(path+filename0+"_"+ext, gray);
+//            }
         }
         // Encuentra los contornos (mas exteriores si existen otros dentro) y los enlista
         findContours(gray, contours1, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(-1, -1)); //Point(-1 ,-1)
@@ -280,10 +302,7 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
 
         for(size_t i = 0; i < contours1.size(); i++)
         {
-            //convexHull(Mat(contours1[i]), approx, CV_CLOCKWISE, true); //PROVOCA DESORDEN EN LOS VERTICES
-            //tmp.push_back(approx);
-            //drawContours(image, tmp, 0, Scalar(255), 2, 8);
-            approxPolyDP(Mat(contours1[i]), approx, arcLength(Mat(contours1[i]), true)*0.1, true);
+            approxPolyDP(Mat(contours1[i]), approx, arcLength(Mat(contours1[i]), true)*0.015, true);
 
             if( approx.size() == 4 && fabs(contourArea(Mat(approx))) > SQUARE_AREA &&
                 !filtrarCuadrado(cuadrados, approx) && isContourConvex(Mat(approx)))
@@ -300,7 +319,7 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
                 // if cosines of all angles are small
                 // (all angles are ~90 degree) then write quandrange
                 // vertices to resultant sequence
-                if( maxCosine < 0.5 ) {
+                if( maxCosine < 0.35) {
                     cuadrados.push_back(approx);
                 }
             }
@@ -313,7 +332,11 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
 
 static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
 
-    if(cuadrados.size() <= 3) return;
+    if(cuadrados.size() <= 3){
+        //cuadrados.clear();
+        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "%s", "menos de 2 cuadrados");
+        return;
+    }// {cuadrados.clear(); return;} ////???
 
     vector<vector<Point> > cuadradosSeleccionados;
 
@@ -331,11 +354,14 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                 //cuadradosSeleccionados.push_back(cuadrados[p]);
 
                 distanciaSeleccionada = distanciaEntreDosPuntos(cuadrados[n][0], cuadrados[p][0]);
-                angSeleccionado = -atan2(cuadrados[p][0].y - cuadrados[n][0].y, cuadrados[p][0].x - cuadrados[n][0].x);
+
+                int dx = cuadrados[p][0].x - cuadrados[n][0].x;
+                int dy = cuadrados[p][0].y - cuadrados[n][0].y;
+
+                angSeleccionado = -atan2(dy, dx);
 
                 for (int q = p + 1; q < cuadrados.size(); q++) {
-                    //__android_log_print(ANDROID_LOG_ERROR, "OK ", "cSelec size %d",
-                     //                   cuadradosSeleccionados.size());
+
                     distanciaActual = distanciaEntreDosPuntos(cuadrados[p][0], cuadrados[q][0]);
                     double razon = (distanciaSeleccionada >= distanciaActual) ?
                                    (distanciaActual / distanciaSeleccionada) :
@@ -348,7 +374,10 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                     //    __android_log_print(ANDROID_LOG_ERROR, "OK ", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
                     //                        distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
 
-                        angActual = -atan2(cuadrados[q][0].y - cuadrados[p][0].y, cuadrados[q][0].x - cuadrados[p][0].x);
+                        dx = cuadrados[q][0].x - cuadrados[p][0].x;
+                        dy = cuadrados[q][0].y - cuadrados[p][0].y;
+
+                        angActual = -atan2(dy, dx);
 
                         if(angSeleccionado == 0.0) angSeleccionado = 0.01;
                         if(angActual == 0.0)       angActual = 0.01;
@@ -356,40 +385,18 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                         angSeleccionado = normalizeAngle(angSeleccionado);
                         angActual = normalizeAngle(angActual);
 
-                        //double angInf = normalizeAngle(angSeleccionado - deg2Rad(10));
-                        //double angSup = normalizeAngle(angSeleccionado + deg2Rad(10));
-                        double angDiff = fabs(angSeleccionado-angActual); //fabs(fabs(angSeleccionado) - fabs(angActual));
+                        double angDiff = fabs(angSeleccionado-angActual);
 
-                        //bool angOK = (angActual >= angInf) && (angActual <= angSup);
                         //__android_log_print(ANDROID_LOG_ERROR, "ord", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), anfdiff: %.2f",
                         //                   rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, rad2Deg(angDiff));
-                        if (angDiff < mejorAngulo){//angActual <= angSup && angActual >= angInf){
+                        if (angDiff < mejorAngulo){
                             mejorAngulo = angDiff;
                             indexMejorCuadrado[0] = n;
                             indexMejorCuadrado[1] = p;
                             indexMejorCuadrado[2] = q;
-
-                            //__android_log_print(ANDROID_LOG_ERROR, "ord", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), anfdiff: %.2f",
-                            //                   rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, rad2Deg(angDiff));
-
-                            //cuadradosSeleccionados.push_back(cuadrados[q]);
-
-//                            if(cuadradosSeleccionados.size() == NUM_MATRICES){
-//                                cuadrados.clear();
-//                                cuadrados = cuadradosSeleccionados;
-//                                return;
-//                            }
                        }
                     }
-
-//                    if(cuadradosSeleccionados.size() == 2 && q == cuadrados.size() - 1){
-//                        cuadradosSeleccionados.pop_back();
-//                    }
                 }
-
-//                if(cuadradosSeleccionados.size() == 1 && p == cuadrados.size() - 2){
-//                    cuadradosSeleccionados.pop_back();
-//                }
             }
         }
         cuadradosSeleccionados.push_back(cuadrados[indexMejorCuadrado[0]]);
@@ -406,7 +413,7 @@ double normalizeAngle(double ang){
     else return ang;
 }
 static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
-                                 double f, double ratio1, double ratio2, double cx, double cy,
+                                 double f, double cx, double cy,
                                  double& tilt, double& yaw, double& roll){
     if(cuadrados.size() <  3) return;
 
@@ -529,6 +536,30 @@ static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
 
             if (ratio >= 0.2)
                 vYaw.push_back(angYaw);
+
+
+
+//            if(angRoll > 0 && accumRoll > 0){
+//                if(angRoll >= accumRoll)
+//                    ratio = accumRoll / angRoll;
+//                else
+//                    ratio = angRoll / accumRoll;
+//            }
+//            else if(angRoll < 0 && accumRoll < 0){
+//                if(angRoll >= accumRoll)
+//                    ratio = angRoll / accumRoll;
+//                else
+//                    ratio = accumRoll / angRoll;
+//            }
+//            else if(angRoll > 0 && accumRoll < 0){
+//                ratio = fabs(accumRoll / angRoll);
+//            }
+//            else if(angRoll < 0 && accumRoll > 0){
+//                ratio = fabs(angRoll / accumRoll);
+//            }
+//
+//            if (ratio >= 0.2)
+//                vRoll.push_back(angRoll);
         }
 
         accumTilt = accumulate(vTilt.begin(), vTilt.end(), 0.0f);
@@ -537,6 +568,8 @@ static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
         accumYaw = accumulate(vYaw.begin(), vYaw.end(), 0.0f);
         yaw = (vYaw.size() == 0) ? 1 : (accumYaw / vYaw.size());
 
+//        accumRoll = accumulate(vRoll.begin(), vRoll.end(), 0.0f);
+//        roll = (vRoll.size() == 0) ? 1 : (accumRoll / vRoll.size());
         roll = angRoll;
     }
     catch (Exception e){
@@ -571,8 +604,8 @@ static void dibujarCuadrados( Mat& image, const vector<vector<Point> >& cuadrado
         int n = (int) cuadrados[i].size();
 
         putText(image, IntToString(i + 1).c_str(), Point(cuadrados[i][0].x, cuadrados[i][0].y-10),
-                FONT_HERSHEY_SIMPLEX, 0.75, Scalar(255, 0, 0), 2, LINE_AA, false);
-        polylines(image, &p, &n, 1, true, scalar, 2, 16);
+                FONT_HERSHEY_SIMPLEX, 0.75, Scalar(255, 0, 0), 1, LINE_AA, false);
+        polylines(image, &p, &n, 1, true, scalar, 1, 16);
     }
 }
 static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuadrados , vector<vector<vector<Point> > >& particiones) {
@@ -948,7 +981,7 @@ static void preprocesar( Mat& image, Mat& image_prep, double thresh){
     //convertScaleAbs( tmp, image_prep );
     //if(ratiowidth <= 0.0) ratiowidth = 0.1;
     //if(ratiowidth > 1.0) ratiowidth = 1.0;   80 * 0.05
-    threshold(image_prep, image_prep, thresh , 255, CV_THRESH_BINARY);
+    threshold(image_prep, image_prep, thresh , 255, CV_THRESH_BINARY);//CV_TRESH_OTSU
     //__android_log_print(ANDROID_LOG_ERROR, "thresh", "%.2f", 160-(40 * ratiowidth));
 
     //imwrite("/storage/3034-3465/DCIM/prep4.jpg", image_prep);
@@ -978,7 +1011,10 @@ static void decodificarParticiones( Mat& image,
 
             Mat mParticion;
             if(X>PARTICION_OFFSET && Y>PARTICION_OFFSET && W>PARTICION_OFFSET && H>PARTICION_OFFSET) {
-                mParticion = image_c(Rect(X, Y, W, H));
+                try{
+                    mParticion = image_c(Rect(X, Y, W, H));
+                }catch(Exception e){}
+
                 float tamanio = W * H;
 
                 if (tamanio > 36.0) {
@@ -1322,7 +1358,7 @@ bool alineadoEjeFocal(Mat& image, vector<vector<Point> >& cuadrados) {
 static double rad2Deg(double rad){return rad*(180/M_PI);}//Convert radians to degrees
 static double deg2Rad(double deg){return deg*(M_PI/180);}//Convert degrees to radians
 
-void warpFrame(const Mat &input, Mat &output, double tilt, double yaw, double roll,
+void corregirPerspectiva(const Mat &input, Mat &output, double tilt, double yaw, double roll,
                  double dx, double dy, double dz, double f, double cx, double cy){
     Mat Rx = Mat(4, 4, CV_64FC1);
     Mat Ry = Mat(4, 4, CV_64FC1);
