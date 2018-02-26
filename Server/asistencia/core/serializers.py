@@ -56,7 +56,7 @@ class EstudianteSerializer(serializers.ModelSerializer):
         )
 
 class FacultadSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Facultad
         fields=(
             'nombre',
@@ -64,7 +64,7 @@ class FacultadSerializer(serializers.ModelSerializer):
         )
 
 class EdificioSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Edificio
         fields = (
             'id_facultad',
@@ -73,7 +73,7 @@ class EdificioSerializer(serializers.ModelSerializer):
         )
 
 class AulaSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Aula
         fields = (
             'id_edificio',
@@ -83,7 +83,7 @@ class AulaSerializer(serializers.ModelSerializer):
         )
 
 class ArduinoSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Arduino
         fields = (
             'id_aula',
@@ -91,17 +91,17 @@ class ArduinoSerializer(serializers.ModelSerializer):
         )
 
 class MateriaSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Materia
         fields = (
             'id_facultad',
-            'codigo,'
+            'identificador',
             'nombre',
             'descripcion',
         )
 
 class ParaleloSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Paralelo
         fields = (
             'id_materia',
@@ -113,7 +113,7 @@ class ParaleloSerializer(serializers.ModelSerializer):
         )
 
 class AsistenciaProfesorSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Paralelo
         fields = (
             'id_profesor',

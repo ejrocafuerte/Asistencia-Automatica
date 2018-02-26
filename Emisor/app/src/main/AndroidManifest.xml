@@ -24,10 +24,10 @@
         <activity android:name=".InitActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,10 +39,9 @@
             android:name=".DeviceListActivity"
             android:label="@string/title_activity_device_list"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".InitActivity">
+        <activity android:name=".EstudianteListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

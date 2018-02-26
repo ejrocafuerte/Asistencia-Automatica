@@ -187,7 +187,6 @@ public class MainActivity extends Activity {
         //txt_imei.setText(InfoConn.getIMEI(getApplicationContext()));
         //txt_bt.setText(InfoConn.getBTMAC());
         //Handler manejador = new Handler();
-        //BtConn btconexion = new BtConn();
         /*Intent intent = new Intent(this.getApplication(),DeviceListActivity.class);
         startActivity(intent);*/
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

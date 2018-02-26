@@ -14,16 +14,17 @@ import android.util.Log;
 public class EmisorSQLHelper extends SQLiteOpenHelper{
     public static final String emisor_db = "emisor.db";
     private static final int version = 1;
-    private static final String facultad = "CREATE TABLE core_facultad (id integer NOT NULL PRIMARY KEY AUTOINCREMENT," +
-            " nombre varchar(50) NOT NULL, abreviatura varchar(6) NOT NULL)";
-    private static final String materia= "CREATE TABLE core_materia (id integer NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-            "codigo varchar(10) NOT NULL UNIQUE, nombre varchar(30) NOT NULL, descripcion varchar(100) NULL," +
-            "id_facultad_id integer NOT NULL)";
-    private static final String paralelo="CREATE TABLE core_paralelo (id integer NOT NULL PRIMARY KEY AUTOINCREMENT,"+
-            "identificador varchar(10) NOT NULL UNIQUE, anio varchar(4) NOT NULL, termino varchar(1) NOT NULL, "+
-            "numero_paralelo varchar(2) NOT NULL, dia1 varchar(3) NOT NULL, dia2 varchar(3) NULL,"+
-            "id_materia_id integer NOT NULL, id_profesor_id integer NOT NULL, hora1 time NOT NULL, hora2 time NOT NULL,"+
-            "hora3 time NOT NULL, dia3 varchar(3) NULL)";
+    private static final String facultad = "CREATE TABLE core_facultad (id integer NOT NULL " +
+            "PRIMARY KEY AUTOINCREMENT, nombre varchar(50) NOT NULL, abreviatura varchar(6) NOT NULL)";
+    private static final String materia= "CREATE TABLE core_materia (id integer NOT NULL PRIMARY " +
+            "KEY AUTOINCREMENT, codigo varchar(10) NOT NULL UNIQUE, nombre varchar(30) NOT NULL, " +
+            "descripcion varchar(100) NULL, id_facultad_id integer NOT NULL)";
+    private static final String paralelo="CREATE TABLE core_paralelo (id integer NOT NULL " +
+            "PRIMARY KEY AUTOINCREMENT, identificador varchar(10) NOT NULL UNIQUE, anio varchar(4)" +
+            " NOT NULL, termino varchar(1) NOT NULL, numero_paralelo varchar(2) NOT NULL, " +
+            "dia1 varchar(3) NOT NULL, dia2 varchar(3) NULL, id_materia_id integer NOT NULL, " +
+            "id_profesor_id integer NOT NULL, hora1 time NOT NULL, hora2 time NOT NULL,hora3 time " +
+            "NOT NULL, dia3 varchar(3) NULL)";
     private static final String profesor="CREATE TABLE core_profesor (id integer NOT NULL PRIMARY KEY AUTOINCREMENT, " +
             "identificador varchar(20) NOT NULL, nombres varchar(60) NOT NULL, apellidos varchar(60) NOT NULL, " +
             "correo varchar(60) NOT NULL)";
