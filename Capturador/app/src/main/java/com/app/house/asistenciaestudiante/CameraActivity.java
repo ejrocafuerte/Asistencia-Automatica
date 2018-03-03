@@ -89,6 +89,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private int MAX_WIDTH = 0;
     private int MAX_HEIGHT = 0;
     private boolean first_frame = true;
+    private int intentos = 0;
+    private int exitos = 0;
 
     private ArrayList<String> mensajeListaFase1 = new ArrayList<>(),
                               mensajeListaFase2 = new ArrayList<>(),
@@ -101,8 +103,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.e(TAG, "OpenCV loaded successfully");
-                    // Load ndk built module, as specified in moduleName in build.gradle
-                    // after opencv initialization
                     System.loadLibrary("native-lib");
                     _cameraBridgeViewBase.enableView();
                 }
@@ -126,7 +126,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        // Permissions for Android 6+
+
         ActivityCompat.requestPermissions(CameraActivity.this,
                 new String[]{Manifest.permission.CAMERA},
                 1);
@@ -219,7 +219,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mParameters.put(0, 2, roll);
         mParameters.put(0, 3, horizonalAngle);
         mParameters.put(0, 4, verticalAngle);
-        mParameters.put(0, 5, 4);//faseDeco);
+        mParameters.put(0, 5, faseDeco);
         mParameters.put(0, 6, focalPx);
         mParameters.put(0, 7, threshold);
 
@@ -231,25 +231,16 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         tilt = mParameters.get(0, 0)[0];
         yaw = mParameters.get(0, 1)[0];
         roll = mParameters.get(0, 2)[0];
-
-        anchoObjetoImagen = mObjectSize.get(0, 2)[0];
-
-            estimatedDist = (anchoObjetoImagen > 0) ? ((anchoObjetoReal * focalLength * mRGBA.cols()) / (sensorWidth * anchoObjetoImagen)) : 0;//??
-
-            estimatedDistX = -estimatedDist * Math.sin(yaw) * Math.cos(tilt);
-            estimatedDistY = Math.abs(estimatedDist * Math.cos(yaw) * Math.cos(tilt));
-        Log.e(TAG, "d "+anchoObjetoReal+ " "+anchoObjetoImagen+" "+estimatedDist);
-
-
         faseDeco = (int) mParameters.get(0, 5)[0];
 
-        /*if (faseDeco == -1) {
+        if (faseDeco == -1) {
             mensajeListaFase1.clear();
             mensajeListaFase2.clear();
             mensajeListaFase3.clear();
             faseDeco = 0;
             first_frame = true;
             amountFrameEstDistance = 0;
+            intentos++;
         }
 
         if(faseDeco == -2){
@@ -264,15 +255,12 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             if(fps > 1.0f){
 
                 if (faseDeco == 0) {
-
-                    //Log.e(TAG, "Empezando Fase 0, fps: " + fps);
                     if (mensajeResultado.equals(CODIGO_INICIO)) {
                         faseDeco++;
                         if(first_frame){
                             vibrate(50);
                             first_frame = false;
                         }
-                        //Log.e(TAG, "FASE 0 OK");
                     }
 
                     mensajeListaFase1.clear();
@@ -321,7 +309,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 faseDeco = 4;
                 Log.e(TAG, "Mensajes FASE 3 terminó ");
             }
-            //showText(DECODIFICACION);
         }
 
         if (faseDeco == 4){
@@ -359,6 +346,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                 }
                 amountFrameEstDistance++;
+
+                if(!mensajeFinal.isEmpty()) exitos++;
 
                 if(amountFrameEstDistance > 10) {
                     amountFrameEstDistance = 0;
@@ -398,8 +387,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                             setResult(LobbyActivity.RESULT_OK, intent);
                             finish();
                         }
-
-
                     }
                 }else{
                     if(faseDeco == 4)
@@ -412,7 +399,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
             showText(POSICION);
 
-        }*/
+        }
 
         if(faseDeco >= 1 && faseDeco <= 3){
             showText(DECODIFICACION);
@@ -434,12 +421,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         if(msg1.equals("0000") ||
            msg2.equals("0000") ||
            msg3.equals("0000")) {
-           //Log.e(TAG, "Discarding: " + mensajeResultado);
-
             return CODIGO_OFF;
         }
         else {
-            //Log.e(TAG, "Secciones: (" + msg1+", "+msg2+", "+msg3+")");
             return mensajeResultado;
         }
     }
@@ -471,7 +455,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 e.printStackTrace();
             }
         } else {
-            // do something for phones running an SDK before lollipop
         }
     }
 
@@ -549,9 +532,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             if (max == null || e.getValue() > max.getValue())
                 max = e;
         }
-        /*if(map.size() == list.size()){
-            return "";
-        }*/
         return (max != null) ? max.getKey() : "";
     }
 
@@ -570,27 +550,20 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                             switch (rsp) {
                                 case "0": {
-
-                                    //codigosServer = null;
                                     codigosServer = response.body().getCodigos();
                                     Toast.makeText(getBaseContext(), "Server OK Codigos", Toast.LENGTH_SHORT).show();
                                     Log.e(TAG, "Server OK Codigos");
                                     break;
                                 }
                                 case "1": {
-                                    //codigosServer.clear();
-                                    //codigosServer = null;
-                                    //Toast.makeText(getBaseContext(), "Codigos NOK", Toast.LENGTH_SHORT).show();
                                     Log.e(TAG, "Server NOK Codigos");
                                     break;
                                 }
                                 default: {
-                                    //Toast.makeText(getBaseContext(), "Default Codigos NOK", Toast.LENGTH_SHORT).show();
                                     break;
                                 }
                             }
                         } else {
-                            //Toast.makeText(getBaseContext(), "Codigos NOK2, no succs req", Toast.LENGTH_SHORT).show();
                         }
                         consultandoServer=false;
                     }
@@ -636,14 +609,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     new Point(10, 110), Core.FONT_HERSHEY_SIMPLEX, .85, new Scalar(255, 0, 0), 2);
 
         }
-
         Imgproc.putText(mResultado, "T: " + String.format("%.2f", Math.toDegrees(tilt)) +
-                        ", P: " + String.format("%.2f", Math.toDegrees(yaw)) +
+                        ", Y: " + String.format("%.2f", Math.toDegrees(yaw)) +
                         ", R: " + String.format("%.2f", Math.toDegrees(roll)),
                 new Point(10, MAX_HEIGHT-30),
-                Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
-        Imgproc.putText(mResultado, "Threshold: " + (int)mParameters.get(0, 7)[0],
-                new Point(10, MAX_HEIGHT-60),
                 Core.FONT_HERSHEY_SIMPLEX, 0.75, new Scalar(255, 0, 0), 2);
     }
 

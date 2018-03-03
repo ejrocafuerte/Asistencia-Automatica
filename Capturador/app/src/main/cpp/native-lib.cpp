@@ -103,37 +103,34 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
     vector<vector<vector<Point> > > particiones;
 
     buscarCuadrados(mProcesado, cuadrados, CANNY, BUSQUEDA_TRESH);
-    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 1.0);
     if(cuadrados.size() == NUM_MATRICES){
-        //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 2.0);
         dibujarCuadrados(mProcesado, cuadrados, Scalar(255, 0, 0));
         drawMarker(mProcesado, Scalar(255, 0, 0));
-        //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 3.0);
+
         if(alineadoEjeFocal(mProcesado, cuadrados)) {
 
             dibujarCuadrados(mProcesado, cuadrados, Scalar(0, 255, 0));
             drawMarker(mProcesado, Scalar(0, 255, 0));
-            //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 4.0);
+
             double dist = distanciaEntreDosPuntos(cuadrados[0][0], cuadrados[2][1]);
             double ratiowidth = dist / MAX_WIDTH;
-            //__android_log_print(ANDROID_LOG_ERROR, "_", "dist: %.2f, ratio: %0.2f, thresh: %0.2f", 0,0,0);
+
             threshold = INIT_THRESH_DECO * sqrt(ratiowidth);
             threshold = (threshold <= 0) ? 10 : ((threshold >= INIT_THRESH_DECO) ? INIT_THRESH_DECO : threshold);
-                    //MAX_WIDTH / ((dist <= 0) ? 1 : dist);
-            //__android_log_print(ANDROID_LOG_ERROR, "_", "dist: %.2f, ratio: %0.2f, thresh: %0.2f", dist, ratiowidth, threshold);
+
             Mat mWarpImage;
-            //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 5.0);
+
             if (faseDeco < 4) {
                 if(faseDeco == 0) {
                     resetAngles();
                 }
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 5.1);
+
                 particionarCuadrados(mProcesado, cuadrados, particiones);
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 6.0);
+
                 decodificarParticiones(mProcesado, mOriginalCopia, particiones, mensajeBinario, threshold);
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 7.0);
+
                 traducirMensaje(mensajeBinario, mensajeDecimal, faseDeco);
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 8.0);
+
                 mResultado = mProcesado;
 
             } else if(faseDeco == 4){
@@ -146,7 +143,7 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                 brPoints.push_back(cuadrados[2][2]);
                 brPoints.push_back(cuadrados[0][3]);
                 boundRect = boundingRect(brPoints);
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 9.0);
+
                 mObjectSize.at<double>(0, 0) = distanciaEntreDosPuntos(
                         Point(boundRect.tl().x, boundRect.tl().y + boundRect.height),
                         boundRect.br());
@@ -154,15 +151,14 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                        Point(boundRect.tl().x,
                                                                              boundRect.tl().y +
                                                                              boundRect.height));
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 10.0);
+
                 estimarAngulosEuler(mProcesado,
                                     cuadrados,
                                     mParameters.at<double>(0, 6),
                                     MAX_WIDTH / 2,
                                     MAX_HEIGHT / 2,
                                     tilt, yaw, roll);
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f %.3f %.3f ", tilt, yay, roll);
-                //__android_log_print(ANDROID_LOG_ERROR, "Plane Z", "%.2f ", 1.0 - (fabs(yaw) / CV_PI));
+
                 corregirPerspectiva(mOriginalCopiaB,
                           mWarpImage,
                           tilt, yaw, roll,
@@ -171,26 +167,20 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                           MAX_WIDTH / 2,
                           MAX_HEIGHT / 2);
 
-                //mWarpImage = mWarpImage(Rect((mWarpImage.cols / 2) - (MAX_WIDTH / 2), (mWarpImage.rows / 2) - (MAX_HEIGHT / 2), MAX_WIDTH, MAX_HEIGHT));
-
                 Mat croppedImage;
                 int X = boundRect.tl().x - 50; X = (X > 0) ? X : 0;
                 int Y = boundRect.tl().y - 40; Y = (Y > 0) ? Y : 0;
                 int W = boundRect.width + 100; W = (W > 0) ? W : 0;
                 int H = boundRect.height + 80; H = (H > 0) ? H : 0;
 
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 12.0);
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%i %i %i %i", X, Y, W, H);
-
                 try{
                     croppedImage = mWarpImage(Rect(X, Y, W, H));
                 } catch(Exception e){
                     croppedImage = mWarpImage;
-                    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones ex", "%s", e.what());
                 }
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 12.1);
+
                 buscarCuadrados(croppedImage, cuadradosImagenCorregida, CANNY, BUSQUEDA_TRESH);
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 13.0);
+
                 if (cuadradosImagenCorregida.size() == NUM_MATRICES) {
 
                     Rect boundRect2;
@@ -200,23 +190,6 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                     brPoints2.push_back(cuadradosImagenCorregida[2][2]);
                     brPoints2.push_back(cuadradosImagenCorregida[0][3]);
                     boundRect2 = boundingRect(brPoints2);
-                    /*rectangle(mWarpImage, boundRect2.tl(), boundRect2.br(), Scalar(255, 200, 0),
-                              1,
-                              8, 0);
-                    rectangle(mWarpImage, boundRect.tl(), boundRect.br(), Scalar(0, 255, 200),
-                              1, 8,
-                              0);
-
-                    circle(mWarpImage, cuadradosImagenCorregida[0][3], 2, Scalar(255, 0, 255),
-                           2,
-                           8);
-                    circle(mWarpImage, cuadradosImagenCorregida[2][2], 2, Scalar(255, 0, 255),
-                           2,
-                           8);
-                    circle(mWarpImage,
-                           Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height), 2,
-                           Scalar(0, 0, 255), 2, 8);
-                    circle(mWarpImage, boundRect2.br(), 2, Scalar(0, 0, 255), 2, 8);*/
 
                     mObjectSize.at<double>(0, 2) = distanciaEntreDosPuntos(
                             Point(boundRect2.tl().x, boundRect2.tl().y + boundRect2.height),
@@ -226,9 +199,8 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
                                                                            Point(boundRect2.tl().x,
                                                                                  boundRect2.tl().y +
                                                                                  boundRect2.height));
-                    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 14.0);
                     }
-                mResultado = mProcesado;//mProcesado;//mWarpImage;
+                mResultado = mProcesado;
             }
         }
         else {
@@ -246,12 +218,10 @@ Java_com_app_house_asistenciaestudiante_CameraActivity_decodificar(JNIEnv *env,
 
     }
     else {
-        dibujarCuadrados(mProcesado, cuadrados, Scalar(255, 0, 0));//Scalar(0, 0, 255));
+        dibujarCuadrados(mProcesado, cuadrados, Scalar(255, 0, 0));
         drawMarker(mProcesado, Scalar(255, 0, 0));
         mResultado = mProcesado;
     }
-
-    //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 15.0);
     mParameters.at<double>(0,0) = tilt;
     mParameters.at<double>(0,1) = yaw;
     mParameters.at<double>(0,2) = roll;
@@ -272,7 +242,6 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
     for( int l = 0; l < thresholdFactor; l++ ){
         if(l == 0 ){
             if(metodo == LAPLACIAN) {
-                /// Apply Laplace function
                 Mat dst;
                 bitwise_not(gray0, gray0);
                 Laplacian(gray0, dst, 3, 3, 1, 0, BORDER_DEFAULT); //3 depth CV_16S
@@ -288,12 +257,6 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
         else
         {
             threshold(gray0, gray, (l+1)*255/BUSQUEDA_TRESH, 255, CV_THRESH_BINARY);
-//            if(true){
-//                    string path = "/storage/3034-3465/DCIM/";
-//                    string filename0 = IntToString(l);
-//                    string ext = ".jpg";
-//                    imwrite(path+filename0+"_"+ext, gray);
-//            }
         }
         // Encuentra los contornos (mas exteriores si existen otros dentro) y los enlista
         findContours(gray, contours1, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(-1, -1)); //Point(-1 ,-1)
@@ -311,14 +274,9 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
 
                 for( int j = 2; j < 5; j++ )
                 {
-                    // find the maximum cosine of the angle between joint edges
                     double cosine = fabs(calcularAnguloEntreDosPuntos(approx[j%4], approx[j-2], approx[j-1]));
                     maxCosine = MAX(maxCosine, cosine);
                 }
-
-                // if cosines of all angles are small
-                // (all angles are ~90 degree) then write quandrange
-                // vertices to resultant sequence
                 if( maxCosine < 0.35) {
                     cuadrados.push_back(approx);
                 }
@@ -333,10 +291,8 @@ static void buscarCuadrados(const Mat& image, vector<vector<Point> >& cuadrados,
 static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
 
     if(cuadrados.size() <= 3){
-        //cuadrados.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "obtenerCuadradosCercanos", "%s", "menos de 2 cuadrados");
         return;
-    }// {cuadrados.clear(); return;} ////???
+    }
 
     vector<vector<Point> > cuadradosSeleccionados;
 
@@ -348,10 +304,8 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
     double mejorAngulo = MAXFLOAT;
 
         for (int n = 0; n < cuadrados.size() - 2; n++) {
-            //cuadradosSeleccionados.push_back(cuadrados[n]);
 
             for (int p = n + 1; p < cuadrados.size() - 1; p++) {
-                //cuadradosSeleccionados.push_back(cuadrados[p]);
 
                 distanciaSeleccionada = distanciaEntreDosPuntos(cuadrados[n][0], cuadrados[p][0]);
 
@@ -367,12 +321,7 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
                                    (distanciaActual / distanciaSeleccionada) :
                                    (distanciaSeleccionada / distanciaActual);
 
-                    //__android_log_print(ANDROID_LOG_ERROR, "ord", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
-                    //                    distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
-
                     if (fabs(razon) > DISTANCE_RATIO) {
-                    //    __android_log_print(ANDROID_LOG_ERROR, "OK ", "distsel %.2f (%d-%d), distAct %.2f (%d-%d), razon %.2f",
-                    //                        distanciaSeleccionada, n+1,p+1, distanciaActual, p+1,q+1, razon);
 
                         dx = cuadrados[q][0].x - cuadrados[p][0].x;
                         dy = cuadrados[q][0].y - cuadrados[p][0].y;
@@ -387,8 +336,6 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
 
                         double angDiff = fabs(angSeleccionado-angActual);
 
-                        //__android_log_print(ANDROID_LOG_ERROR, "ord", "angSelec %.2f (%d-%d), angAct %.2f (%d-%d), anfdiff: %.2f",
-                        //                   rad2Deg(angSeleccionado), n+1,p+1, rad2Deg(angActual), p+1,q+1, rad2Deg(angDiff));
                         if (angDiff < mejorAngulo){
                             mejorAngulo = angDiff;
                             indexMejorCuadrado[0] = n;
@@ -403,7 +350,6 @@ static void obtenerCuadradosCercanos(vector<vector<Point> >& cuadrados){
         cuadradosSeleccionados.push_back(cuadrados[indexMejorCuadrado[1]]);
         cuadradosSeleccionados.push_back(cuadrados[indexMejorCuadrado[2]]);
         cuadrados = cuadradosSeleccionados;
-    //__android_log_print(ANDROID_LOG_ERROR, "cuadradosSelecc ", "%d %d",cuadrados.size(), cuadradosSeleccionados.size());
 }
 double normalizeAngle(double ang){
 
@@ -446,16 +392,9 @@ static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
         s.x = d.x + (d.x - c.x) / distance4 * 50000;
         s.y = d.y + (d.y - c.y) / distance4 * 50000;
 
-        /*line(image, a, p, Scalar(255, 0, 0), 1, LINE_8, 0);
-        line(image, b, q, Scalar(255, 0, 0), 1, LINE_8, 0);
-        line(image, a, r, Scalar(0, 255, 255), 1, LINE_8, 0);
-        line(image, d, s, Scalar(0, 255, 255), 1, LINE_8, 0);*/
-
         if(intersection(a, p, b, q, vx) && intersection(a, r, d, s, vy)) {
 
             Mat CI = Mat(3, 3, CV_64FC1), V = Mat(3, 1, CV_64FC1), R1, R2, R3;
-            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "Vx: (%.2f, %.2f)", vx.x, vx.y);
-            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "Vy: (%.2f, %.2f)", vy.x, vy.y);
 
             CI.at<double>(0, 0) = 1 / f;
             CI.at<double>(0, 1) = 0;
@@ -488,9 +427,6 @@ static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
             angYaw = -atan(R3.at<double>(0,0) / R3.at<double>(2,0));
             angRoll = CV_PI - atan2(cuadrados[0][3].y - cuadrados[2][2].y, cuadrados[0][3].x - cuadrados[2][2].x);
 
-            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "antes actilt: %0.2f, acyaw: %.2f, acroll: %.2f", accumTilt, accumYaw, accumRoll);
-            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "tilt: %0.2f, yaw: %.2f, roll: %.2f", angTilt, angYaw, angRoll);
-
                 if(angTilt > 0 && accumTilt > 0){
                     if(angTilt >= accumTilt)
                         ratio = accumTilt / angTilt;
@@ -510,7 +446,6 @@ static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
                     ratio = fabs(angTilt / accumTilt);
                 }
 
-            //__android_log_print(ANDROID_LOG_ERROR, "interseccion", "ratio tilt: %0.2f", ratio);
             if (ratio >= 0.2)
                 vTilt.push_back(angTilt);
 
@@ -537,29 +472,6 @@ static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
             if (ratio >= 0.2)
                 vYaw.push_back(angYaw);
 
-
-
-//            if(angRoll > 0 && accumRoll > 0){
-//                if(angRoll >= accumRoll)
-//                    ratio = accumRoll / angRoll;
-//                else
-//                    ratio = angRoll / accumRoll;
-//            }
-//            else if(angRoll < 0 && accumRoll < 0){
-//                if(angRoll >= accumRoll)
-//                    ratio = angRoll / accumRoll;
-//                else
-//                    ratio = accumRoll / angRoll;
-//            }
-//            else if(angRoll > 0 && accumRoll < 0){
-//                ratio = fabs(accumRoll / angRoll);
-//            }
-//            else if(angRoll < 0 && accumRoll > 0){
-//                ratio = fabs(angRoll / accumRoll);
-//            }
-//
-//            if (ratio >= 0.2)
-//                vRoll.push_back(angRoll);
         }
 
         accumTilt = accumulate(vTilt.begin(), vTilt.end(), 0.0f);
@@ -568,8 +480,6 @@ static void estimarAngulosEuler( Mat& image, vector<vector<Point> >& cuadrados,
         accumYaw = accumulate(vYaw.begin(), vYaw.end(), 0.0f);
         yaw = (vYaw.size() == 0) ? 1 : (accumYaw / vYaw.size());
 
-//        accumRoll = accumulate(vRoll.begin(), vRoll.end(), 0.0f);
-//        roll = (vRoll.size() == 0) ? 1 : (accumRoll / vRoll.size());
         roll = angRoll;
     }
     catch (Exception e){
@@ -625,27 +535,18 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
 
     particiones.clear();
 
-    //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%0.2f",3.0);
-
     for (int i = 0; i < cuadrados.size(); i++) {
-        //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f", 3.1);
         //Buscando los puntos de las fronteras
-
-
         for (int n = 0; n < SEGMENTOS_FRONTERA; n++) {
-            //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 3);
+
             const Point puntoInicial = cuadrados[i][n];
             const Point puntoFinal = cuadrados[i][(n + 1) % SEGMENTOS_FRONTERA];
-
-            //__android_log_print(ANDROID_LOG_ERROR, "puntos vertices ptos ---> ", " i(%i %i) f(%i %i)", puntoInicial.x, puntoInicial.y, puntoFinal.x, puntoFinal.y);
 
             LineIterator it(image, puntoInicial, puntoFinal, 8, false);
 
             int razon = (int) round(it.count / (PUNTOS_SEGMENTO_FRONTERA+1));
 
             puntosVerticePorCuadrado.push_back(puntoInicial);
-
-            //circle(image, puntoInicial, 2, Scalar(0, 0, 255 * n / (SEGMENTOS_FRONTERA-1)), 2, 8);
 
             //Iterando cada segmento del cuadrado para hallar puntos medios y divirlos
             // en cuatro partes iguales
@@ -656,8 +557,6 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
                     if ((k % razon) == 0 && puntosFronteraPorSegmento.size() < PUNTOS_SEGMENTO_FRONTERA) {
                         puntosFronteraPorSegmento.push_back(it.pos());
 
-                        //__android_log_print(ANDROID_LOG_ERROR, "puntos FRONTERA ptos ---> ", "PTO INI PTO FIN %i %i %i %i %i (%i %i)", i, n, razon, it.count, puntosFronteraPorSegmento.size(), it.pos().x, it.pos().y);
-                        //circle(image, it.pos(), 2, Scalar((255 * k / it.count), 0, 0), 2, 8);
                         }
                     }
                 }
@@ -665,13 +564,7 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
             puntosFronteraPorCuadrado.push_back(puntosFronteraPorSegmento);
             puntosFronteraPorSegmento.clear();
         }
-        //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f", 3.2);
-        //__android_log_print(ANDROID_LOG_ERROR, "puntos Vertice ---> ", "%i, (%i %i) (%i %i) (%i %i) (%i %i)",i+1,
-        //                    puntosFronteraPorCuadrado[0][0].x, puntosFronteraPorCuadrado[0][0].y,
-        //                    puntosFronteraPorCuadrado[1][0].x, puntosFronteraPorCuadrado[1][0].y,
-        //                   puntosFronteraPorCuadrado[2][0].x, puntosFronteraPorCuadrado[2][0].y,
-        //                   puntosFronteraPorCuadrado[3][0].x, puntosFronteraPorCuadrado[3][0].y);
-        
+
         puntosVertices.push_back(puntosVerticePorCuadrado);
         puntosVerticePorCuadrado.clear();
 
@@ -680,50 +573,33 @@ static void particionarCuadrados( Mat& image, const vector<vector<Point> >& cuad
 
         //Buscando los puntos internos del cuadrado
         for (int r = 0; r < SEGMENTOS_INTERNOS; r++) {
-            //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 4);
             //Punto del segmento A del cuadrado
-            //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f %i %i %i", 3.3, i, SEGMENTOS_INTERNOS - r - 1, (int)puntosFrontera[i].size());
+
             Point puntoInicial = puntosFrontera[i][3][SEGMENTOS_INTERNOS - r - 1];
 
-            //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f", 3.31);
             //Punto del segmento B del cuadrado opuesto a A
             Point puntoFinal = puntosFrontera[i][1][r];
-            //__android_log_print(ANDROID_LOG_ERROR, "puntos internos ptos ---> ", "PTO INI PTO FIN (%i %i) (%i %i)",  puntoInicial.x, puntoInicial.y, puntoFinal.x, puntoFinal.y);
+
             //Iterador que recorre el segmento de linea punto a punto
             LineIterator it(image, puntoInicial, puntoFinal, 8, true);
             int razon = (int) round(it.count / (PUNTOS_SEGMENTO_INTERNOS+1)); //+ 1
 
             //Recoriendo el segmento punto a punto
             for (int k = 0; k < it.count; k++, ++it) {
-                //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 5);
+
                 if (k == 0 || k == it.count-1) { ; }
                 else {
                     if ((k % razon) == 0 && puntosInternosPorSegmento.size() < PUNTOS_SEGMENTO_INTERNOS) {
                         puntosInternosPorSegmento.push_back(it.pos());
-                        //__android_log_print(ANDROID_LOG_ERROR, "Punto Interno ---> ", "(%i %i) %i %i %i %i", it.pos().x, it.pos().y, r, k, puntosInternosPorSegmento.size(), it.count);
-                        //circle(image, it.pos(), 2, Scalar(0, 0, 255 * k / it.count), 2, 8);
-                        //puntos internos ptos --->: 0 1 0 (20 1529) - (111 317)
-
                     }
                 }
             }
-            //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%f", 4.0);
-            //__android_log_print(ANDROID_LOG_ERROR, "puntos Vertice ---> ", "%i %i, (%i %i) (%i %i) (%i %i)",i+1, r+1,
-            //                    puntosInternosPorSegmento[0].x, puntosInternosPorSegmento[0].y,
-            //                    puntosInternosPorSegmento[1].x, puntosInternosPorSegmento[1].y,
-            //                    puntosInternosPorSegmento[2].x, puntosInternosPorSegmento[2].y);
-
-            //__android_log_print(ANDROID_LOG_ERROR, "puntos frontera ---> ", "%i %i",r+1, puntosInternosPorSegmento.size());
             puntosInternosPorCuadrado.push_back(puntosInternosPorSegmento);
             puntosInternosPorSegmento.clear();
         }
-        //__android_log_print(ANDROID_LOG_ERROR, "particionarCuadrados", "%i", 6);
-
         puntosInternos.push_back(puntosInternosPorCuadrado);
         puntosInternosPorCuadrado.clear();
-
-        //__android_log_print(ANDROID_LOG_ERROR, "size ---> ", "%i %i %i", puntosVertices[i].size(), puntosFrontera[i].size(), puntosInternos[i].size());
-    }
+}
 
     unificarParticiones(cuadrados, puntosVertices, puntosFrontera, puntosInternos, particiones);
 
@@ -755,209 +631,130 @@ static void unificarParticiones(const vector<vector<Point> >& cuadrados,
 
     for(int indiceCuadrado = 0; indiceCuadrado < cuadrados.size(); indiceCuadrado++){
         //Particion 1
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.11, puntosVertices[indiceCuadrado][0].x, puntosVertices[indiceCuadrado][0].y);
         particion.push_back(puntosVertices[indiceCuadrado][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.12, puntosFrontera[indiceCuadrado][0][0].x, puntosFrontera[indiceCuadrado][0][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][0][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.13, puntosInternos[indiceCuadrado][0][0].x, puntosInternos[indiceCuadrado][0][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.14, puntosFrontera[indiceCuadrado][3][2].x, puntosFrontera[indiceCuadrado][3][2].y);
         particion.push_back(puntosFrontera[indiceCuadrado][3][2]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
 
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.2);
         //Particion 2
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.21, puntosFrontera[indiceCuadrado][0][0].x, puntosFrontera[indiceCuadrado][0][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][0][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.22, puntosFrontera[indiceCuadrado][0][1].x, puntosFrontera[indiceCuadrado][0][1].y);
         particion.push_back(puntosFrontera[indiceCuadrado][0][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.23, puntosInternos[indiceCuadrado][0][1].x, puntosInternos[indiceCuadrado][0][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.24, puntosInternos[indiceCuadrado][0][0].x, puntosInternos[indiceCuadrado][0][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][0]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.3);
         //Particion 3
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.31, puntosFrontera[indiceCuadrado][0][1].x, puntosFrontera[indiceCuadrado][0][1].y);
         particion.push_back(puntosFrontera[indiceCuadrado][0][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.32, puntosFrontera[indiceCuadrado][0][2].x, puntosFrontera[indiceCuadrado][0][2].y);
         particion.push_back(puntosFrontera[indiceCuadrado][0][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.33, puntosInternos[indiceCuadrado][0][2].x, puntosInternos[indiceCuadrado][0][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.34, puntosInternos[indiceCuadrado][0][1].x, puntosInternos[indiceCuadrado][0][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][1]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.4);
         //Particion 4
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.41, puntosFrontera[indiceCuadrado][0][2].x, puntosFrontera[indiceCuadrado][0][2].y);
         particion.push_back(puntosFrontera[indiceCuadrado][0][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.42, puntosVertices[indiceCuadrado][1].x, puntosVertices[indiceCuadrado][1].y);
         particion.push_back(puntosVertices[indiceCuadrado][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.43, puntosFrontera[indiceCuadrado][1][0].x, puntosFrontera[indiceCuadrado][1][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][1][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.44, puntosInternos[indiceCuadrado][0][2].x, puntosInternos[indiceCuadrado][0][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][2]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.5);
         //Particion 5
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.51, puntosFrontera[indiceCuadrado][3][2].x, puntosFrontera[indiceCuadrado][3][2].y);
         particion.push_back(puntosFrontera[indiceCuadrado][3][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.52, puntosInternos[indiceCuadrado][0][0].x, puntosInternos[indiceCuadrado][0][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.53, puntosInternos[indiceCuadrado][1][0].x, puntosInternos[indiceCuadrado][1][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.54, puntosFrontera[indiceCuadrado][3][1].x, puntosFrontera[indiceCuadrado][3][1].y);
         particion.push_back(puntosFrontera[indiceCuadrado][3][1]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.6);
         //Particion 6
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.61, puntosInternos[indiceCuadrado][0][0].x, puntosInternos[indiceCuadrado][0][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.62, puntosInternos[indiceCuadrado][0][1].x, puntosInternos[indiceCuadrado][0][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.63, puntosVertices[indiceCuadrado][0].x, puntosVertices[indiceCuadrado][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.64, puntosInternos[indiceCuadrado][1][1].x, puntosInternos[indiceCuadrado][1][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][0]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.7);
         //Particion 7
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.71, puntosInternos[indiceCuadrado][0][1].x, puntosInternos[indiceCuadrado][0][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.72, puntosInternos[indiceCuadrado][0][2].x, puntosInternos[indiceCuadrado][0][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.73, puntosInternos[indiceCuadrado][1][2].x, puntosInternos[indiceCuadrado][1][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.74, puntosInternos[indiceCuadrado][1][1].x, puntosInternos[indiceCuadrado][1][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][1]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.8);
         //Particion 8
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.81, puntosVertices[indiceCuadrado][0].x, puntosVertices[indiceCuadrado][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][0][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.82, puntosVertices[indiceCuadrado][0].x, puntosVertices[indiceCuadrado][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][1][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.83, puntosVertices[indiceCuadrado][0].x, puntosVertices[indiceCuadrado][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][1][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.84, puntosVertices[indiceCuadrado][0].x, puntosVertices[indiceCuadrado][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][2]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.9);
         //Particion 9
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.91, puntosFrontera[indiceCuadrado][3][1].x, puntosFrontera[indiceCuadrado][3][1].y);
         particion.push_back(puntosFrontera[indiceCuadrado][3][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.92, puntosInternos[indiceCuadrado][1][0].x, puntosInternos[indiceCuadrado][1][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.93, puntosInternos[indiceCuadrado][2][0].x, puntosInternos[indiceCuadrado][2][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.94, puntosFrontera[indiceCuadrado][3][0].x, puntosFrontera[indiceCuadrado][3][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][3][0]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.10);
         //Particion 10
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.101, puntosInternos[indiceCuadrado][1][0].x, puntosVertices[indiceCuadrado][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.102, puntosVertices[indiceCuadrado][0].x, puntosInternos[indiceCuadrado][1][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.103, puntosInternos[indiceCuadrado][2][1].x, puntosInternos[indiceCuadrado][2][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.104, puntosInternos[indiceCuadrado][2][0].x, puntosInternos[indiceCuadrado][2][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][0]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.11);
         //Particion 11
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.111, puntosInternos[indiceCuadrado][1][1].x, puntosInternos[indiceCuadrado][1][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.112, puntosInternos[indiceCuadrado][1][2].x, puntosInternos[indiceCuadrado][1][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.113, puntosInternos[indiceCuadrado][2][2].x, puntosInternos[indiceCuadrado][2][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.114, puntosInternos[indiceCuadrado][2][1].x, puntosInternos[indiceCuadrado][2][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][1]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.12);
         //Particion 12
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.121, puntosInternos[indiceCuadrado][1][2].x, puntosInternos[indiceCuadrado][1][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][1][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.122, puntosFrontera[indiceCuadrado][1][1].x, puntosFrontera[indiceCuadrado][1][1].y);
         particion.push_back(puntosFrontera[indiceCuadrado][1][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.123, puntosFrontera[indiceCuadrado][1][2].x, puntosFrontera[indiceCuadrado][1][2].y);
         particion.push_back(puntosFrontera[indiceCuadrado][1][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.124, puntosInternos[indiceCuadrado][2][2].x, puntosInternos[indiceCuadrado][2][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][2]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.13);
         //Particion 13
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.131, puntosFrontera[indiceCuadrado][3][0].x, puntosFrontera[indiceCuadrado][3][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][3][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.132, puntosInternos[indiceCuadrado][2][0].x, puntosInternos[indiceCuadrado][2][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.133, puntosFrontera[indiceCuadrado][2][2].x, puntosFrontera[indiceCuadrado][2][2].y);
         particion.push_back(puntosFrontera[indiceCuadrado][2][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.134, puntosVertices[indiceCuadrado][3].x, puntosVertices[indiceCuadrado][3].y);
         particion.push_back(puntosVertices[indiceCuadrado][3]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.14);
         //Particion 14
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.141, puntosInternos[indiceCuadrado][2][0].x, puntosInternos[indiceCuadrado][2][0].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.142, puntosInternos[indiceCuadrado][2][1].x, puntosInternos[indiceCuadrado][2][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.143, puntosFrontera[indiceCuadrado][2][1].x, puntosFrontera[indiceCuadrado][2][1].y);
         particion.push_back(puntosFrontera[indiceCuadrado][2][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.144, puntosFrontera[indiceCuadrado][2][2].x, puntosFrontera[indiceCuadrado][2][2].y);
         particion.push_back(puntosFrontera[indiceCuadrado][2][2]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.15);
         //Particion 15
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.151, puntosInternos[indiceCuadrado][2][1].x, puntosInternos[indiceCuadrado][2][1].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][1]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.152, puntosInternos[indiceCuadrado][2][2].x, puntosInternos[indiceCuadrado][2][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.153, puntosFrontera[indiceCuadrado][2][0].x, puntosFrontera[indiceCuadrado][2][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][2][0]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.154, puntosFrontera[indiceCuadrado][2][1].x, puntosFrontera[indiceCuadrado][2][1].y);
         particion.push_back(puntosFrontera[indiceCuadrado][2][1]);
         particionesPorCuadrado.push_back(particion);
 
         particion.clear();
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%f", 7.16);
         //Particion 16
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.161, puntosInternos[indiceCuadrado][2][2].x, puntosInternos[indiceCuadrado][2][2].y);
         particion.push_back(puntosInternos[indiceCuadrado][2][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.162, puntosFrontera[indiceCuadrado][1][2].x, puntosFrontera[indiceCuadrado][1][2].y);
         particion.push_back(puntosFrontera[indiceCuadrado][1][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.163, puntosVertices[indiceCuadrado][2].x, puntosVertices[indiceCuadrado][2].y);
         particion.push_back(puntosVertices[indiceCuadrado][2]);
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%.2f (%i %i)", 7.164, puntosFrontera[indiceCuadrado][2][0].x, puntosFrontera[indiceCuadrado][2][0].y);
         particion.push_back(puntosFrontera[indiceCuadrado][2][0]);
         particionesPorCuadrado.push_back(particion);
 
@@ -965,8 +762,6 @@ static void unificarParticiones(const vector<vector<Point> >& cuadrados,
 
         particiones.push_back(particionesPorCuadrado);
         particionesPorCuadrado.clear();
-
-        //__android_log_print(ANDROID_LOG_ERROR, "unificarCuadrados", "%i", 0);
     }
 
 
@@ -975,17 +770,7 @@ static void preprocesar( Mat& image, Mat& image_prep, double thresh){
     Mat tmp;
     cvtColor(image, image_prep, CV_BGR2GRAY);
     GaussianBlur( image_prep, image_prep, Size( GAUSSIAN_FACTOR, GAUSSIAN_FACTOR ), 0, 0 );
-    //imwrite("/storage/3034-3465/DCIM/prep1.jpg", image_prep);
-    //Laplacian( image_prep, tmp, 2, 1, 1, 0, BORDER_DEFAULT );
-    //imwrite("/storage/3034-3465/DCIM/prep2.jpg", tmp);
-    //convertScaleAbs( tmp, image_prep );
-    //if(ratiowidth <= 0.0) ratiowidth = 0.1;
-    //if(ratiowidth > 1.0) ratiowidth = 1.0;   80 * 0.05
     threshold(image_prep, image_prep, thresh , 255, CV_THRESH_BINARY);//CV_TRESH_OTSU
-    //__android_log_print(ANDROID_LOG_ERROR, "thresh", "%.2f", 160-(40 * ratiowidth));
-
-    //imwrite("/storage/3034-3465/DCIM/prep4.jpg", image_prep);
-
 }
 static void decodificarParticiones( Mat& image,
                                     Mat& image_c,
@@ -1023,18 +808,8 @@ static void decodificarParticiones( Mat& image,
                 }
                 else PARTICION_OFFSET = 1;
 
-                /*if(i < NUM_MATRICES){
-                    string path = "/storage/3034-3465/DCIM/";
-                    string filename0 = IntToString(i+1);
-                    string filename1 = IntToString(k+1);
-                    string ext = ".jpg";
-                    imwrite(path+filename0+"_"+filename1+ext, mParticion);
-                }*/
-
                 ////Busca pixeles blancos en imagen binarizada
                 findNonZero(mParticion, puntosBlancos);
-                //__android_log_print(ANDROID_LOG_ERROR, "decodificarParticiones", "%.3f", 4.0);
-
 
                 //Calcula el procentaje de pixeles blancos contra el total de pixeles en la region
                 porcentajeBlanco = float((puntosBlancos.size()) * 100.0) / tamanio;
@@ -1258,15 +1033,11 @@ bool filtrarCuadrado(const vector<vector<Point> >& cuadrados, vector<Point>& app
         int d2 = (int)sqrt((p2->x - q2->x)*(p2->x - q2->x) + (p2->y - q2->y)*(p2->y - q2->y));//norm(p2-q2);
         int d3 = (int)sqrt((p3->x - q3->x)*(p3->x - q3->x) + (p3->y - q3->y)*(p3->y - q3->y));//norm(p3-q3);
 
-        //__android_log_print(ANDROID_LOG_ERROR, "dist entre 2 ptos ---> ", "%i %i %i %i ", d0,d1,d2,d3);
-
         if((d0 <= TOLERANCIA && d1 <= TOLERANCIA && d2 <= TOLERANCIA && d3 <= TOLERANCIA) ||
                 d0 <= TOLERANCIA || d1 <= TOLERANCIA || d2 <= TOLERANCIA || d3 <= TOLERANCIA){
             return true;
         }
     }
-    //__android_log_print(ANDROID_LOG_ERROR, "APPROX SELECCIONADO ---> ", "(%i %i) (%i %i) (%i %i) (%i %i) ",
-    //                    q0->x, q0->y,q1->x,q1->y, q2->x, q2->y, q3->x, q3->y);
     return false;
 }
 static void ordenarVerticesCuadrado(vector<Point> &verticesCuadrado){
@@ -1402,13 +1173,10 @@ void corregirPerspectiva(const Mat &input, Mat &output, double tilt, double yaw,
     T.at<double>(2,0) = 0; T.at<double>(2,1) = 0; T.at<double>(2,2) = 1; T.at<double>(2,3) = dz;
     T.at<double>(3,0) = 0; T.at<double>(3,1) = 0; T.at<double>(3,2) = 0; T.at<double>(3,3) = 1;
 
-    // Compose rotation matrix with (RX, RY, RZ)
     Mat R = Rz * Ry * Rx;
 
-    // Final transformation matrix
     Mat H = C * (T * (R * CI));
 
-    // Apply matrix transformation
     warpPerspective(input, output, H, input.size(), INTER_LANCZOS4);
 }
 

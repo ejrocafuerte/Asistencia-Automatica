@@ -135,7 +135,7 @@ def gestionar_estudiante(request):
     def get_info_codigo(codigo):
         return codigo[0:4], codigo[4:8], codigo[8:10], codigo[10:12]
 
-    def validar_posicion(estudiante, senales, asistencia_estudiante):
+    def validar_senales(estudiante, senales, asistencia_estudiante):
 
         senales_estudiante = senales
         asistencia_profesor = AsistenciaProfesor.objects.filter(codigo = asistencia_estudiante.codigodecodificado).first()
@@ -302,7 +302,7 @@ def gestionar_estudiante(request):
                     if not senal:
                         raise Exception('Error al crear senal')
 
-                aceptado = validar_posicion(estudiante, senales, asistencia)
+                aceptado = validar_senales(estudiante, senales, asistencia)
 
                 print ('OK')
                 return JsonResponse({'response':'0', 'msg' : 'ok'})
